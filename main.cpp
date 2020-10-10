@@ -3,7 +3,7 @@
 // DMN files information and preform several operations with it  //
 // (e.g., Complexity analysis[Shannon entropy, Fisher Integral,  //
 // etc.])                                                        //
-// This program belongs to Mauricio Rodríguez Mayorga            //
+// This program belongs to Mauricio Rodriguez Mayorga            //
 // Ph.D. student at University of the Basque Country             //
 // for support and comments email to: marm3.14@gmail.com         //
 ///////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 /////////////////////
  if(argc!=2)
  {
-  cout<<"Introduce the name of the file with RHO.OPS.2.4 commands"<<endl;
+  cout<<"Introduce the name of the file with RHO.OPS commands"<<endl;
   do
   {getline(cin,name_file);
   }while(name_file=="");
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;
-  Results<<"#                       Welcome to RHO.OPS.2.4                                 #";
+  Results<<"#                           Welcome to RHO.OPS                                 #";
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;
-  Results<<"# Copyright (C) 2014 M.Sc. Mauricio A. Rodríguez Mayorga                      #";
+  Results<<"# Copyright (C) 2014 M.Sc. Mauricio Rodriguez-Mayorga                          #";
   Results<<endl;
   Results<<"# Ph.D. student at University of the Basque Country                            #";
   Results<<endl;
@@ -220,13 +220,12 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"# Remember to cite this program:                                                 #";
   Results<<endl;
-  Results<<"# Rodríguez-Mayorga, M.; RHO.OPS.2.4: Density Operations Program & MO or NO     #";
+  Results<<"# Rodriguez-Mayorga, M.; RHO.OPS: Density Operations Program & MO or NO          #";
   Results<<endl;
   Results<<"# Overalps Calculations; Donostia International Physics Center (DIPC)            #";
   Results<<endl;
   Results<<"# University of the Basque Country, Donostia, Guipuzkoa, Spain, 2014;            #";
   Results<<endl;
-  Results<<"# http://iqc.udg.es/~marm314/download/RHO_OPS.2.4.tar.gz                         #";
   Results<<endl;
   Results<<"#                                                                                #";
   Results<<endl;

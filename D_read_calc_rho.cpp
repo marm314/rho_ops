@@ -866,7 +866,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
     if(!overlap)
     {
      cout<<"(Warning, the AO overlap matrix was not found! Include the keyword iop(3/33=4) and"<<endl;
-     cout<<"repeat the gaussian calculation. Then, use the new .log file for RHO.OPS.2.3)"<<endl;
+     cout<<"repeat the gaussian calculation. Then, use the new .log file for RHO.OPS)"<<endl;
     }
    }
    else
