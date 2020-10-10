@@ -33,3 +33,7 @@ tar:
 	tar -pczf $(NAME).tar.gz ./$(NAME)
 	rm -r ./$(NAME)
 	cp ./*.tar.gz ../
+tex:
+	latex Manual_RHO.OPS.tex
+	latex Manual_RHO.OPS.tex
+	dvipdf Manual_RHO.OPS.dvi
