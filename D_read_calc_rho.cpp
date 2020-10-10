@@ -3675,13 +3675,13 @@ void READ_FCHK_WFN::rho_p_eval(double point_p[3],double &result)
   for(i[0]=0;i[0]<nbasisf;i[0]++)
   {AOp[0][i[0]]=ZERO;AOp[1][i[0]]=ZERO;}
   build_AOp(AOp,point_p);
-  //Evaluate the density
+  //Evaluate the density 
    result=ZERO;
    for(i[0]=0;i[0]<nbasisf;i[0]++)
    {
     for(j[0]=i[0];j[0]<nbasisf;j[0]++)
     {
-     result=result+(AOp[0][i[0]]*AOp[0][j[0]]+AOp[1][i[0]]*AOp[1][j[0]])*Total_rho[j[0]][i[0]];
+     result=result+(AOp[0][i[0]]*AOp[0][j[0]]+AOp[1][i[0]]*AOp[1][j[0]])*Total_rho[j[0]][i[0]]; 
      if(i[0]!=j[0])
      {
      result=result+(AOp[0][j[0]]*AOp[0][i[0]]+AOp[1][j[0]]*AOp[1][i[0]])*Total_rho[j[0]][i[0]];
@@ -4101,41 +4101,42 @@ void READ_FCHK_WFN::rho_p_lapl_a_b(double point_p[3], double &laplacian_a,double
 }
 void READ_FCHK_WFN::build_NOp_wfn(complex<double> &NOp,double Point_p[3],int &numMO)
 {
-  int *i,*j,*nlm, **Quant;
-  i=new int [1];j=new int [1];nlm=new int[3];
-  double *pos_nuclei,*exponent,*evaluation_prim_real,*evaluation_prim_imag;
-  pos_nuclei=new double[3];exponent=new double[1];
-  evaluation_prim_real=new double[1];evaluation_prim_imag=new double[1];
-  ///////////////////////////////////////
-  //dynamic arrays
-  Quant=new int*[35];
-  for(i[0]=0;i[0]<35;i[0]++)
-  {Quant[i[0]]=new int[3];}
-  ///////////////////////////////////////
-  //Initialize
-  Quant_fill(Quant,0); //0 because no type is needed
-  NOp=(ZERO,ZERO);
-  //////////////////////////////////////////
-  //build NOps
-  for(i[0]=0;i[0]<nprimitv;i[0]++)
+ int *i,*j,*nlm, **Quant;
+ i=new int [1];j=new int [1];nlm=new int[3];
+ double *pos_nuclei,*exponent,*evaluation_prim_real,*evaluation_prim_imag;
+ pos_nuclei=new double[3];exponent=new double[1];
+ evaluation_prim_real=new double[1];evaluation_prim_imag=new double[1];
+ ///////////////////////////////////////
+ //dynamic arrays
+ Quant=new int*[35];
+ for(i[0]=0;i[0]<35;i[0]++)
+ {Quant[i[0]]=new int[3];}
+ ///////////////////////////////////////
+ //Initialize
+ Quant_fill(Quant,0); //0 because no type is needed
+ NOp=ZERO*NOp;
+ //////////////////////////////////////////
+ //build NOps
+ for(i[0]=0;i[0]<nprimitv;i[0]++)
+ {
+  for(j[0]=0;j[0]<3;j[0]++)
   {
-   for(j[0]=0;j[0]<3;j[0]++)
-   {
-    pos_nuclei[j[0]]=Cartesian_Coor[shell_map[i[0]]-1][j[0]];
-    nlm[j[0]]=Quant[shell_type[i[0]]-1][j[0]];
-   }
-   exponent[0]=Prim_exp[i[0]];
-   eval_Primitive_p_wfn(Point_p,pos_nuclei,nlm,exponent[0],evaluation_prim_real[0],evaluation_prim_imag[0]);
-   NOp=NOp+(MOcoefA[numMO][i[0]]*evaluation_prim_real[0]+MOcoefA[numMO][i[0]]*(ZERO,evaluation_prim_imag[0]));
+   pos_nuclei[j[0]]=Cartesian_Coor[shell_map[i[0]]-1][j[0]];
+   nlm[j[0]]=Quant[shell_type[i[0]]-1][j[0]];
   }
-  for(i[0]=0;i[0]<35;i[0]++)
-  {delete[] Quant[i[0]];Quant[i[0]]=NULL;}
-  delete[] Quant;
-  delete[] i; delete [] j;delete[] nlm;
-  delete[] pos_nuclei; delete [] evaluation_prim_real;
-  delete[] evaluation_prim_imag;
-  i=NULL;j=NULL;nlm=NULL;Quant=NULL;pos_nuclei=NULL;
-  evaluation_prim_real=NULL; evaluation_prim_imag=NULL;
+  exponent[0]=Prim_exp[i[0]];
+  eval_Primitive_p_wfn(Point_p,pos_nuclei,nlm,exponent[0],evaluation_prim_real[0],evaluation_prim_imag[0]);
+  complex<double>ztmp(ZERO,evaluation_prim_imag[0]);
+  NOp=NOp+(MOcoefA[numMO][i[0]]*evaluation_prim_real[0]+MOcoefA[numMO][i[0]]*ztmp);
+ }
+ for(i[0]=0;i[0]<35;i[0]++)
+ {delete[] Quant[i[0]];Quant[i[0]]=NULL;}
+ delete[] Quant;
+ delete[] i; delete [] j;delete[] nlm;
+ delete[] pos_nuclei; delete [] evaluation_prim_real;
+ delete[] evaluation_prim_imag;
+ i=NULL;j=NULL;nlm=NULL;Quant=NULL;pos_nuclei=NULL;
+ evaluation_prim_real=NULL; evaluation_prim_imag=NULL;
 }
 //Build MOp
 void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &numMO)
@@ -4160,21 +4161,23 @@ void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &n
    if(numMO%2==0)
    {
     for(j[0]=0;j[0]<nbasisf;j[0]++)
-    {
-     MOp=MOp+(MOcoefA[numMO/2][j[0]])*(AOp[0][j[0]]+(ZERO,AOp[1][j[0]]));
+    { 
+     complex<double>ztmp=(ZERO,AOp[1][j[0]]);
+     MOp=MOp+(MOcoefA[numMO/2][j[0]])*(AOp[0][j[0]]+ztmp);
     }
    }
    else
    {
     for(j[0]=0;j[0]<nbasisf;j[0]++)
     {
+     complex<double>ztmp=(ZERO,AOp[1][j[0]]);
      if(BETA_MOS)
      {
-      MOp=MOp+(MOcoefB[(numMO-1)/2][j[0]])*(AOp[0][j[0]]+(ZERO*AOp[1][j[0]]));
+      MOp=MOp+(MOcoefB[(numMO-1)/2][j[0]])*(AOp[0][j[0]]+ztmp);
      }
      else
      {
-      MOp=MOp+(MOcoefA[(numMO-1)/2][j[0]])*(AOp[0][j[0]]+(ZERO,AOp[1][j[0]]));
+      MOp=MOp+(MOcoefA[(numMO-1)/2][j[0]])*(AOp[0][j[0]]+ztmp);
      }
     }
    }
@@ -4802,10 +4805,11 @@ void READ_FCHK_WFN::eval_p(double Coord_At[3],double point_p[3],double &expon, i
   coord_at[i[0]]=Coord_At[i[0]];
   point[i[0]]=point_p[i[0]];
  }
- castCOMPLX(z1[0],cos(dot(nn[0],coord_at,point)),sin(dot(nn[0],coord_at,point)));
+ complex<double> ztmp(cos(dot(nn[0],coord_at,point)),sin(dot(nn[0],coord_at,point)));
+ z1[0]=ztmp;
  //Multiplication
  z2[0]=Pnorm[0];
- z3[0]=(exp(-PP[0]/(FOUR*expon)));
+ z3[0]=exp(-PP[0]/(FOUR*expon));
  z[0]=z1[0]*z2[0]*z3[0]*fpx[0]*fpy[0]*fpz[0];
  //Send only RE and IM
  re=real(z[0]);
@@ -4843,9 +4847,10 @@ void READ_FCHK_WFN::eval_Primitive_p_wfn(double point_p[3],double pos_nuclei[3],
   coord_at[i[0]]=pos_nuclei[i[0]];
   point[i[0]]=point_p[i[0]];
  }
- castCOMPLX(z1[0],cos(dot(nn[0],coord_at,point)),sin(dot(nn[0],coord_at,point)));
+ complex<double>ztmp(cos(dot(nn[0],coord_at,point)),sin(dot(nn[0],coord_at,point)));
+ z1[0]=ztmp;
  //Multiplication
- z2[0]=(exp(-PP[0]/(FOUR*expon)));
+ z2[0]=exp(-PP[0]/(FOUR*expon));
  z[0]=z1[0]*z2[0]*fpx[0]*fpy[0]*fpz[0];
  //Send only RE and IM
  re=real(z[0]);
@@ -4865,23 +4870,28 @@ void READ_FCHK_WFN::fps(complex<double> &f,double &p,int &quant_num,double &expo
 {
  if(quant_num==0)
  {
-  castCOMPLX(f,(ONE/pow(TWO*expon,HALF)),ZERO);
+  complex<double> f1((ONE/pow(TWO*expon,HALF)),ZERO);
+  f=f1;
  }
  else if(quant_num==1)
- {
-  castCOMPLX(f,ZERO,(p/(TWO*pow(TWO,HALF)*pow(expon,THREE/TWO))));
+ { 
+  complex<double> f1(ZERO,(p/(TWO*pow(TWO,HALF)*pow(expon,THREE/TWO))));
+  f=f1;
  }
  else if(quant_num==2)
  {
-  castCOMPLX(f,(TWO*expon-pow(p,TWO))/(FOUR*pow(TWO,HALF)*pow(expon,FIVE/TWO)),ZERO);
+  complex<double> f1((TWO*expon-pow(p,TWO))/(FOUR*pow(TWO,HALF)*pow(expon,FIVE/TWO)),ZERO);
+  f=f1;
  }
  else if(quant_num==3)
  {
-  castCOMPLX(f,ZERO,((SIX*p/pow(expon,FIVE/TWO)-pow(p,THREE)/pow(expon,SEVEN/TWO))/(EIGHT*pow(TWO,HALF))));
+  complex<double> f1(ZERO,((SIX*p/pow(expon,FIVE/TWO)-pow(p,THREE)/pow(expon,SEVEN/TWO))/(EIGHT*pow(TWO,HALF))));
+  f=f1;
  }
  else if(quant_num==4)
  {
-  castCOMPLX(f,((TWO*SIX*pow(expon,TWO)-TWO*SIX*pow(p,TWO)*expon+pow(p,FOUR))/(pow(expon,NINE/TWO)*TWO*EIGHT*pow(TWO,HALF))) ,ZERO);
+  complex<double> f1(((TWO*SIX*pow(expon,TWO)-TWO*SIX*pow(p,TWO)*expon+pow(p,FOUR))/(pow(expon,NINE/TWO)*TWO*EIGHT*pow(TWO,HALF))),ZERO);
+  f=f1;
  }
  else
  {cout<<"Warning! Basis set not available!"<<endl;}

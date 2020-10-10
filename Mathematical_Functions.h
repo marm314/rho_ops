@@ -41,8 +41,6 @@ void mat_equal(int n,double **A,double **RES);//RES=A
 void mat_inverse2(int n,double **A,double **Ainv);//This function and the next one
 void inverse(double* A, int N);                   //work together
 void jacobi(int n, double **m, double **v);//Diagonalization
-void castCOMPLX(complex<double> &z, double RE,double IM);//Save in z=Re+iIM
-void COMPLXconj(complex<double> &zout, complex<double> zin);//Gives in zout the complex conjugate of zin
 double Gamma(double x);//Gamma function of x
 double PochhammerS(double n,double x);//Rising Pochhammer symbol (x)n
 double Y_lm(double l,double m,double teta, double phi);//Evaluates the spherical harmonic at teta and phi

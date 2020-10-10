@@ -679,11 +679,11 @@ void DMN_P_OPS::Read_use_DMN()
        else
        {element_prime[0]=(element_prime[0]+1)/2;}
       }
-      COMPLXconj(conjugated,Array_MOs[element[0]-1][0]);
+      conjugated=conj(Array_MOs[element[0]-1][0]);
       sum=sum+conjugated*Array_MOs[element_prime[0]-1][1]*Dij;
       if(element[0]!=element_prime[0])
       {
-       COMPLXconj(conjugated,Array_MOs[element_prime[0]-1][0]);
+       conjugated=conj(Array_MOs[element_prime[0]-1][0]);
        sum=sum+conjugated*Array_MOs[element[0]-1][1]*Dij;
       }
      }
@@ -704,24 +704,24 @@ void DMN_P_OPS::Read_use_DMN()
       }
       for(i=0;i<3;i++)
       {
-       COMPLXconj(conjugated,Grad_MOs[element[0]-1][i]);
+       conjugated=conj(Grad_MOs[element[0]-1][i]);
        Grad[i]=Grad[i]+conjugated*Array_MOs[element_prime[0]-1][0]*Dij;
-       COMPLXconj(conjugated,Array_MOs[element[0]-1][0]);
+       conjugated=conj(Array_MOs[element[0]-1][0]);
        Grad[i]=Grad[i]+conjugated*Grad_MOs[element_prime[0]-1][i]*Dij;
        if(i==0)
        {
-        COMPLXconj(conjugated,Array_MOs[element[0]-1][0]);
+        conjugated=conj(Array_MOs[element[0]-1][0]);
         sum=sum+conjugated*Array_MOs[element_prime[0]-1][0]*Dij;
        }
        if(element[0]!=element_prime[0])
        {
-        COMPLXconj(conjugated,Grad_MOs[element_prime[0]-1][i]);
+        conjugated=conj(Grad_MOs[element_prime[0]-1][i]);
         Grad[i]=Grad[i]+conjugated*Array_MOs[element[0]-1][0]*Dij;
-        COMPLXconj(conjugated,Array_MOs[element_prime[0]-1][0]);
+        conjugated=conj(Array_MOs[element_prime[0]-1][0]);
         Grad[i]=Grad[i]+conjugated*Grad_MOs[element[0]-1][i]*Dij;
         if(i==0)
         {
-         COMPLXconj(conjugated,Array_MOs[element_prime[0]-1][0]);
+         conjugated=conj(Array_MOs[element_prime[0]-1][0]);
          sum=sum+conjugated*Array_MOs[element[0]-1][0]*Dij;
         }
        }
