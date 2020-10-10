@@ -1,10 +1,10 @@
-# Makefile for rho_ops.2.2
+# Makefile for rho_ops
 #
 CPP = icc
 #CPPFLAGS = -Wall -fopenmp -llapack -lstdc++
 CPPFLAGS = -Wall -fopenmp -mkl -lstdc++
 Cln = /bin/rm -rf
-NAME=`pwd | sed 's,^\(.*/\)\?\([^/]*\),\2,'`
+NAME=rho_ops
 ###########################################
 ###########################################
 SCR= main.cpp sphere_lebedev_rule.cpp legendre_quadrature.cpp hcubature.c Integrals_quadrature.cpp Critical_Points.cpp DMN_ops_p_class.cpp Input_commands.cpp Integrals_DMN.cpp Mathematical_Functions.cpp MOp_class.cpp String_ops.cpp DMN_ops_class.cpp D_read_calc_rho.cpp Integrals.cpp main.cpp MO_class.cpp NO_class.cpp NO_DMN_class.cpp gnuplot.cpp

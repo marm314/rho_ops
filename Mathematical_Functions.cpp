@@ -343,7 +343,7 @@ void castCOMPLX(complex<double> &z, double RE,double IM)
 }
 void COMPLXconj(complex<double> &zout, complex<double> zin)
 {
- zout=(real(zin),imag(zin));
+ zout=(real(zin),-imag(zin));
 }
 //Spherical harmonics
 double Y_lm(double l,double m,double teta, double phi)
