@@ -1,7 +1,8 @@
 # Makefile for rho_ops.2.2
 #
 CPP = icc
-CPPFLAGS = -Wall -fopenmp -llapack -lstdc++
+#CPPFLAGS = -Wall -fopenmp -llapack -lstdc++
+CPPFLAGS = -Wall -fopenmp -mkl -lstdc++
 Cln = /bin/rm -rf
 NAME=`pwd | sed 's,^\(.*/\)\?\([^/]*\),\2,'`
 ###########################################
