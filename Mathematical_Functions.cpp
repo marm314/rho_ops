@@ -218,6 +218,23 @@ void matmul(int n,double **A,double **B, double **RES)
  delete[] row;
  delete[] column;
 }
+
+void matmul_full(int dim1,int dim2, int dim3,double **A,double **B, double **RES)
+{
+ int i,j,k;
+ for(i=0;i<dim1;i++)
+ {
+  for(j=0;j<dim3;j++)
+  {
+   RES[i][j]=ZERO;
+   for(k=0;k<dim2;k++)
+   {
+    RES[i][j]=RES[i][j]+A[i][k]*B[k][j];
+   }
+  }
+ }
+}
+
 //A-A^T==RES
 void mat_transpose(int n,double **A, double **RES)
 {

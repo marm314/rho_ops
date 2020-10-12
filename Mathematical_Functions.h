@@ -35,6 +35,7 @@ double dot(int &n,double *a,double *b);//Dot product
 void proyect(int &n,double *a,double *b,double *res);//Project vector a in b.
 void print_mat(int &n,double **A);
 void matmul(int n,double **A,double **B, double **RES);//RES=AxB
+void matmul_full(int dim1,int dim2,int dim3,double **A,double **B, double **RES);//RES=AxB
 void mat_inverse(int n,double **A,double **Ainv);
 void mat_transpose(int n,double **A, double **RES);//Transpose A->A^t==RES
 void mat_equal(int n,double **A,double **RES);//RES=A

@@ -43,6 +43,7 @@
 /////////////////////////////
 bool firstcall=true,wfn_fchk=false;
 string name_file;
+const int RECORD_DELIMITER_LENGTH=4;
 /////////////////////////////
 using namespace std;
 //////////////////////////
@@ -351,6 +352,153 @@ int main(int argc, char *argv[])
    Results<<"#*************************************************************************#";
    Results<<endl;
   }
+  ////////////////////////////////////////////
+  // Prepare .basis and pseudo dm2 file     //
+  // from wfn files -> intracule 1rdm       //
+  ////////////////////////////////////////////
+  if(Input_commands.basis_file)
+  {
+   if(name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')
+   {
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+    Results<<"#            Preparing basis and dm1 files for RHO2_OPS                   #";
+    Results<<endl;
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+    string name_basis,name_dm1;
+    int nucleous,nx,ny,nz,elements[4];
+    int **Quant;
+    double Exp,Dij,Atom_coord[3]={ZERO};
+    double **Coef,**CoefT,**Temp,**Temp2,*norm,**dm1;
+    Quant=new int*[35];
+    for(i=0;i<35;i++)
+    {
+     Quant[i]=new int[3];
+    }
+    Read_fchk_wfn.Quant_fill(Quant,0); 
+    name_basis=name_file.substr(0,name_file.length()-3)+"basis";
+    name_dm1=name_file.substr(0,name_file.length()-3)+"dm1";
+    ofstream basis_out(name_basis.c_str());
+    // Basis file
+    basis_out<<"# Z  \t\t X_A \t\t Y_A \t\t Z_A \t\t Exp \t\t Quant(nx,ny,nz)\n";
+    norm=new double[Read_fchk_wfn.nprimitv];
+    CoefT=new double*[Read_fchk_wfn.nprimitv];
+    Temp2=new double*[Read_fchk_wfn.nprimitv];
+    for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+    {
+     CoefT[i]=new double[Read_fchk_wfn.nbasis()];
+     Temp2[i]=new double[Read_fchk_wfn.nprimitv];
+     nucleous=(int)Read_fchk_wfn.Nu_charge[Read_fchk_wfn.shell_map[i]-1];
+     nx=Quant[Read_fchk_wfn.shell_type[i]-1][0];
+     ny=Quant[Read_fchk_wfn.shell_type[i]-1][1];
+     nz=Quant[Read_fchk_wfn.shell_type[i]-1][2];
+     Exp=Read_fchk_wfn.Prim_exp[i];
+     norm[i]=(double)(nx+ny+nz);
+     norm[i]=pow((TWO*Exp/PI),(THREE/FOUR))*pow((FOUR*Exp),(norm[i]/TWO));
+     norm[i]=norm[i]/pow(dfact(2*nx-1)*dfact(2*ny-1)*dfact(2*nz-1),HALF);
+     Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
+     Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
+     Atom_coord[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][2];
+     basis_out<<setw(3)<<nucleous<<"\t"<<setprecision(8)<<fixed<<scientific<<Atom_coord[0]<<"\t"<<Atom_coord[1]<<"\t"<<Atom_coord[2];
+     basis_out<<"\t"<<Exp<<"\t\t"<<nx<<"\t"<<ny<<"\t"<<nz<<endl;
+    }    
+    basis_out<<setw(3)<<0<<"\t"<<setprecision(8)<<fixed<<scientific<<ZERO<<"\t"<<ZERO<<"\t"<<ZERO;
+    basis_out<<"\t"<<1e-8<<"\t\t"<<0<<"\t"<<0<<"\t"<<0<<endl;
+    // DM1 file
+    dm1=new double*[Read_fchk_wfn.nbasis()];
+    Coef=new double*[Read_fchk_wfn.nbasis()];
+    Temp=new double*[Read_fchk_wfn.nbasis()];
+    for(i=0;i<Read_fchk_wfn.nbasis();i++)
+    {
+     dm1[i]=new double[Read_fchk_wfn.nbasis()];
+     for(j=0;j<Read_fchk_wfn.nbasis();j++)
+     {
+      dm1[i][j]=ZERO;
+      if(i==j)
+      {
+       // Times two because RHO2_OPS will divide by two
+       dm1[i][i]=TWO*Read_fchk_wfn.Ocupation[i];
+      }
+     }
+     Coef[i]=new double[Read_fchk_wfn.nprimitv];
+     Temp[i]=new double[Read_fchk_wfn.nprimitv];
+     for(j=0;j<Read_fchk_wfn.nprimitv;j++)
+     {
+      Coef[i][j]=Read_fchk_wfn.MOcoefA[i][j]/norm[j];
+      CoefT[j][i]=Coef[i][j];
+     }
+    }
+    matmul_full(Read_fchk_wfn.nbasis(),Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,dm1,Coef,Temp);
+    matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,CoefT,Temp,Temp2);
+    ofstream dm1_out(name_dm1.c_str(),ios::out | ios::binary);
+    for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+    {
+     for(j=0;j<Read_fchk_wfn.nprimitv;j++)
+     {
+      if(abs(Temp2[i][j])>pow(TEN,-TEN)) 
+      {
+       Dij=Temp2[i][j];
+       elements[0]=i+1;
+       elements[1]=Read_fchk_wfn.nprimitv+1;
+       elements[2]=j+1;
+       elements[3]=Read_fchk_wfn.nprimitv+1;
+       dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+       dm1_out.write((char*) &elements[0], sizeof(elements[0]));
+       dm1_out.write((char*) &elements[1], sizeof(elements[1]));
+       dm1_out.write((char*) &elements[2], sizeof(elements[2]));
+       dm1_out.write((char*) &elements[3], sizeof(elements[3]));
+       dm1_out.write((char*) &Dij, sizeof(Dij));
+       dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+      }
+     }
+    }
+    Dij=ZERO;
+    elements[0]=0;
+    elements[1]=0;
+    elements[2]=0;
+    elements[3]=0;
+    dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+    dm1_out.write((char*) &elements[0], sizeof(elements[0]));
+    dm1_out.write((char*) &elements[1], sizeof(elements[1]));
+    dm1_out.write((char*) &elements[2], sizeof(elements[2]));
+    dm1_out.write((char*) &elements[3], sizeof(elements[3]));
+    dm1_out.write((char*) &Dij, sizeof(Dij));
+    dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+    // Deallocate arrays
+    for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+    {
+     delete[] CoefT[i];CoefT[i]=NULL;
+     delete[] Temp2[i];Temp2[i]=NULL;
+    }
+    for(i=0;i<Read_fchk_wfn.nbasis();i++)
+    {
+     delete[] dm1[i];dm1[i]=NULL;
+     delete[] Coef[i];Coef[i]=NULL;
+     delete[] Temp[i];Temp[i]=NULL;
+    }
+    for(i=0;i<35;i++)
+    {
+     delete[] Quant[i];Quant[i]=NULL;
+    }
+    delete[] Quant;Quant=NULL;
+    delete[] norm;norm=NULL;
+    delete[] dm1;dm1=NULL;
+    delete[] Coef;Coef=NULL;
+    delete[] CoefT;CoefT=NULL;
+    delete[] Temp;Temp=NULL;
+    delete[] Temp2;Temp2=NULL;
+    dm1_out.close();
+    basis_out.close();
+    Results<<endl;
+    Results<<" See the files "<<name_basis<<" "<<name_dm1<<endl;
+    Results<<endl;
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+   }
+  }	  
   ///////////////////////////////////////////////
   // Punctual evals and scans for WFN and FCHK //
   ///////////////////////////////////////////////

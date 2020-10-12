@@ -77,10 +77,6 @@ class READ_FCHK_WFN
    double exponent);
    //Momentum space:
    void eval_Primitive_p_wfn(double point_p[3],double pos_nuclei[3],int nlm[3],double &expon,double &re,double &im);
-   ////////////
-   //for both//
-   ////////////
-   void Quant_fill(int **Quant,int styp);
    void Center_of_mass();
  public:
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +95,10 @@ class READ_FCHK_WFN
    double *Prim_exp, *Contr_Coef, *SP_Contr_Coef,Rot_ICM[3][3];
    bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx;
    string identity;
+   ////////////
+   //for both//
+   ////////////
+   void Quant_fill(int **Quant,int styp);
    //Position space
    void build_AO_AOgrad2(double *AO,double **AO_grad,double Point[3]);
    void rho_eval(double [3],double &);
