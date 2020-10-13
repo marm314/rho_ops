@@ -1147,7 +1147,11 @@ void calc_mij_mat(double **Sij,double **ORBITALS,double interval[6],int &order_r
 void integrate_intra_coord(double **Scanned,double Dij,double exp_i,double exp_j,double Atom1[3],double Atom2[3],int nx_exp[2],int ny_exp[2],int nz_exp[2],
 int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss)
 {
-
+ int j;
+ double zeta_ij,Aij;
+ zeta_ij=pow(exp_i*exp_j,-HALF*THREE);
+ Aij=Dij*zeta_ij;
+ 
 
 }
 //Clean info
