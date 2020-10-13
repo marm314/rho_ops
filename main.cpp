@@ -356,35 +356,36 @@ int main(int argc, char *argv[])
   // Prepare .basis and pseudo dm2 file     //
   // from wfn files -> intracule 1rdm       //
   ////////////////////////////////////////////
-  if(Input_commands.basis_file)
+  if(Input_commands.intra_1rdm)
   {
    if(name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')
    {
     Results<<"#*************************************************************************#";
     Results<<endl;
     Results<<"#            Preparing basis and dm1 files in primitives                  #";
+    Results<<"#               also computing intracule-like integrals                   #";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
-    string name_basis,name_dm1;
-    int nucleous,elements[2];
+    string name_basis,name_dm1,name_in;
+    int mode=1,nucleous,nr,nang,elements[2];
     int **Quant;
-    double nx,ny,nz,Exp,Dij,Atom_coord[3]={ZERO};
-    double **Coef,**CoefT,**Temp,**dm1_prim,*norm,**dm1;
+    double nx,ny,nz,Exp,Dij,Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
+    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Scanned;
     Quant=new int*[35];
     for(i=0;i<35;i++)
     {
      Quant[i]=new int[3];
     }
-    Read_fchk_wfn.Quant_fill(Quant,0); 
-    name_basis=name_file.substr(0,name_file.length()-3)+"basis";
-    name_dm1=name_file.substr(0,name_file.length()-3)+"dm1";
+    Read_fchk_wfn.Quant_fill(Quant,0);
+    name_in=name_file.substr(0,name_file.length()-3); 
+    name_basis=name_in+"basis";
+    name_dm1=name_in+"dm1";
     ofstream basis_out(name_basis.c_str());
     // Basis file
     basis_out<<"# Z  \t\t X_A \t\t Y_A \t\t Z_A \t\t Exp \t\t Quant(nx,ny,nz)\n";
-    norm=new double[Read_fchk_wfn.nprimitv];
     CoefT=new double*[Read_fchk_wfn.nprimitv];
     dm1_prim=new double*[Read_fchk_wfn.nprimitv];
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
@@ -396,7 +397,6 @@ int main(int argc, char *argv[])
      ny=(double)Quant[Read_fchk_wfn.shell_type[i]-1][1];
      nz=(double)Quant[Read_fchk_wfn.shell_type[i]-1][2];
      Exp=Read_fchk_wfn.Prim_exp[i];
-     norm[i]=pow((TWO*Exp/PI),(THREE/FOUR))*pow((FOUR*Exp),(norm[i]/TWO))/pow(dfact(2*(int)nx-1)*dfact(2*(int)ny-1)*dfact(2*(int)nz-1),HALF);
      Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
      Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
      Atom_coord[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][2];
@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
      basis_out<<"\t"<<Exp<<"\t\t"<<(int)nx<<"\t"<<(int)ny<<"\t"<<(int)nz<<endl;
     }    
     basis_out.close();
-    // DM1 file
+    // DM1 file and scan 'inntracule like'
     dm1=new double*[Read_fchk_wfn.nbasis()];
     Coef=new double*[Read_fchk_wfn.nbasis()];
     Temp=new double*[Read_fchk_wfn.nbasis()];
@@ -416,7 +416,6 @@ int main(int argc, char *argv[])
       dm1[i][j]=ZERO;
       if(i==j)
       {
-       // Times two because RHO2_OPS will divide by two
        dm1[i][i]=Read_fchk_wfn.Ocupation[i];
       }
      }
@@ -424,20 +423,42 @@ int main(int argc, char *argv[])
      Temp[i]=new double[Read_fchk_wfn.nprimitv];
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
-      Coef[i][j]=Read_fchk_wfn.MOcoefA[i][j]/norm[j];
+      Coef[i][j]=Read_fchk_wfn.MOcoefA[i][j];
       CoefT[j][i]=Coef[i][j];
      }
     }
     matmul_full(Read_fchk_wfn.nbasis(),Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,dm1,Coef,Temp);
     matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,CoefT,Temp,dm1_prim);
+    nr=Input_commands.order_grid_r;
+    nang=Input_commands.order_grid_ang;
+    grid_avail(nang);
+    Scanned=new double*[nr];
+    for(i=0;i<nr;i++)
+    {
+     Scanned[i]=new double[nang];
+     for(j=0;j<nang;j++)
+     {
+      Scanned[i][j]=ZERO;
+     }
+    }
+    void *data;
+    double **nth1,**nth2;
+    integrate_quadrature(data,name_in,false,nr,nang,false,nth1,nth2,mode);
     ofstream dm1_out(name_dm1.c_str(),ios::out | ios::binary);
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
+     Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
+     Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
+     Atom_coord[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][2];
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
       if(abs(dm1_prim[i][j])>pow(TEN,-TEN)) 
       {
+       Atom_coord2[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][0];
+       Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
+       Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
        Dij=dm1_prim[i][j];
+       //integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2);
        elements[0]=i+1;
        elements[1]=j+1;
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
@@ -457,7 +478,14 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
+    Results<<"#u                I(u)              I(u)u**2"<<endl;
+    Results<<setprecision(10)<<scientific<<fixed;
+    for(i=0;i<nr;i++)
+    {
+     Results<<Scanned[i][0]<<Scanned[i][1]<<Scanned[i][2]<<endl;
+    } 
     // Deallocate arrays
+    clean_quadrature(name_in,mode);
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      delete[] CoefT[i];CoefT[i]=NULL;
@@ -474,7 +502,6 @@ int main(int argc, char *argv[])
      delete[] Quant[i];Quant[i]=NULL;
     }
     delete[] Quant;Quant=NULL;
-    delete[] norm;norm=NULL;
     delete[] dm1;dm1=NULL;
     delete[] Coef;Coef=NULL;
     delete[] CoefT;CoefT=NULL;

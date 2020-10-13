@@ -15,7 +15,7 @@
 #include"MO_class.h"
 #include"NO_class.h"
 using namespace std;
-void integrate_quadrature(void *,string,bool,int ,int ,bool ,double **,double **);
+void integrate_quadrature(void *,string,bool,int ,int ,bool ,double **,double **,int mode=0);
 void integrate_quadrature_p(void *,string,bool,int ,int ,bool ,double **,double **);
 void build_nos_quadrature(void *,string,double **,int,int);
 void build_nos_quadrature_rot(void *data,string name,double **ORBITALS,int order,int order2,double rot);
@@ -26,7 +26,7 @@ void integral_calc_p(string,int &,int &,double **,double **,double [6],double &)
 void calc_sij_mat(double **,double**,double [6],int &,int &,int &);
 void calc_mij_mat(double **,double**,double [6],int &,int &,int &);
 void grid_avail(int &);
-void clean_quadrature(string);
+void clean_quadrature(string,int mode=0);
 double theta_rad(double &);
 double phi_rad(double &);
 void rotate_point(double Point[3],double rot);

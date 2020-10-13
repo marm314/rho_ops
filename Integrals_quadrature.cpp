@@ -2,12 +2,12 @@
 //theta from 0 to PI,
 //phi from -PI  to PI
 //r and r_real are not position space are RADIAL
-double *r,*r_real,*w_radial,*w_theta_phi,*theta,*phi;
+double *r,*r_real,*w_radial,*w_theta_phi,*theta,*phi,*XX,*YY,*ZZ;
 /////////////////////////////////////
 //Quantities dependent of densities//
 /////////////////////////////////////
 //Generate entire grid for position space dependent densities
-void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,bool fisher,double **density_evals,double **density_grads)
+void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,bool fisher,double **density_evals,double **density_grads,int mode)
 {
  int i,j;
  double r_inf,r_sup,*x,*y,*z,Grad[3];
@@ -39,6 +39,12 @@ void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,b
  x=new double[order2];
  y=new double[order2];
  z=new double[order2];
+ if(mode!=0)
+ {
+  XX=new double[order2];
+  YY=new double[order2];
+  ZZ=new double[order2];
+ }
  w_theta_phi=new double[order2];
  theta=new double[order2];
  phi=new double[order2];
@@ -49,35 +55,44 @@ void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,b
  for(i=0;i<order2;i++)
  {
   xyz_to_tp(x[i],y[i],z[i],temp,temp1);
+  if(mode!=0)
+  {
+   XX[i]=x[i];
+   YY[i]=y[i];
+   ZZ[i]=z[i];
+  }
   phi[i]=temp[0];
   theta[i]=temp1[0];
  }
  delete[] temp; temp=NULL;
  delete[] temp1; temp1=NULL;
- //Loop over radial points
- for(i=0;i<order;i++)
- {//Loop over angular points
-  for(j=0;j<order2;j++)
-  {
-   Point[0]=r_real[i]*x[j];
-   Point[1]=r_real[i]*y[j];
-   Point[2]=r_real[i]*z[j];
-   if(!dmn)
+ if(mode==0)
+ {
+  //Loop over radial points
+  for(i=0;i<order;i++)
+  {//Loop over angular points
+   for(j=0;j<order2;j++)
    {
-    ((READ_FCHK_WFN*)data)[0].rho_eval(Point,density_evals[i][j]);
-    if(fisher)
+    Point[0]=r_real[i]*x[j];
+    Point[1]=r_real[i]*y[j];
+    Point[2]=r_real[i]*z[j];
+    if(!dmn)
     {
-     ((READ_FCHK_WFN*)data)[0].rho_grad(Point,Grad);
-     density_grads[i][j]=pow(norm3D(Grad),TWO);
+     ((READ_FCHK_WFN*)data)[0].rho_eval(Point,density_evals[i][j]);
+     if(fisher)
+     {
+      ((READ_FCHK_WFN*)data)[0].rho_grad(Point,Grad);
+      density_grads[i][j]=pow(norm3D(Grad),TWO);
+     }
     }
-   }
-   else
-   {
-    density_evals[i][j]=((DMN_OPS*)data)[0].evaluation(Point,Point);
-    if(fisher)
+    else
     {
-     ((DMN_OPS*)data)[0].grad_rho_r(Point,Grad,density_evals[i][j]);
-     density_grads[i][j]=pow(norm3D(Grad),TWO);
+     density_evals[i][j]=((DMN_OPS*)data)[0].evaluation(Point,Point);
+     if(fisher)
+     {
+      ((DMN_OPS*)data)[0].grad_rho_r(Point,Grad,density_evals[i][j]);
+      density_grads[i][j]=pow(norm3D(Grad),TWO);
+     }
     }
    }
   }
@@ -1129,7 +1144,7 @@ void calc_mij_mat(double **Sij,double **ORBITALS,double interval[6],int &order_r
  }
 }
 //Clean info
-void clean_quadrature(string name)
+void clean_quadrature(string name,int mode)
 {
  system(("rm "+name+"_w.txt").c_str());
  system(("rm "+name+"_x.txt").c_str());
@@ -1140,6 +1155,12 @@ void clean_quadrature(string name)
  delete[] phi; phi=NULL;
  delete[] w_radial; w_radial=NULL;
  delete[] w_theta_phi; w_theta_phi=NULL;
+ if(mode!=0)
+ {
+  delete[] XX;XX=NULL;
+  delete[] YY;YY=NULL;
+  delete[] ZZ;ZZ=NULL;
+ }
 }
 //Check for available order in Lebedev
 void grid_avail(int & Order)
