@@ -362,17 +362,17 @@ int main(int argc, char *argv[])
    {
     Results<<"#*************************************************************************#";
     Results<<endl;
-    Results<<"#            Preparing basis and dm1 files for RHO2_OPS                   #";
+    Results<<"#            Preparing basis and dm1 files in primitives                  #";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
     string name_basis,name_dm1;
-    int nucleous,nx,ny,nz,elements[4];
+    int nucleous,elements[2];
     int **Quant;
-    double Exp,Dij,Atom_coord[3]={ZERO};
-    double **Coef,**CoefT,**Temp,**Temp2,*norm,**dm1;
+    double nx,ny,nz,Exp,Dij,Atom_coord[3]={ZERO};
+    double **Coef,**CoefT,**Temp,**dm1_prim,*norm,**dm1;
     Quant=new int*[35];
     for(i=0;i<35;i++)
     {
@@ -386,27 +386,24 @@ int main(int argc, char *argv[])
     basis_out<<"# Z  \t\t X_A \t\t Y_A \t\t Z_A \t\t Exp \t\t Quant(nx,ny,nz)\n";
     norm=new double[Read_fchk_wfn.nprimitv];
     CoefT=new double*[Read_fchk_wfn.nprimitv];
-    Temp2=new double*[Read_fchk_wfn.nprimitv];
+    dm1_prim=new double*[Read_fchk_wfn.nprimitv];
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      CoefT[i]=new double[Read_fchk_wfn.nbasis()];
-     Temp2[i]=new double[Read_fchk_wfn.nprimitv];
+     dm1_prim[i]=new double[Read_fchk_wfn.nprimitv];
      nucleous=(int)Read_fchk_wfn.Nu_charge[Read_fchk_wfn.shell_map[i]-1];
-     nx=Quant[Read_fchk_wfn.shell_type[i]-1][0];
-     ny=Quant[Read_fchk_wfn.shell_type[i]-1][1];
-     nz=Quant[Read_fchk_wfn.shell_type[i]-1][2];
+     nx=(double)Quant[Read_fchk_wfn.shell_type[i]-1][0];
+     ny=(double)Quant[Read_fchk_wfn.shell_type[i]-1][1];
+     nz=(double)Quant[Read_fchk_wfn.shell_type[i]-1][2];
      Exp=Read_fchk_wfn.Prim_exp[i];
-     norm[i]=(double)(nx+ny+nz);
-     norm[i]=pow((TWO*Exp/PI),(THREE/FOUR))*pow((FOUR*Exp),(norm[i]/TWO));
-     norm[i]=norm[i]/pow(dfact(2*nx-1)*dfact(2*ny-1)*dfact(2*nz-1),HALF);
+     norm[i]=pow((TWO*Exp/PI),(THREE/FOUR))*pow((FOUR*Exp),(norm[i]/TWO))/pow(dfact(2*(int)nx-1)*dfact(2*(int)ny-1)*dfact(2*(int)nz-1),HALF);
      Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
      Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
      Atom_coord[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][2];
      basis_out<<setw(3)<<nucleous<<"\t"<<setprecision(8)<<fixed<<scientific<<Atom_coord[0]<<"\t"<<Atom_coord[1]<<"\t"<<Atom_coord[2];
-     basis_out<<"\t"<<Exp<<"\t\t"<<nx<<"\t"<<ny<<"\t"<<nz<<endl;
+     basis_out<<"\t"<<Exp<<"\t\t"<<(int)nx<<"\t"<<(int)ny<<"\t"<<(int)nz<<endl;
     }    
-    basis_out<<setw(3)<<0<<"\t"<<setprecision(8)<<fixed<<scientific<<ZERO<<"\t"<<ZERO<<"\t"<<ZERO;
-    basis_out<<"\t"<<1e-8<<"\t\t"<<0<<"\t"<<0<<"\t"<<0<<endl;
+    basis_out.close();
     // DM1 file
     dm1=new double*[Read_fchk_wfn.nbasis()];
     Coef=new double*[Read_fchk_wfn.nbasis()];
@@ -420,7 +417,7 @@ int main(int argc, char *argv[])
       if(i==j)
       {
        // Times two because RHO2_OPS will divide by two
-       dm1[i][i]=TWO*Read_fchk_wfn.Ocupation[i];
+       dm1[i][i]=Read_fchk_wfn.Ocupation[i];
       }
      }
      Coef[i]=new double[Read_fchk_wfn.nprimitv];
@@ -432,24 +429,20 @@ int main(int argc, char *argv[])
      }
     }
     matmul_full(Read_fchk_wfn.nbasis(),Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,dm1,Coef,Temp);
-    matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,CoefT,Temp,Temp2);
+    matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,CoefT,Temp,dm1_prim);
     ofstream dm1_out(name_dm1.c_str(),ios::out | ios::binary);
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
-      if(abs(Temp2[i][j])>pow(TEN,-TEN)) 
+      if(abs(dm1_prim[i][j])>pow(TEN,-TEN)) 
       {
-       Dij=Temp2[i][j];
+       Dij=dm1_prim[i][j];
        elements[0]=i+1;
-       elements[1]=Read_fchk_wfn.nprimitv+1;
-       elements[2]=j+1;
-       elements[3]=Read_fchk_wfn.nprimitv+1;
+       elements[1]=j+1;
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
        dm1_out.write((char*) &elements[0], sizeof(elements[0]));
        dm1_out.write((char*) &elements[1], sizeof(elements[1]));
-       dm1_out.write((char*) &elements[2], sizeof(elements[2]));
-       dm1_out.write((char*) &elements[3], sizeof(elements[3]));
        dm1_out.write((char*) &Dij, sizeof(Dij));
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
       }
@@ -458,20 +451,17 @@ int main(int argc, char *argv[])
     Dij=ZERO;
     elements[0]=0;
     elements[1]=0;
-    elements[2]=0;
-    elements[3]=0;
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.write((char*) &elements[0], sizeof(elements[0]));
     dm1_out.write((char*) &elements[1], sizeof(elements[1]));
-    dm1_out.write((char*) &elements[2], sizeof(elements[2]));
-    dm1_out.write((char*) &elements[3], sizeof(elements[3]));
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+    dm1_out.close();
     // Deallocate arrays
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      delete[] CoefT[i];CoefT[i]=NULL;
-     delete[] Temp2[i];Temp2[i]=NULL;
+     delete[] dm1_prim[i];dm1_prim[i]=NULL;
     }
     for(i=0;i<Read_fchk_wfn.nbasis();i++)
     {
@@ -489,9 +479,7 @@ int main(int argc, char *argv[])
     delete[] Coef;Coef=NULL;
     delete[] CoefT;CoefT=NULL;
     delete[] Temp;Temp=NULL;
-    delete[] Temp2;Temp2=NULL;
-    dm1_out.close();
-    basis_out.close();
+    delete[] dm1_prim;dm1_prim=NULL;
     Results<<endl;
     Results<<" See the files "<<name_basis<<" "<<name_dm1<<endl;
     Results<<endl;
