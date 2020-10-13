@@ -22,6 +22,7 @@
 #include"Integrals.h"
 #include"Integrals_DMN.h"
 #include"Integrals_quadrature.h"
+#include"gauss_quad.h"
 #include"Numbers.h"
 #include"String_ops.h"
 #include"DMN_ops_class.h"
@@ -371,9 +372,10 @@ int main(int argc, char *argv[])
     Results<<endl;
     string name_basis,name_dm1,name_in;
     int mode=1,nucleous,nr,nang,elements[2];
-    int **Quant;
-    double nx,ny,nz,Exp,Dij,Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
-    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Scanned;
+    int **Quant,Lmax=0,Nroot_Lmax_plus_1;
+    double nx,ny,nz,Exp,Dij,alpha,a,b;
+    double Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
+    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Scanned,*r_gauss,*w_gauss;
     Quant=new int*[35];
     for(i=0;i<35;i++)
     {
@@ -384,7 +386,7 @@ int main(int argc, char *argv[])
     name_basis=name_in+"basis";
     name_dm1=name_in+"dm1";
     ofstream basis_out(name_basis.c_str());
-    // Basis file
+    // Basis file and primitives quadrature preparation
     basis_out<<"# Z  \t\t X_A \t\t Y_A \t\t Z_A \t\t Exp \t\t Quant(nx,ny,nz)\n";
     CoefT=new double*[Read_fchk_wfn.nprimitv];
     dm1_prim=new double*[Read_fchk_wfn.nprimitv];
@@ -396,6 +398,7 @@ int main(int argc, char *argv[])
      nx=(double)Quant[Read_fchk_wfn.shell_type[i]-1][0];
      ny=(double)Quant[Read_fchk_wfn.shell_type[i]-1][1];
      nz=(double)Quant[Read_fchk_wfn.shell_type[i]-1][2];
+     if((Read_fchk_wfn.shell_type[i]-1)>Lmax){Lmax=Read_fchk_wfn.shell_type[i]-1;}
      Exp=Read_fchk_wfn.Prim_exp[i];
      Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
      Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
@@ -404,6 +407,41 @@ int main(int argc, char *argv[])
      basis_out<<"\t"<<Exp<<"\t\t"<<(int)nx<<"\t"<<(int)ny<<"\t"<<(int)nz<<endl;
     }    
     basis_out.close();
+    if(Lmax==3){Lmax=1;}
+    else if(Lmax==9){Lmax=2;}
+    else if(Lmax==19){Lmax=3;}
+    else if(Lmax==34){Lmax=4;}
+    else {Lmax=0;}
+    Nroot_Lmax_plus_1=Lmax+1;
+    Results<<"Lmax                  :"<<setw(10)<<Lmax<<endl;
+    Results<<"Quadrature rule order :"<<setw(10)<<Nroot_Lmax_plus_1<<endl;
+    Results<<"[Quadrature for primitive integrals. Order = Lmax + 1 ]"<<endl;
+    alpha=ZERO;
+    a=ZERO;
+    b=ONE;
+    gauss_hermite_rule(name_in,alpha,a,b,Nroot_Lmax_plus_1);
+    r_gauss=new double[Nroot_Lmax_plus_1];
+    w_gauss=new double[Nroot_Lmax_plus_1];
+    //Read quadrature info
+    ifstream read_quad;
+    // Read weights
+    read_quad.open(name_in.c_str());
+    for(i=0;i<Nroot_Lmax_plus_1;i++)
+    {
+     read_quad>>w_gauss[i];
+    }
+    read_quad.close();
+    // Read roots
+    read_quad.open(name_in.c_str());
+    for(i=0;i<Nroot_Lmax_plus_1;i++)
+    {
+     read_quad>>r_gauss[i];
+    }
+    read_quad.close();
+    // Remove quadrature files
+    system(("rm "+name_in+"_r.txt").c_str());
+    system(("rm "+name_in+"_w.txt").c_str());
+    system(("rm "+name_in+"_x.txt").c_str());
     // DM1 file and scan 'inntracule like'
     dm1=new double*[Read_fchk_wfn.nbasis()];
     Coef=new double*[Read_fchk_wfn.nbasis()];
@@ -458,7 +496,7 @@ int main(int argc, char *argv[])
        Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
        Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
        Dij=dm1_prim[i][j];
-       //integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2);
+       integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,Nroot_Lmax_plus_1,r_gauss,w_gauss);
        elements[0]=i+1;
        elements[1]=j+1;
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
@@ -507,6 +545,8 @@ int main(int argc, char *argv[])
     delete[] CoefT;CoefT=NULL;
     delete[] Temp;Temp=NULL;
     delete[] dm1_prim;dm1_prim=NULL;
+    delete[] r_gauss;r_gauss=NULL;
+    delete[] w_gauss;w_gauss=NULL;
     Results<<endl;
     Results<<" See the files "<<name_basis<<" "<<name_dm1<<endl;
     Results<<endl;

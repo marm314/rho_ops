@@ -1143,6 +1143,12 @@ void calc_mij_mat(double **Sij,double **ORBITALS,double interval[6],int &order_r
   }
  }
 }
+// Integrate intracule like for 1RDM
+void integrate_intra_coord(double **Scanned,double Dij,double exp_i,double exp_j,double Atom1[3],double Atom2[3],int Nroot_Lmax_plus_1,double *r_gauss
+,double *w_gauss)
+{
+
+}
 //Clean info
 void clean_quadrature(string name,int mode)
 {
