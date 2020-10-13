@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
     Results<<endl;
     string name_basis,name_dm1,name_in;
     int mode=1,nucleous,nr,nang,elements[2];
-    int **Quant,Lmax=0,Nroot_Lmax_plus_1;
+    int **Quant,Lmax=0,Nroot_Lmax_plus_1,nx_exp[2],ny_exp[2],nz_exp[2];
     double nx,ny,nz,Exp,Dij,alpha,a,b;
     double Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
     double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Scanned,*r_gauss,*w_gauss;
@@ -488,6 +488,9 @@ int main(int argc, char *argv[])
      Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
      Atom_coord[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][1];
      Atom_coord[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][2];
+     nx_exp[0]=Quant[Read_fchk_wfn.shell_type[i]-1][0];
+     ny_exp[0]=Quant[Read_fchk_wfn.shell_type[i]-1][1];
+     nz_exp[0]=Quant[Read_fchk_wfn.shell_type[i]-1][2];
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
       if(abs(dm1_prim[i][j])>pow(TEN,-TEN)) 
@@ -495,8 +498,12 @@ int main(int argc, char *argv[])
        Atom_coord2[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][0];
        Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
        Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
+       nx_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][0];
+       ny_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][1];
+       nz_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][2];
        Dij=dm1_prim[i][j];
-       integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,Nroot_Lmax_plus_1,r_gauss,w_gauss);
+       integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,nx_exp,ny_exp,nz_exp,
+       Nroot_Lmax_plus_1,r_gauss,w_gauss);
        elements[0]=i+1;
        elements[1]=j+1;
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
