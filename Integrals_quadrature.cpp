@@ -1148,8 +1148,7 @@ void integrate_intra_coord(double **Intrac,double Dij,double exp_i,double exp_j,
 int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r, int order_ang,bool last)
 {
  int i,j,k;
- double zeta_ij,zeta_ij_m1h,zeta_ij_m1h_s,Aij,alpha_ij,alpha_ij_m_12,alpha_ij_p_12,Xij,Yij,Zij,Coef_ij,Point[3],RpRimRj[3],VijX,VijY,VijZ;
- double *Iu;
+ double zeta_ij,zeta_ij_m1h,zeta_ij_m1h_s,Aij,alpha_ij,alpha_ij_m_12,alpha_ij_p_12,Xij,Yij,Zij,Coef_ij,Point[3],RpRimRj[3],VijX,VijY,VijZ,Iu;
  zeta_ij=exp_i+exp_j;
  zeta_ij_m1h=pow(zeta_ij,-HALF);
  Aij=pow(zeta_ij_m1h,THREE)*Dij;
@@ -1186,23 +1185,19 @@ int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r,
  }
  if(last)
  {
-  Iu=new double[order_r];
   for(i=0;i<order_r;i++)
   {
-   Iu[i]=ZERO;
+   Iu=ZERO;
    for(j=0;j<order_ang;j++)
    {
-    Iu[i]=Iu[i]+w_theta_phi[j]*Intrac[i][j];
+    // Do not use 4*PI as we want I(0) = Nelectrons. Is like, spherical-averaged quantity.
+    Iu=Iu+w_theta_phi[j]*Intrac[i][j];
    }
-   if(abs(Iu[i])<pow(TEN,-EIGHT)){Iu[i]=ZERO;}
-  }
-  for(i=0;i<order_r;i++)
-  {
+   if(abs(Iu)<pow(TEN,-EIGHT)){Iu=ZERO;}
    Intrac[i][0]=r_real[i];
-   Intrac[i][1]=Iu[i];
-   Intrac[i][2]=Iu[i]*pow(r_real[i],TWO);
+   Intrac[i][1]=Iu;
+   Intrac[i][2]=Iu*pow(r_real[i],TWO);
   }
-  delete[] Iu;Iu=NULL;
  } 
 }
 //Clean info

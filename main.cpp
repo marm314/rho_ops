@@ -529,6 +529,7 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
+    Results<<"# In the following: I(u) is spherical-averaged [ I(u) / 4*PI ]"<<endl;
     Results<<"#      u                  I(u)                I(u)u**2"<<endl;
     Results<<setprecision(10)<<fixed<<scientific;
     for(i=0;i<nr;i++)
