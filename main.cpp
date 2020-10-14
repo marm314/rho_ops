@@ -364,6 +364,7 @@ int main(int argc, char *argv[])
     Results<<"#*************************************************************************#";
     Results<<endl;
     Results<<"#            Preparing basis and dm1 files in primitives                  #";
+    Results<<endl;
     Results<<"#               also computing intracule-like integrals                   #";
     Results<<endl;
     Results<<"#*************************************************************************#";
@@ -523,11 +524,11 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
-    Results<<"#u                I(u)              I(u)u**2"<<endl;
+    Results<<"#      u                I(u)             I(u)u**2"<<endl;
     Results<<setprecision(10)<<scientific<<fixed;
     for(i=0;i<nr;i++)
     {
-     Results<<Scanned[i][0]<<Scanned[i][1]<<Scanned[i][2]<<endl;
+     Results<<setw(17)<<Scanned[i][0]<<setw(17)<<Scanned[i][1]<<setw(17)<<Scanned[i][2]<<endl;
     } 
     // Deallocate arrays
     clean_quadrature(name_in,mode);
