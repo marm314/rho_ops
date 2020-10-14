@@ -372,11 +372,12 @@ int main(int argc, char *argv[])
     Results<<"#*************************************************************************#";
     Results<<endl;
     string name_basis,name_dm1,name_in;
+    bool last=false;
     int mode=1,nucleous,nr,nang,elements[2];
     int **Quant,Lmax=0,Nroot_Lmax_plus_1,nx_exp[2],ny_exp[2],nz_exp[2];
     double nx,ny,nz,Exp,Dij,alpha,a,b;
     double Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
-    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Scanned,*r_gauss,*w_gauss;
+    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Intra_1,*r_gauss,*w_gauss;
     Quant=new int*[35];
     for(i=0;i<35;i++)
     {
@@ -426,14 +427,14 @@ int main(int argc, char *argv[])
     //Read quadrature info
     ifstream read_quad;
     // Read weights
-    read_quad.open(name_in.c_str());
+    read_quad.open((name_in+"_w.txt").c_str());
     for(i=0;i<Nroot_Lmax_plus_1;i++)
     {
      read_quad>>w_gauss[i];
     }
     read_quad.close();
     // Read roots
-    read_quad.open(name_in.c_str());
+    read_quad.open((name_in+"_x.txt").c_str());
     for(i=0;i<Nroot_Lmax_plus_1;i++)
     {
      read_quad>>r_gauss[i];
@@ -471,13 +472,13 @@ int main(int argc, char *argv[])
     nr=Input_commands.order_grid_r;
     nang=Input_commands.order_grid_ang;
     grid_avail(nang);
-    Scanned=new double*[nr];
+    Intra_1=new double*[nr];
     for(i=0;i<nr;i++)
     {
-     Scanned[i]=new double[nang];
+     Intra_1[i]=new double[nang];
      for(j=0;j<nang;j++)
      {
-      Scanned[i][j]=ZERO;
+      Intra_1[i][j]=ZERO;
      }
     }
     void *data;
@@ -494,8 +495,12 @@ int main(int argc, char *argv[])
      nz_exp[0]=Quant[Read_fchk_wfn.shell_type[i]-1][2];
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
-      if(abs(dm1_prim[i][j])>pow(TEN,-TEN)) 
+      if(abs(dm1_prim[i][j])>pow(TEN,-TEN)||(i==j && i==(Read_fchk_wfn.nprimitv-1))) 
       {
+       if(i==j && i==(Read_fchk_wfn.nprimitv-1))
+       {
+        last=true;
+       }
        Atom_coord2[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][0];
        Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
        Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
@@ -503,8 +508,8 @@ int main(int argc, char *argv[])
        ny_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][1];
        nz_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][2];
        Dij=dm1_prim[i][j];
-       integrate_intra_coord(Scanned,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,nx_exp,ny_exp,nz_exp,
-       Nroot_Lmax_plus_1,r_gauss,w_gauss);
+       integrate_intra_coord(Intra_1,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,nx_exp,ny_exp,nz_exp,
+       Nroot_Lmax_plus_1,r_gauss,w_gauss,nr,nang,last);
        elements[0]=i+1;
        elements[1]=j+1;
        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
@@ -524,14 +529,18 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
-    Results<<"#      u                I(u)             I(u)u**2"<<endl;
-    Results<<setprecision(10)<<scientific<<fixed;
+    Results<<"#      u                  I(u)                I(u)u**2"<<endl;
+    Results<<setprecision(10)<<fixed<<scientific;
     for(i=0;i<nr;i++)
     {
-     Results<<setw(17)<<Scanned[i][0]<<setw(17)<<Scanned[i][1]<<setw(17)<<Scanned[i][2]<<endl;
+     Results<<setw(20)<<Intra_1[i][0]<<setw(20)<<Intra_1[i][1]<<setw(20)<<Intra_1[i][2]<<endl;
     } 
     // Deallocate arrays
     clean_quadrature(name_in,mode);
+    for(i=0;i<nr;i++)
+    {
+     delete[] Intra_1[i];Intra_1[i]=NULL;
+    }
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      delete[] CoefT[i];CoefT[i]=NULL;
@@ -547,6 +556,7 @@ int main(int argc, char *argv[])
     {
      delete[] Quant[i];Quant[i]=NULL;
     }
+    delete[] Intra_1;Intra_1=NULL;
     delete[] Quant;Quant=NULL;
     delete[] dm1;dm1=NULL;
     delete[] Coef;Coef=NULL;

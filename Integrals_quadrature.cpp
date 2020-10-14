@@ -1144,15 +1144,66 @@ void calc_mij_mat(double **Sij,double **ORBITALS,double interval[6],int &order_r
  }
 }
 // Integrate intracule like for 1RDM
-void integrate_intra_coord(double **Scanned,double Dij,double exp_i,double exp_j,double Atom1[3],double Atom2[3],int nx_exp[2],int ny_exp[2],int nz_exp[2],
-int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss)
+void integrate_intra_coord(double **Intrac,double Dij,double exp_i,double exp_j,double Atom1[3],double Atom2[3],int nx_exp[2],int ny_exp[2],
+int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r, int order_ang,bool last)
 {
- int j;
- double zeta_ij,Aij;
- zeta_ij=pow(exp_i*exp_j,-HALF*THREE);
- Aij=Dij*zeta_ij;
- 
-
+ int i,j,k;
+ double zeta_ij,zeta_ij_m1h,zeta_ij_m1h_s,Aij,alpha_ij,alpha_ij_m_12,alpha_ij_p_12,Xij,Yij,Zij,Coef_ij,Point[3],RpRimRj[3],VijX,VijY,VijZ;
+ double *Iu;
+ zeta_ij=exp_i+exp_j;
+ zeta_ij_m1h=pow(zeta_ij,-HALF);
+ Aij=pow(zeta_ij_m1h,THREE)*Dij;
+ alpha_ij=HALF*(exp_i-exp_j)/zeta_ij;
+ alpha_ij_m_12=alpha_ij-HALF;
+ alpha_ij_p_12=alpha_ij+HALF;
+ Xij=(exp_i*Atom1[0]+exp_j*Atom2[0])/zeta_ij;
+ Yij=(exp_i*Atom1[1]+exp_j*Atom2[1])/zeta_ij;
+ Zij=(exp_i*Atom1[2]+exp_j*Atom2[2])/zeta_ij;
+ for(i=0;i<order_r;i++)
+ {
+  for(j=0;j<order_ang;j++)
+  {
+   Point[0]=r_real[i]*XX[j];
+   Point[1]=r_real[i]*YY[j];
+   Point[2]=r_real[i]*ZZ[j];
+   RpRimRj[0]=Point[0]+Atom1[0]-Atom2[0];
+   RpRimRj[1]=Point[1]+Atom1[1]-Atom2[1];
+   RpRimRj[2]=Point[2]+Atom1[2]-Atom2[2];
+   Coef_ij=Aij*exp(-(exp_i*exp_j/zeta_ij)*(RpRimRj[0]*RpRimRj[0]+RpRimRj[1]*RpRimRj[1]+RpRimRj[2]*RpRimRj[2]));
+   VijX=ZERO;VijY=ZERO;VijZ=ZERO;
+   for(k=0;k<Nroot_Lmax_plus_1;k++)
+   {
+    zeta_ij_m1h_s=zeta_ij_m1h*r_gauss[k];
+    VijX=VijX+w_gauss[k]*pow(zeta_ij_m1h_s+alpha_ij_m_12*Point[0]+Xij-Atom1[0],double(nx_exp[0]))
+                        *pow(zeta_ij_m1h_s+alpha_ij_p_12*Point[0]+Xij-Atom2[0],double(nx_exp[1]));
+    VijY=VijY+w_gauss[k]*pow(zeta_ij_m1h_s+alpha_ij_m_12*Point[1]+Yij-Atom1[1],double(ny_exp[0]))
+                        *pow(zeta_ij_m1h_s+alpha_ij_p_12*Point[1]+Yij-Atom2[1],double(ny_exp[1]));
+    VijZ=VijZ+w_gauss[k]*pow(zeta_ij_m1h_s+alpha_ij_m_12*Point[2]+Zij-Atom1[2],double(nz_exp[0]))
+                        *pow(zeta_ij_m1h_s+alpha_ij_p_12*Point[2]+Zij-Atom2[2],double(nz_exp[1]));
+   }
+   Intrac[i][j]=Intrac[i][j]+Coef_ij*VijX*VijY*VijZ;
+  }
+ }
+ if(last)
+ {
+  Iu=new double[order_r];
+  for(i=0;i<order_r;i++)
+  {
+   Iu[i]=ZERO;
+   for(j=0;j<order_ang;j++)
+   {
+    Iu[i]=Iu[i]+w_theta_phi[j]*Intrac[i][j];
+   }
+   if(abs(Iu[i])<pow(TEN,-EIGHT)){Iu[i]=ZERO;}
+  }
+  for(i=0;i<order_r;i++)
+  {
+   Intrac[i][0]=r_real[i];
+   Intrac[i][1]=Iu[i];
+   Intrac[i][2]=Iu[i]*pow(r_real[i],TWO);
+  }
+  delete[] Iu;Iu=NULL;
+ } 
 }
 //Clean info
 void clean_quadrature(string name,int mode)

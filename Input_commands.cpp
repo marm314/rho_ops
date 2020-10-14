@@ -39,8 +39,6 @@ Input::Input(string rho_in)
    {
     intra_1rdm=true;
     rho_input_file>>order_grid_r>>order_grid_ang;
-    if(order_grid_ang<=30){order_grid_ang=30;}
-    if(order_grid_r<=30){order_grid_r=30;}
    }
    else if(rho_in=="$punctual_r")
    {
