@@ -16,19 +16,33 @@ void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,b
  r=new double[order];
  r_real=new double[order];
  w_radial=new double[order];
- //Grid for r
- r_inf=ZERO;
- r_sup=ONE;
- legendre_quadrature(name,order,r_inf,r_sup);
- wr_read.open((name+"_w.txt").c_str());
- r_read.open((name+"_x.txt").c_str());
- for(i=0;i<order;i++)
+ if(mode!=3)
  {
-  r_read>>r[i];
-  wr_read>>w_radial[i];
+  //Grid for r
+  r_inf=ZERO;
+  r_sup=ONE;
+  legendre_quadrature(name,order,r_inf,r_sup);
+  wr_read.open((name+"_w.txt").c_str());
+  r_read.open((name+"_x.txt").c_str());
+  for(i=0;i<order;i++)
+  {
+   r_read>>r[i];
+   wr_read>>w_radial[i];
+  }
+  wr_read.close();
+  r_read.close();
  }
- wr_read.close();
- r_read.close();
+ else
+ {
+  r[0]=ZERO;
+  w_radial[0]=ONE;
+  ofstream nn((name+"_w.txt").c_str());
+  ofstream nn1((name+"_r.txt").c_str());
+  ofstream nn2((name+"_x.txt").c_str());
+  nn.close();
+  nn1.close();
+  nn2.close();
+ }
  for(i=0;i<order;i++)
  {
   //r_real is for entire space (0 to inf)
@@ -48,7 +62,14 @@ void integrate_quadrature(void *data,string name,bool dmn,int order,int order2,b
  w_theta_phi=new double[order2];
  theta=new double[order2];
  phi=new double[order2];
- ld_by_order(order2,x,y,z,w_theta_phi);
+ if(mode!=3)
+ {
+  ld_by_order(order2,x,y,z,w_theta_phi);
+ }
+ else
+ {
+  x[0]=ZERO;y[0]=ZERO;z[0]=ZERO;w_theta_phi[0]=ONE; 
+ }
  double *temp,*temp1;
  temp=new double[1];
  temp1=new double[1];

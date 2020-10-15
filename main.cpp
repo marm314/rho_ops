@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
     system(("rm "+name_in+"_r.txt").c_str());
     system(("rm "+name_in+"_w.txt").c_str());
     system(("rm "+name_in+"_x.txt").c_str());
-    // DM1 file and scan 'inntracule like'
+    // DM1 file and scan 'intracule like' coordinate
     dm1=new double*[Read_fchk_wfn.nbasis()];
     Coef=new double*[Read_fchk_wfn.nbasis()];
     Temp=new double*[Read_fchk_wfn.nbasis()];
@@ -471,7 +471,14 @@ int main(int argc, char *argv[])
     matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,CoefT,Temp,dm1_prim);
     nr=Input_commands.order_grid_r;
     nang=Input_commands.order_grid_ang;
-    grid_avail(nang);
+    if(nr>0 && nang>0)
+    {
+     grid_avail(nang);
+    }
+    else
+    {
+     nr=1;nang=1;mode=3;
+    }
     Intra_1=new double*[nr];
     for(i=0;i<nr;i++)
     {
@@ -529,7 +536,7 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
-    Results<<"# In the following: I(u) is spherical-averaged [ I(u) / 4*PI ]"<<endl;
+    Results<<"# In the following: I(u) is spherically-averaged [ I(u) / 4*PI ]"<<endl;
     Results<<"#      u                  I(u)                I(u)u**2"<<endl;
     Results<<setprecision(10)<<fixed<<scientific;
     for(i=0;i<nr;i++)
