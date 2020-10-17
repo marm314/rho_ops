@@ -1405,7 +1405,7 @@ int main(int argc, char *argv[])
       shannon=res_integration[1]/Nelec+log(Nelec);
       Results<<"The result of the integration S_r = "<<setw(17)<<shannon<<endl;
       Results<<"The Shannon entropy power     J_r = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon);
       Results<<endl;
       Results<<"[J_r=(1/(2*pi*e)) * e^(2/3 *S_r)]"<<endl;
      }
@@ -1613,7 +1613,7 @@ int main(int argc, char *argv[])
       shannonp=res_integration[1]/Nelec+log(Nelec);
       Results<<"The result of the integration S_p = "<<setw(17)<<shannonp<<endl;
       Results<<"The Shannon entropy power     J_p = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp);
       Results<<endl;
       Results<<"[J_p=(1/(2*pi*e)) * e^(2/3 *S_p)]"<<endl;
      }
@@ -1714,13 +1714,13 @@ int main(int argc, char *argv[])
     if(fish==true && shan==true)
     {
      Results<<"The Fisher-Shannon product    P_r = ";
-     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon)<<endl;
      Results<<"[P_r = (1/3)*I_r*J_r]"<<endl;
     }
     if(fishp==true && shanp==true)
     {
      Results<<"The Fisher-Shannon product    P_p = ";
-     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp)<<endl;
      Results<<"[P_p = (1/3)*I_p*J_p]"<<endl;
     }
     if(shanp==true && shan==true)
@@ -1730,7 +1730,7 @@ int main(int argc, char *argv[])
      Results<<"[S_Total = S_r + S_p]"<<endl;
      Results<<"[S_r + S_p >= 3(1+ln pi) ~ 6.434189658]"<<endl;
      Results<<"The Shannon-Shannonp  (J_r x J_p) = ";
-     Results<<setw(17)<<(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon))<<endl;
+     Results<<setw(17)<<(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon))<<endl;
      Results<<"[J_r*J_p >= 1/4]"<<endl;
     }
     if(fish==true && fishp==true)
@@ -1993,7 +1993,7 @@ int main(int argc, char *argv[])
       Results<<"The result of the integration S_r = "<<setw(17)<<shannon;
       Results<<"\t obtained with "<<method<<", +/- "<<setw(17)<<error<<endl;
       Results<<"The Shannon entropy power     J_r = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon);
       Results<<endl;
       Results<<"[J_r=(1/(2*pi*e)) * e^(2/3 *S_r)]"<<endl;
      }
@@ -2019,7 +2019,7 @@ int main(int argc, char *argv[])
       Results<<"The result of the integration S_p = "<<setw(17)<<shannonp;
       Results<<"\t obtained with "<<method<<", +/- "<<setw(17)<<error<<endl;
       Results<<"The Shannon entropy power     J_p = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp);
       Results<<endl;
       Results<<"[J_p=(1/(2*pi*e)) * e^(2/3 *S_p)]"<<endl;
      }
@@ -2142,13 +2142,13 @@ int main(int argc, char *argv[])
     if(fish==true && shan==true)
     {
      Results<<"The Fisher-Shannon product    P_r = ";
-     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon)<<endl;
      Results<<"[P_r = (1/3)*I_r*J_r]"<<endl;
     }
     if(fishp==true && shanp==true)
     {
      Results<<"The Fisher-Shannon product    P_p = ";
-     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp)<<endl;
      Results<<"[P_p = (1/3)*I_p*J_p]"<<endl;
     }
     if(shanp==true && shan==true)
@@ -2158,7 +2158,7 @@ int main(int argc, char *argv[])
      Results<<"[S_Total = S_r + S_p]"<<endl;
      Results<<"[S_r + S_p >= 3(1+ln pi) ~ 6.434189658]"<<endl;
      Results<<"The Shannon-Shannonp  (J_r x J_p) = ";
-     Results<<setw(17)<<(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon))<<endl;
+     Results<<setw(17)<<(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon))<<endl;
      Results<<"[J_r*J_p >= 1/4]"<<endl;
     }
     if(fish==true && fishp==true)
@@ -2236,7 +2236,7 @@ int main(int argc, char *argv[])
       shannon=res_integration[1]/Nelec+log(Nelec);
       Results<<"The result of the integration S_r = "<<setw(17)<<shannon<<endl;
       Results<<"The Shannon entropy power     J_r = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon);
       Results<<endl;
       Results<<"[J_r=(1/(2*pi*e)) * e^(2/3 *S_r)]"<<endl;
      }
@@ -2291,7 +2291,7 @@ int main(int argc, char *argv[])
       shannonp=res_integration[1]/Nelec+log(Nelec);
       Results<<"The result of the integration S_p = "<<setw(17)<<shannonp<<endl;
       Results<<"The Shannon entropy power     J_p = ";
-      Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp);
+      Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp);
       Results<<endl;
       Results<<"[J_p=(1/(2*pi*e)) * e^(2/3 *S_p)]"<<endl;
      }
@@ -2313,13 +2313,13 @@ int main(int argc, char *argv[])
     if(fish==true && shan==true)
     {
      Results<<"The Fisher-Shannon product    P_r = ";
-     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon)<<endl;
      Results<<"[P_r = (1/3)*I_r*J_r]"<<endl;
     }
     if(fishp==true && shanp==true)
     {
      Results<<"The Fisher-Shannon product    P_p = ";
-     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp)<<endl;
      Results<<"[P_p = (1/3)*I_p*J_p]"<<endl;
     }
     if(shanp==true && shan==true)
@@ -2329,7 +2329,7 @@ int main(int argc, char *argv[])
      Results<<"[S_Total = S_r + S_p]"<<endl;
      Results<<"[S_r + S_p >= 3(1+ln pi) ~ 6.434189658]"<<endl;
      Results<<"The Shannon-Shannonp  (J_r x J_p) = ";
-     Results<<setw(17)<<(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon))<<endl;
+     Results<<setw(17)<<(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon))<<endl;
      Results<<"[J_r*J_p >= 1/4]"<<endl;
     }
     if(fish==true && fishp==true)
@@ -2435,7 +2435,7 @@ int main(int argc, char *argv[])
        Results<<"\t obtained with "<<method<<endl;
        shan=true;
        Results<<"The Shannon entropy power     J_r = ";
-       Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon);
+       Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon);
        Results<<endl;
        Results<<"[J_r=(1/(2*pi*e)) * e^(2/3 *S_r)]"<<endl;
       }
@@ -2685,7 +2685,7 @@ int main(int argc, char *argv[])
      if(fish==true && shan==true)
      {
       Results<<"The Fisher-Shannon product    P_r = ";
-      Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon)<<endl;
+      Results<<setw(17)<<ONE/THREE*fisher*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon)<<endl;
       Results<<"[P_r = (1/3)*I_r*J_r]"<<endl;
      }
      for(i=0;i<Input_commands.order_grid_r;i++)
@@ -2751,7 +2751,7 @@ int main(int argc, char *argv[])
        Results<<"The result of the integration S_p = "<<setw(17)<<shannonp;
        Results<<"\t obtained with "<<method<<endl;
        Results<<"The Shannon entropy power     J_p = ";
-       Results<<setw(17)<<ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp);
+       Results<<setw(17)<<ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp);
        Results<<endl;
        Results<<"[J_p=(1/(2*pi*e)) * e^(2/3 *S_p)]"<<endl;
        shanp=true;
@@ -2896,7 +2896,7 @@ int main(int argc, char *argv[])
     if(fishp==true && shanp==true)
     {
      Results<<"The Fisher-Shannon product    P_p = ";
-     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp)<<endl;
+     Results<<setw(17)<<ONE/THREE*fisherp*ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp)<<endl;
      Results<<"[P_p = (1/3)*I_p*J_p]"<<endl;
     }
     for(i=0;i<Input_commands.order_grid_r;i++)
@@ -2920,7 +2920,7 @@ int main(int argc, char *argv[])
      Results<<"[S_Total = S_r + S_p]"<<endl;
      Results<<"[S_r + S_p >= 3(1+ln pi) ~ 6.434189658]"<<endl;
      Results<<"The Shannon-Shannonp  (J_r x J_p) = ";
-     Results<<setw(17)<<(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*e)*pow(e,(TWO/THREE)*shannon))<<endl;
+     Results<<setw(17)<<(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannonp))*(ONE/(TWO*PI*eul)*pow(eul,(TWO/THREE)*shannon))<<endl;
      Results<<"[J_r*J_p >= 1/4]"<<endl;
     }
     if(fish==true && fishp==true)
