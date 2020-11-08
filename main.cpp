@@ -487,8 +487,8 @@ int main(int argc, char *argv[])
       Intra_1[i][j]=ZERO;
      }
     }
-    void *data;
-    double **nth1,**nth2;
+    void *data=NULL; // This is not used to we can passed it as NULL
+    double **nth1=NULL,**nth2=NULL;
     integrate_quadrature(data,name_in,false,nr,nang,false,nth1,nth2,mode);
     ofstream dm1_out(name_dm1.c_str(),ios::out | ios::binary);
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
@@ -3508,7 +3508,7 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<endl;
    Results<<setprecision(10)<<fixed<<scientific;
-   int fail=1000,k;
+   int fail=1000;
    double res_integration[9]={ZERO},field,error_abs,error_rel,MIN_EVALS,MAX_EVALS;
    Nelec=Read_fchk_wfn.nelectrons;
    string name_file_saved;

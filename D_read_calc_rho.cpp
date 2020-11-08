@@ -4208,7 +4208,8 @@ void READ_FCHK_WFN::build_MOp_fchk2(double  **AOp,complex<double> &MOp,int &numM
    {
     for(j[0]=0;j[0]<nbasisf;j[0]++)
     {
-     MOp=MOp+(MOcoefA[numMO/2][j[0]])*(AOp[0][j[0]],AOp[1][j[0]]);
+     complex<double> ztmp(AOp[0][j[0]],AOp[1][j[0]]);
+     MOp=MOp+(MOcoefA[numMO/2][j[0]])*ztmp;
     }
    }
    else
@@ -4217,11 +4218,13 @@ void READ_FCHK_WFN::build_MOp_fchk2(double  **AOp,complex<double> &MOp,int &numM
     {
      if(BETA_MOS)
      {
-      MOp=MOp+(MOcoefB[(numMO-1)/2][j[0]])*(AOp[0][j[0]],AOp[1][j[0]]);
+      complex<double> ztmp(AOp[0][j[0]],AOp[1][j[0]]);
+      MOp=MOp+(MOcoefB[(numMO-1)/2][j[0]])*ztmp;
      }
      else
      {
-      MOp=MOp+(MOcoefA[(numMO-1)/2][j[0]])*(AOp[0][j[0]],AOp[1][j[0]]);
+      complex<double> ztmp(AOp[0][j[0]],AOp[1][j[0]]);
+      MOp=MOp+(MOcoefA[(numMO-1)/2][j[0]])*ztmp;
      }
     }
    }
@@ -4230,7 +4233,8 @@ void READ_FCHK_WFN::build_MOp_fchk2(double  **AOp,complex<double> &MOp,int &numM
   {
    for(j[0]=0;j[0]<nbasisf;j[0]++)
    {
-    MOp=MOp+(MOcoefA[numMO][j[0]])*(AOp[0][j[0]],AOp[1][j[0]]);
+    complex<double> ztmp(AOp[0][j[0]],AOp[1][j[0]]);
+    MOp=MOp+(MOcoefA[numMO][j[0]])*ztmp;
    }
   }
 ///////////////////////////////////////////////////////////////////////////////

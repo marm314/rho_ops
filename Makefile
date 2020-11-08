@@ -1,8 +1,9 @@
 # Makefile for rho_ops
 #
-CPP = icc
-#CPPFLAGS = -Wall -fopenmp -llapack -lstdc++
-CPPFLAGS = -Wall -fopenmp -mkl -lstdc++
+#CPP = icc
+#CPPFLAGS = -Wall -fopenmp -mkl -lstdc++
+CPP = g++
+CPPFLAGS = -Wall -fopenmp -llapack -lstdc++
 Cln = /bin/rm -rf
 NAME=rho_ops
 ###########################################

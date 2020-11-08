@@ -499,7 +499,7 @@ void  integrate_pol_hyperpol(N_FCHKS_WFNS five_fchks_wfns,string method, const i
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
 double result_integration[9], int &fail,int &ncores,char dir_pol_hyper)
 {
-  int i,j,verbose=0,nregions,neval;
+  int i,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
   void * USERDATA=NULL;
   //Point void pointer to N_FCHKS_WFNS struct direction.
@@ -1295,7 +1295,6 @@ void *userdata)
  #define theta acos(1-2*xx[1])
  #define phi xx[2]*2*PI
  #endif
- int i,j;
  double res1,res2,res3,res4,res5,alpha,gamma,dir,factor_jacobian;
  double *AUX;
  AUX=new double[*ndim];
