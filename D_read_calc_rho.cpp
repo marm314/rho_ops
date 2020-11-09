@@ -990,7 +990,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
       else if(line.substr(0,2)=="MO" && line.substr(0,6)!="MOLCAS")
       {
        counter2=0;
-       aux=line.substr(37,10);
+       aux=line.substr(35,12);
        stringstream ss(aux);
        ss>>Ocupation[counter];
        do
