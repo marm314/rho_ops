@@ -31,7 +31,6 @@ class READ_FCHK_WFN
    bool nu_ch,cart_coor,shtype,nprimsh,satmap,exponents,contract,contractSP,activeSP;
    bool mocoef,scfrho,mo_beta_coef,spinscfrho,rho_CI_bool,spinCIrho,extra1,PS_bool,BETA_MOS,scf_dens_found;
    double *AUX;
-   double  **Spin_rho,**P,**Pbeta,**S,**Sbeta;
    ifstream input_fchk,input_wfn;
    ofstream pseudowfn,pseudowfx;
    string line,name_file;
@@ -93,6 +92,7 @@ class READ_FCHK_WFN
    int *shell_type, *n_prim_per_shell, *shell_map;
    double *Nu_charge,*Ocupation,**Cartesian_Coor,**Total_rho,**MOcoefA,**MOcoefB;
    double *Prim_exp, *Contr_Coef, *SP_Contr_Coef,Rot_ICM[3][3];
+   double  **Spin_rho,**P,**Pbeta,**S,**Sbeta,**Sao;
    bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx;
    string identity;
    ////////////

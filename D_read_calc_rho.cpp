@@ -408,6 +408,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
     Pbeta=new double*[nbasisf];
     Sbeta=new double*[nbasisf];
    }
+   Sao=new double*[nbasisf];
    S=new double*[nbasisf];
    Temp=new double*[nbasisf];
    Temp2=new double*[nbasisf];
@@ -416,6 +417,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
    {
     P[i]=new double[nbasisf];
     S[i]=new double[nbasisf];
+    Sao[i]=new double[nbasisf];
     Eigenvec[i]=new double[nbasisf];
     Temp[i]=new double[nbasisf];
     Temp2[i]=new double[nbasisf];
@@ -589,7 +591,9 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
     {
      for(j=i;j<nbasisf;j++)
      {
-       S[i][j]=S[j][i];
+      S[i][j]=S[j][i];
+      Sao[i][j]=S[j][i];
+      Sao[j][i]=S[j][i];
      }
     }
     for(i=0;i<nbasisf;i++)
@@ -2007,6 +2011,7 @@ READ_FCHK_WFN::~READ_FCHK_WFN()
    }
    delete[] P;
    delete[] S;
+   delete[] Sao;
    delete[] Ocupation;
    if(extra1)
    {

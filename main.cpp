@@ -4853,6 +4853,173 @@ int main(int argc, char *argv[])
    nbasis=Read_fchk_wfn.nbasis();
    transform_int(Input_commands.Sij_region,nbasis);
   }
+  ///////////////////////////
+  // Mulliken analysis     //
+  ///////////////////////////
+  if(Input_commands.mulliken && !wfn_fchk)
+  {
+   int k;
+   double **P_matrix,**NO_coef,**Mulliken_matrix,*Gross_occ,*Nu_charges;
+   bool more=true;
+   Results<<"#*************************************************************************#";
+   Results<<endl;
+   Results<<"#                    Mulliken Population Analysis                         #";
+   Results<<endl;
+   Results<<"#*************************************************************************#";
+   Results<<endl;
+   Results<<endl;
+   nbasis=Read_fchk_wfn.nbasisf;
+   P_matrix=new double*[nbasis];
+   NO_coef=new double*[nbasis];
+   Mulliken_matrix=new double*[nbasis];
+   Gross_occ=new double[nbasis];
+   Nu_charges=new double[Read_fchk_wfn.natoms];
+   for(i=0;i<Read_fchk_wfn.natoms;i++)
+   {
+    Nu_charges[i]=Read_fchk_wfn.Nu_charge[i];
+   }
+   for(i=0;i<nbasis;i++)
+   {
+    P_matrix[i]=new double[nbasis];
+    NO_coef[i]=new double[nbasis];
+    Mulliken_matrix[i]=new double[nbasis];
+   }
+   for(i=0;i<nbasis;i++)
+   {
+    for(j=0;j<nbasis;j++)
+    {
+     Mulliken_matrix[i][j]=ZERO;
+     NO_coef[i][j]=Read_fchk_wfn.S[j][i];
+     if(j<=i)
+     {
+      P_matrix[i][j]=Read_fchk_wfn.P[i][j];
+      P_matrix[j][i]=Read_fchk_wfn.P[i][j];
+     }
+    }  
+   }
+   for(i=0;i<nbasis;i++)
+   {
+    for(j=0;j<nbasis;j++)
+    {
+     for(k=0;k<nbasis;k++)
+     {
+      if(i==j)
+      {
+       Mulliken_matrix[i][i]=Mulliken_matrix[i][i]+P_matrix[k][k]*pow(NO_coef[k][i],TWO);
+      }
+      else
+      {
+       Mulliken_matrix[i][j]=Mulliken_matrix[i][j]+P_matrix[k][k]*NO_coef[k][i]*NO_coef[k][j]*Read_fchk_wfn.Sao[i][j];
+      }
+     }
+    }
+   }
+   Results<<endl;
+   Results<<" Full Mulliken population analysis:"<<endl;
+   Results<<endl;
+   Results<<setprecision(14)<<fixed<<scientific;
+   k=0;
+   do
+   {
+    for(i=0+k;i<nbasis;i++)
+    {
+     for(j=0+k;j<=i;j++)
+     {
+      if(j<k+5)
+      {
+       if(Mulliken_matrix[i][j]>=ZERO){Results<<"  ";}
+       else{Results<<" ";}
+       Results<<Mulliken_matrix[i][j];
+       more=false;
+      }
+      else
+      {
+       j=i+1;
+       more=true;
+      }
+     }
+     Results<<endl;
+    }
+    Results<<endl;
+    k=k+5;
+   }while(more);
+   Density=ZERO;
+   for(i=0;i<nbasis;i++)
+   {
+    Gross_occ[i]=ZERO;
+    for(j=0;j<nbasis;j++)
+    {
+     Gross_occ[i]=Gross_occ[i]+Mulliken_matrix[j][i];
+    }
+    if(abs(Gross_occ[i])<pow(TEN,-TEN)){Gross_occ[i]=ZERO;}
+    Density=Density+Gross_occ[i];
+   }
+   Results<<endl;
+   Results<<" Gross orbital populations:"<<endl;
+   Results<<endl;
+   ifstream log_file(Input_commands.name_log.c_str());
+   more=true;
+   while(getline(log_file,line) && more)
+   {
+    if(line=="     Gross orbital populations:")
+    {
+     more=false;
+    }
+   }
+   j=0;
+   for(i=0;i<nbasis;i++)
+   {
+    if(!more)
+    {
+     getline(log_file,line);
+     line=line.substr(0,23);
+     if(line[9]!=' ' && i!=0){j++;}
+    }
+    else
+    {
+     line="";
+    }
+    Nu_charges[j]=Nu_charges[j]-Gross_occ[i];
+    Results<<line<<setw(21)<<Gross_occ[i]<<endl;
+   }
+   if(!more)
+   {
+    Results<<endl;
+    while(getline(log_file,line))
+    {
+     if(line==" Mulliken atomic charges:" || line==" Mulliken charges:")
+     {
+      Results<<line<<endl;
+      Results<<endl;
+      getline(log_file,line);
+      for(i=0;i<Read_fchk_wfn.natoms;i++)
+      {
+       getline(log_file,line);
+       Results<<line.substr(0,11)<<setw(21)<<Nu_charges[i]<<endl;
+      }
+     }
+    }
+   }
+   log_file.close();
+   Results<<endl;
+   Results<<endl;
+   Results<<" N electrons:"<<setprecision(6)<<fixed<<setw(12)<<Density<<endl;
+   Results<<endl;
+   for(i=0;i<nbasis;i++)
+   {
+    delete[] P_matrix[i];P_matrix[i]=NULL;
+    delete[] NO_coef[i];NO_coef[i]=NULL;
+    delete[] Mulliken_matrix[i];Mulliken_matrix[i]=NULL;
+   }
+   delete[] P_matrix;P_matrix=NULL;
+   delete[] NO_coef;NO_coef=NULL;
+   delete[] Mulliken_matrix;Mulliken_matrix=NULL;
+   delete[] Gross_occ;Gross_occ=NULL;
+   delete[] Nu_charges;Nu_charges=NULL;
+   Results<<endl;
+   Results<<"#*************************************************************************#";
+   Results<<endl;
+  }
   ///////////////////////////////
   // Print a DM1 fchk file     //
   ///////////////////////////////

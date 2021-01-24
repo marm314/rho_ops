@@ -23,7 +23,7 @@ class Input
  bool punctualr,punctualp,scanr,scanp,scanelf,scanindic,cps,indicators,integrals,log,spin_calcs,cas,rotate_grid;
  bool cuba,cubature,quadrature,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrotdens,symgrad;
  bool dmn_indicators,gnuplot,dmn_plots,nopath,dim3,dim2,Beta_MOs,wfx_print,wfx_print_dmn,store_dmn,print_dm1_fchk;
- bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,extracule,int_pol_hyperpol,intra_1rdm;
+ bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,extracule,int_pol_hyperpol,intra_1rdm,mulliken;
  double **interval_integrals,**coordinates_r,**coordinates_p;
  double init_coord_r[3],init_coord_p[3],init_coord_elf[3],init_coord_lh[3],init_coord_indic[3],interval_integralsCUB[6];
  double step_r,step_p,step_elf,step_lh,step_indic,points_scan_r,points_scan_p,points_scan_elf,points_scan_lh,points_scan_indic,grid_1,grid_2,error_abs,error_rel,dmn_threshold;
