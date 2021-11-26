@@ -57,6 +57,8 @@ double &laplacian_alpha, double &laplacian_beta,double &tauW_alpha,double &tauW_
 double &tau_alpha,double &tau_beta,double &k_F_alpha,double &k_F_beta,double &k_s_alpha,
 double &k_s_beta,double &s_r_alpha,double &s_r_beta,double &q_red_alpha,double &q_red_beta,
 bool wfn_fchk);
+void pre_elf(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &Density_alpha,double &Density_beta,
+double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta);
 void mos_to_nos_int_fchk_dm1(READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands,double **ORBITALS,int &total_grid,int &nbasis);
 void mos_to_nos_dmn_sij(double **SIJ,READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands);
 void print_int(READ_FCHK_WFN &Read_fchk_wfn,string name_file,double **Sij, int nbasis,double &rho,double &rhoa,double &rhob,
@@ -793,10 +795,14 @@ int main(int argc, char *argv[])
     Point[0]=Input_commands.init_coord_elf[0];
     Point[1]=Input_commands.init_coord_elf[1];
     Point[2]=Input_commands.init_coord_elf[2];
+    /*
     punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
     Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
     tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
     q_red_alpha,q_red_beta,wfn_fchk);
+    */
+    pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+    Density=Density_alpha+Density_beta;
     step=Input_commands.step_elf;
     points=Input_commands.points_scan_elf;
     direct=Input_commands.dir_elf;
@@ -831,10 +837,14 @@ int main(int argc, char *argv[])
      {Point[1]=Point[1]+step;}
      else
      {Point[2]=Point[2]+step;}
+     /*
      punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
      Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
      tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
      q_red_alpha,q_red_beta,wfn_fchk);
+     */
+     pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+     Density=Density_alpha+Density_beta;
     }
     Results<<"#[JCP,92,5397(1990)]"<<endl;
     Results<<"#[Notice that a represents alpha and b beta]"<<endl;
@@ -5472,8 +5482,115 @@ bool wfn_fchk)
   tau_beta=HALF*tau_beta;
  //delete dynamic arrays
   for(i=0;i<4;i++)
-  {delete[] NO_orb_grad[i];}
-  delete[] NO_orb_grad;
+  {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
+  delete[] NO_orb_grad;NO_orb_grad=NULL;
+}
+//Compute intermediate quantities used by ELF
+void pre_elf(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &Density_alpha,double &Density_beta,
+double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta)
+{
+ if(Read_fchk_wfn.wfn)
+ {
+  int nbasis,i,j,k;
+  double **NO_orb_grad,AUX[3]={ZERO},shift_min=pow(TEN,-TWO*TEN);
+  double Grad_alpha[3]={ZERO},Grad_beta[3]={ZERO};
+  double Grad_norm_alpha,Grad_norm_beta;
+  nbasis=Read_fchk_wfn.nbasis();
+  NO_orb_grad=new double*[4];
+  for(i=0;i<4;i++)
+  {NO_orb_grad[i]=new double[nbasis];}
+  for(i=0;i<4;i++)
+  {
+   for(j=0;j<nbasis;j++)
+   {NO_orb_grad[i][j]=ZERO;}
+  }
+  Density_alpha=ZERO;Density_beta=ZERO;tauW_alpha=ZERO;tauW_beta=ZERO,tau_alpha=ZERO;tau_beta=ZERO;
+  if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
+  if(!Read_fchk_wfn.correlated)
+  {
+   if(Read_fchk_wfn.open_shell)
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     if(i%2==0)
+     {
+      for(k=0;k<3;k++)
+      {
+       Grad_alpha[k]=Grad_alpha[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+      }
+      Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+     }
+     else
+     {
+      for(k=0;k<3;k++)
+      {
+       Grad_beta[k]=Grad_beta[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+      }
+      Density_beta=Density_beta+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+     }
+    }
+   }
+   else
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     for(k=0;k<3;k++)
+     {
+      Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+      Grad_beta[k]=Grad_alpha[k];
+     }
+     Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+    }
+    tau_beta=tau_alpha;
+    Density_beta=Density_alpha;
+   }
+  }
+  else
+  {
+   if(Read_fchk_wfn.open_shell)
+   {
+    Density_alpha=ZERO;
+    Density_beta=ZERO;
+    tau_alpha=ZERO;
+    tau_beta=ZERO;
+   }
+   else
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     for(k=0;k<3;k++)
+     {
+      Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+      Grad_beta[k]=Grad_alpha[k];
+     }
+     Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+    }
+    tau_beta=tau_alpha;
+    Density_beta=Density_alpha;
+   }
+  }
+  Grad_norm_alpha=norm3D(Grad_alpha);
+  Grad_norm_beta=norm3D(Grad_beta);
+  tau_alpha=HALF*tau_alpha;
+  tau_beta=HALF*tau_beta;
+  tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);
+  tauW_beta=pow(Grad_norm_beta,TWO)/(EIGHT*Density_beta+shift_min);
+  //delete dynamic arrays
+  for(i=0;i<4;i++)
+  {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
+  delete[] NO_orb_grad;NO_orb_grad=NULL;
+ }
+ else
+ {
+  cout<<"pre_elf function not implemented for FCHK files"<<endl;
+ }
 }
 //Change MOs to NOs for quadrature using the DMN information
 void mos_to_nos_int_fchk_dm1(READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands,double **ORBITALS,int &total_grid,int &nbasis)
@@ -5826,12 +5943,15 @@ double stepy,double stepz)
 {
  int i,j,k,termsx,termsy,termsz;
  double eval,auxiliar[3],grad[3];
- double Grad_alpha[3],Grad_beta[3];
- double Density,Density_alpha,Density_beta,Grad_norm,Grad_norm_alpha,Grad_norm_beta,laplacian_r;
- double laplacian_alpha,laplacian_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta;
- double k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,q_red_alpha,q_red_beta,IND_alpha,IND_beta,ID_alpha,ID_beta;
+ //double Grad_alpha[3],Grad_beta[3];
+ double Density,Density_alpha,Density_beta;//,Grad_norm,Grad_norm_alpha,Grad_norm_beta,laplacian_r;
+ //double laplacian_alpha,laplacian_beta;
+ double tauW_alpha,tauW_beta,tau_alpha,tau_beta;
+ //double k_F_alpha,k_F_beta;
+ //double k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,q_red_alpha,q_red_beta;
+ double IND_alpha,IND_beta,ID_alpha,ID_beta;
  double coef_elf=(THREE/FIVE)*pow(SIX*PI*PI,TWO/THREE);
- bool not_elf,not_indic,wfn_fchk;
+ bool not_elf,not_indic;//,wfn_fchk;
  ofstream cube;
  ifstream read_cube;
  string name_cube,aux;
@@ -5906,10 +6026,14 @@ double stepy,double stepz)
      }
      if(!not_elf)
      {
+      /*
       punctual(Read_fchk_wfn,auxiliar,Density,Density_alpha,Density_beta,grad,Grad_alpha,Grad_beta,Grad_norm,
       Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
       tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
       q_red_alpha,q_red_beta,wfn_fchk);
+      */
+      pre_elf(Read_fchk_wfn,auxiliar,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+      Density=Density_alpha+Density_beta;
      }
      if(op_cube=="elf")
      {
