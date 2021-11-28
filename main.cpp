@@ -74,8 +74,7 @@ double Shannon_ni(READ_FCHK_WFN &Read_fchk_wfn);
 double Deviation_idemp_dmn(DMN_OPS &DMN,double &N);
 double ID_ni_dmn(DMN_OPS &DMN,double &N);
 double IND_ni_dmn(DMN_OPS &DMN,double &N);
-void ID_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &ID_alpha,double &ID_beta); //Only for (FCHK + LOG) and WFN. For DM1, convert the FCHK to a FCI-FCHK.
-void IND_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &IND_alpha,double &IND_beta);
+void ID_IND_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &ID_alpha,double &ID_beta,double &IND_alpha,double &IND_beta);
 double Shannon_ni_dmn(DMN_OPS &DMN,double &N);
 void calc_time(double DATE[2][4]);
 ///////////////////////////
@@ -632,8 +631,7 @@ int main(int argc, char *argv[])
     Results<<"tau_alpha          : "<<setw(17)<<tau_alpha<<endl;
     Results<<"tau_beta           : "<<setw(17)<<tau_beta<<endl;
     Results<<"tau alpha or beta = 1/2 sum n_i | Grad phi_alpha or beta |^2 "<<endl;
-    ID_local(Read_fchk_wfn,Point,ID_alpha,ID_beta);
-    IND_local(Read_fchk_wfn,Point,IND_alpha,IND_beta);
+    ID_IND_local(Read_fchk_wfn,Point,ID_alpha,ID_beta,IND_alpha,IND_beta);
     Results<<"ID_total           : "<<setw(17)<<ID_alpha+ID_beta<<endl;
     Results<<"ID_alpha           : "<<setw(17)<<ID_alpha<<endl;
     Results<<"ID_beta            : "<<setw(17)<<ID_beta<<endl;
@@ -717,10 +715,9 @@ int main(int argc, char *argv[])
    Point[0]=Input_commands.init_coord_r[0];
    Point[1]=Input_commands.init_coord_r[1];
    Point[2]=Input_commands.init_coord_r[2];
-   punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-   Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-   tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-   q_red_alpha,q_red_beta,wfn_fchk);
+   Read_fchk_wfn.rho_eval(Point,Density);
+   Read_fchk_wfn.rho_grad(Point,Grad);
+   Read_fchk_wfn.rho_lapl(Point,laplacian_r);
    step=Input_commands.step_r;
    points=Input_commands.points_scan_r;
    direct=Input_commands.dir_r;
@@ -734,10 +731,9 @@ int main(int argc, char *argv[])
     {Point[1]=Point[1]+step;}
     else
     {Point[2]=Point[2]+step;}
-    punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-    Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-    tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-    q_red_alpha,q_red_beta,wfn_fchk);
+    Read_fchk_wfn.rho_eval(Point,Density);
+    Read_fchk_wfn.rho_grad(Point,Grad);
+    Read_fchk_wfn.rho_lapl(Point,laplacian_r);
    }
    Results<<"#*************************************************************************#";
    Results<<endl;
@@ -795,12 +791,6 @@ int main(int argc, char *argv[])
     Point[0]=Input_commands.init_coord_elf[0];
     Point[1]=Input_commands.init_coord_elf[1];
     Point[2]=Input_commands.init_coord_elf[2];
-    /*
-    punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-    Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-    tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-    q_red_alpha,q_red_beta,wfn_fchk);
-    */
     pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
     Density=Density_alpha+Density_beta;
     step=Input_commands.step_elf;
@@ -837,12 +827,6 @@ int main(int argc, char *argv[])
      {Point[1]=Point[1]+step;}
      else
      {Point[2]=Point[2]+step;}
-     /*
-     punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-     Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-     tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-     q_red_alpha,q_red_beta,wfn_fchk);
-     */
      pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
      Density=Density_alpha+Density_beta;
     }
@@ -870,12 +854,8 @@ int main(int argc, char *argv[])
     Point[0]=Input_commands.init_coord_indic[0];
     Point[1]=Input_commands.init_coord_indic[1];
     Point[2]=Input_commands.init_coord_indic[2];
-    punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-    Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-    tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-    q_red_alpha,q_red_beta,wfn_fchk);
-    ID_local(Read_fchk_wfn,Point,ID_alpha,ID_beta);
-    IND_local(Read_fchk_wfn,Point,IND_alpha,IND_beta);
+    Read_fchk_wfn.rho_eval(Point,Density);
+    ID_IND_local(Read_fchk_wfn,Point,ID_alpha,ID_beta,IND_alpha,IND_beta);
     step=Input_commands.step_indic;
     points=Input_commands.points_scan_indic;
     direct=Input_commands.dir_indic;
@@ -889,12 +869,8 @@ int main(int argc, char *argv[])
      {Point[1]=Point[1]+step;}
      else
      {Point[2]=Point[2]+step;}
-     punctual(Read_fchk_wfn,Point,Density,Density_alpha,Density_beta,Grad,Grad_alpha,Grad_beta,Grad_norm,
-     Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-     tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-     q_red_alpha,q_red_beta,wfn_fchk);
-     ID_local(Read_fchk_wfn,Point,ID_alpha,ID_beta);
-     IND_local(Read_fchk_wfn,Point,IND_alpha,IND_beta);
+     Read_fchk_wfn.rho_eval(Point,Density);
+     ID_IND_local(Read_fchk_wfn,Point,ID_alpha,ID_beta,IND_alpha,IND_beta);
     }
     Results<<"#[Notice that a represents alpha and b beta]"<<endl;
     Results<<"#*************************************************************************#";
@@ -5343,147 +5319,147 @@ double &tau_alpha,double &tau_beta,double &k_F_alpha,double &k_F_beta,double &k_
 double &k_s_beta,double &s_r_alpha,double &s_r_beta,double &q_red_alpha,double &q_red_beta,
 bool wfn_fchk)
 {
-  int nbasis,i,j;
-  double **NO_orb_grad,AUX[3]={ZERO},shift_min=pow(TEN,-TWO*TEN);
-  nbasis=Read_fchk_wfn.nbasis();
-  NO_orb_grad=new double*[4];
-  for(i=0;i<4;i++)
-  {NO_orb_grad[i]=new double[nbasis];}
-  for(i=0;i<4;i++)
-  {
-   for(j=0;j<nbasis;j++)
-   {NO_orb_grad[i][j]=ZERO;}
-  }
-////////////////////////////////////////////
-  if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
+ int nbasis,i,j;
+ double **NO_orb_grad,AUX[3]={ZERO},shift_min=pow(TEN,-TWO*TEN);
+ nbasis=Read_fchk_wfn.nbasis();
+ NO_orb_grad=new double*[4];
+ for(i=0;i<4;i++)
+ {NO_orb_grad[i]=new double[nbasis];}
+ for(i=0;i<4;i++)
+ {
+  for(j=0;j<nbasis;j++)
+  {NO_orb_grad[i][j]=ZERO;}
+ }
 ///////////////////////////////////////////
-  Read_fchk_wfn.rho_eval(Point,Density);
-  Read_fchk_wfn.rho_eval_a_b(Point,Density_alpha,Density_beta);
-  Read_fchk_wfn.rho_grad(Point,Grad);
-  Read_fchk_wfn.rho_lapl(Point,laplacian_r);
-  Grad_norm=norm3D(Grad);//Norm of the gradient
-  Read_fchk_wfn.rho_grad_a_b(Point,Grad_alpha,Grad_beta);
-  Grad_norm_alpha=norm3D(Grad_alpha);
-  Grad_norm_beta=norm3D(Grad_beta);
-  Read_fchk_wfn.rho_lapl_a_b(Point,laplacian_alpha,laplacian_beta);
-  tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);
-  tauW_beta=pow(Grad_norm_beta,TWO)/(EIGHT*Density_beta+shift_min);
-  k_F_alpha=pow(THREE*PI*PI*Density_alpha+shift_min,(ONE_THIRD));
-  k_F_beta=pow(THREE*PI*PI*Density_beta+shift_min,(ONE_THIRD));
-  k_s_alpha=pow(FOUR*k_F_alpha/(PI*a_o),(HALF));
-  k_s_beta=pow(FOUR*k_F_beta/(PI*a_o),(HALF));
-  s_r_alpha=Grad_norm_alpha/(TWO*k_F_alpha*Density_alpha+shift_min);
-  s_r_beta=Grad_norm_beta/(TWO*k_F_beta*Density_beta+shift_min);
-  q_red_alpha=laplacian_alpha/(FOUR*k_F_alpha*k_F_alpha*Density_alpha+shift_min);
-  q_red_beta=laplacian_beta/(FOUR*k_F_beta*k_F_beta*Density_beta+shift_min);
-  if((Read_fchk_wfn.correlated && Read_fchk_wfn.open_shell) && (Read_fchk_wfn.wfn && firstcall))
-  {cout<<"Warning open-shell correlated wfn file!"<<endl;}
-  tau_alpha=ZERO;
-  tau_beta=ZERO;
-  if(Read_fchk_wfn.wfn)
+ if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
+///////////////////////////////////////////
+ Read_fchk_wfn.rho_eval(Point,Density);
+ Read_fchk_wfn.rho_eval_a_b(Point,Density_alpha,Density_beta);
+ Read_fchk_wfn.rho_grad(Point,Grad);
+ Read_fchk_wfn.rho_lapl(Point,laplacian_r);
+ Grad_norm=norm3D(Grad);//Norm of the gradient
+ Read_fchk_wfn.rho_grad_a_b(Point,Grad_alpha,Grad_beta);
+ Grad_norm_alpha=norm3D(Grad_alpha);
+ Grad_norm_beta=norm3D(Grad_beta);
+ Read_fchk_wfn.rho_lapl_a_b(Point,laplacian_alpha,laplacian_beta);
+ tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);
+ tauW_beta=pow(Grad_norm_beta,TWO)/(EIGHT*Density_beta+shift_min);
+ k_F_alpha=pow(THREE*PI*PI*Density_alpha+shift_min,(ONE_THIRD));
+ k_F_beta=pow(THREE*PI*PI*Density_beta+shift_min,(ONE_THIRD));
+ k_s_alpha=pow(FOUR*k_F_alpha/(PI*a_o),(HALF));
+ k_s_beta=pow(FOUR*k_F_beta/(PI*a_o),(HALF));
+ s_r_alpha=Grad_norm_alpha/(TWO*k_F_alpha*Density_alpha+shift_min);
+ s_r_beta=Grad_norm_beta/(TWO*k_F_beta*Density_beta+shift_min);
+ q_red_alpha=laplacian_alpha/(FOUR*k_F_alpha*k_F_alpha*Density_alpha+shift_min);
+ q_red_beta=laplacian_beta/(FOUR*k_F_beta*k_F_beta*Density_beta+shift_min);
+ if((Read_fchk_wfn.correlated && Read_fchk_wfn.open_shell) && (Read_fchk_wfn.wfn && firstcall))
+ {cout<<"Warning open-shell correlated wfn file!"<<endl;}
+ tau_alpha=ZERO;
+ tau_beta=ZERO;
+ if(Read_fchk_wfn.wfn)
+ {
+  if(!Read_fchk_wfn.correlated)
   {
-   if(!Read_fchk_wfn.correlated)
+   if(Read_fchk_wfn.open_shell)
    {
-    if(Read_fchk_wfn.open_shell)
+    for(i=0;i<nbasis;i++)
     {
-     for(i=0;i<nbasis;i++)
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     if(i%2==0)
      {
-      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-      if(i%2==0)
-      {
-       tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-      }
-      else
-      {
-       tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-      }
+      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
      }
-    }
-    else
-    {
-     for(i=0;i<nbasis;i++)
+     else
      {
-      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+      tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
      }
-     tau_beta=tau_alpha;
     }
    }
    else
    {
-    if(Read_fchk_wfn.open_shell)
+    for(i=0;i<nbasis;i++)
     {
-     if(firstcall)
-     {
-      cout<<"Warning! Unable to compute tau_alpha and tau_beta with open-shell"<<endl;
-      cout<<"correlated wfn file!"<<endl;
-      firstcall=false;
-     }
-     tau_alpha=ZERO;
-     tau_beta=ZERO;
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
     }
-    else
-    {
-     for(i=0;i<nbasis;i++)
-     {
-      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
-     }
-     tau_beta=tau_alpha;
-    }
+    tau_beta=tau_alpha;
    }
   }
   else
   {
-   if(Read_fchk_wfn.overlap)
+   if(Read_fchk_wfn.open_shell)
    {
-    if(Read_fchk_wfn.uhf)
+    if(firstcall)
     {
-     for(i=0;i<nbasis;i++)
-     {
-      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-      if(i%2==0)
-      {
-       tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-      }
-      else
-      {
-       tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-      }
-     }
+     cout<<"Warning! Unable to compute tau_alpha and tau_beta with open-shell"<<endl;
+     cout<<"correlated wfn file!"<<endl;
+     firstcall=false;
     }
-    else
-    {
-     for(i=0;i<nbasis;i++)
-     {
-      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-     }
-     tau_alpha=tau_alpha/TWO; //Correct the ocupation!
-     tau_beta=tau_alpha;
-    }
-   }
-   else if(firstcall)
-   {
-    cout<<"Warning! Unable to compute tau_alpha and tau_beta without the"<<endl;
-    cout<<"S^1/2 P S^1/2 matrix (tau_alpha and tau_beta will be 0.0e0)."<<endl;
-    firstcall=false;
     tau_alpha=ZERO;
     tau_beta=ZERO;
    }
    else
    {
-    firstcall=false;
-    tau_alpha=ZERO;
-    tau_beta=ZERO;
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+    }
+    tau_beta=tau_alpha;
    }
   }
-  tau_alpha=HALF*tau_alpha;
-  tau_beta=HALF*tau_beta;
- //delete dynamic arrays
-  for(i=0;i<4;i++)
-  {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
-  delete[] NO_orb_grad;NO_orb_grad=NULL;
+ }
+ else
+ {
+  if(Read_fchk_wfn.overlap)
+  {
+   if(Read_fchk_wfn.uhf)
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     if(i%2==0)
+     {
+      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+     }
+     else
+     {
+      tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+     }
+    }
+   }
+   else
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+    }
+    tau_alpha=tau_alpha/TWO; //Correct the ocupation!
+    tau_beta=tau_alpha;
+   }
+  }
+  else if(firstcall)
+  {
+   cout<<"Warning! Unable to compute tau_alpha and tau_beta without the"<<endl;
+   cout<<"S^1/2 P S^1/2 matrix (tau_alpha and tau_beta will be 0.0e0)."<<endl;
+   firstcall=false;
+   tau_alpha=ZERO;
+   tau_beta=ZERO;
+  }
+  else
+  {
+   firstcall=false;
+   tau_alpha=ZERO;
+   tau_beta=ZERO;
+  }
+ }
+ tau_alpha=HALF*tau_alpha;
+ tau_beta=HALF*tau_beta;
+//delete dynamic arrays
+ for(i=0;i<4;i++)
+ {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
+ delete[] NO_orb_grad;NO_orb_grad=NULL;
 }
 //Compute intermediate quantities used by ELF
 void pre_elf(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &Density_alpha,double &Density_beta,
@@ -5942,7 +5918,7 @@ void cube_file(READ_FCHK_WFN &Read_fchk_wfn,string name_file,string op_cube,doub
 double stepy,double stepz)
 {
  int i,j,k,termsx,termsy,termsz;
- double eval,auxiliar[3],grad[3];
+ double eval,point[3],grad[3];
  //double Grad_alpha[3],Grad_beta[3];
  double Density,Density_alpha,Density_beta;//,Grad_norm,Grad_norm_alpha,Grad_norm_beta,laplacian_r;
  //double laplacian_alpha,laplacian_beta;
@@ -5970,48 +5946,48 @@ double stepy,double stepz)
  {
   for(i=0;i<Read_fchk_wfn.natoms;i++)
   {
-   auxiliar[0]=Read_fchk_wfn.Cartesian_Coor[i][0]+cubex*stepx/TWO;
-   auxiliar[1]=Read_fchk_wfn.Cartesian_Coor[i][1]+cubey*stepy/TWO;
-   auxiliar[2]=Read_fchk_wfn.Cartesian_Coor[i][2]+cubez*stepz/TWO;
+   point[0]=Read_fchk_wfn.Cartesian_Coor[i][0]+cubex*stepx/TWO;
+   point[1]=Read_fchk_wfn.Cartesian_Coor[i][1]+cubey*stepy/TWO;
+   point[2]=Read_fchk_wfn.Cartesian_Coor[i][2]+cubez*stepz/TWO;
    fprintf(pFile,"%4d    %8.6f    %8.6f    %8.6f    %8.6f \n",(int)Read_fchk_wfn.Nu_charge[i],ZERO,
-   auxiliar[0],auxiliar[1],auxiliar[2]);
+   point[0],point[1],point[2]);
   }
  }
  else
  {
-  auxiliar[0]=cubex*stepx/TWO;
-  auxiliar[1]=cubey*stepy/TWO;
-  auxiliar[2]=cubez*stepz/TWO;
-  fprintf(pFile,"%4d    %8.6f    %8.6f    %8.6f    %8.6f \n",1,ZERO,auxiliar[0],auxiliar[1],auxiliar[2]);
+  point[0]=cubex*stepx/TWO;
+  point[1]=cubey*stepy/TWO;
+  point[2]=cubez*stepz/TWO;
+  fprintf(pFile,"%4d    %8.6f    %8.6f    %8.6f    %8.6f \n",1,ZERO,point[0],point[1],point[2]);
  }
- auxiliar[0]=-cubex*stepx/TWO;
+ point[0]=-cubex*stepx/TWO;
  for(i=0;i<termsx;i++)
  {
-  auxiliar[1]=-cubey*stepy/TWO;
+  point[1]=-cubey*stepy/TWO;
   for(j=0;j<termsy;j++)
   {
-   auxiliar[2]=-cubez*stepz/TWO;
+   point[2]=-cubez*stepz/TWO;
    for(k=0;k<termsz;k++)
    {
     if(op_cube=="density")
-    {Read_fchk_wfn.rho_eval(auxiliar,eval);}
+    {Read_fchk_wfn.rho_eval(point,eval);}
     if(op_cube=="laplacian")
-    {Read_fchk_wfn.rho_lapl(auxiliar,eval);}
-    if(op_cube=="nlaplacian")
+    {Read_fchk_wfn.rho_lapl(point,eval);}
+    if(op_cube=="neglaplacian")
     {
-     Read_fchk_wfn.rho_lapl(auxiliar,eval);
+     Read_fchk_wfn.rho_lapl(point,eval);
      eval=-eval;
     }
     if(op_cube=="shannon")
     {
-     Read_fchk_wfn.rho_eval(auxiliar,eval);
+     Read_fchk_wfn.rho_eval(point,eval);
      if(eval<pow(TEN,-EIGHT)){eval=pow(TEN,-EIGHT);}
      eval=-eval/(double)Read_fchk_wfn.nelectrons*log(eval/(double)Read_fchk_wfn.nelectrons);
     }
     if(op_cube=="fisher")
     {
-     Read_fchk_wfn.rho_eval(auxiliar,eval);
-     Read_fchk_wfn.rho_grad(auxiliar,grad);
+     Read_fchk_wfn.rho_eval(point,eval);
+     Read_fchk_wfn.rho_grad(point,grad);
      if(eval<pow(TEN,-EIGHT)){eval=pow(TEN,-EIGHT);}
      eval=pow(norm3D(grad),TWO)/(eval*(double)Read_fchk_wfn.nelectrons);
     }
@@ -6026,13 +6002,7 @@ double stepy,double stepz)
      }
      if(!not_elf)
      {
-      /*
-      punctual(Read_fchk_wfn,auxiliar,Density,Density_alpha,Density_beta,grad,Grad_alpha,Grad_beta,Grad_norm,
-      Grad_norm_alpha,Grad_norm_beta,laplacian_r,laplacian_alpha,laplacian_beta,tauW_alpha,
-      tauW_beta,tau_alpha,tau_beta,k_F_alpha,k_F_beta,k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,
-      q_red_alpha,q_red_beta,wfn_fchk);
-      */
-      pre_elf(Read_fchk_wfn,auxiliar,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+      pre_elf(Read_fchk_wfn,point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
       Density=Density_alpha+Density_beta;
      }
      if(op_cube=="elf")
@@ -6083,8 +6053,7 @@ double stepy,double stepz)
      }
      if(!not_indic)
      {
-      IND_local(Read_fchk_wfn,auxiliar,IND_alpha,IND_beta);
-      ID_local(Read_fchk_wfn,auxiliar,ID_alpha,ID_beta);
+      ID_IND_local(Read_fchk_wfn,point,ID_alpha,ID_beta,IND_alpha,IND_beta);
      }
      if(op_cube=="id")
      {
@@ -6117,26 +6086,26 @@ double stepy,double stepz)
     }
     if(op_cube=="mo")
     {
-     mo=MO(Read_fchk_wfn,auxiliar,Read_fchk_wfn.Pair[0]);
+     mo=MO(Read_fchk_wfn,point,Read_fchk_wfn.Pair[0]);
      eval=mo.evaluation;
     }
     if(op_cube=="no")
     {
-     no=NO(Read_fchk_wfn,auxiliar,Read_fchk_wfn.Pair[0]);
+     no=NO(Read_fchk_wfn,point,Read_fchk_wfn.Pair[0]);
      eval=no.evaluation;
     }
     if(op_cube=="densityp")
-    {Read_fchk_wfn.rho_p_eval(auxiliar,eval);}
+    {Read_fchk_wfn.rho_p_eval(point,eval);}
     if(op_cube=="shannonp")
     {
-     Read_fchk_wfn.rho_p_eval(auxiliar,eval);
+     Read_fchk_wfn.rho_p_eval(point,eval);
      if(eval<pow(TEN,-EIGHT)){eval=pow(TEN,-EIGHT);}
      eval=-eval/(double)Read_fchk_wfn.nelectrons*log(eval/(double)Read_fchk_wfn.nelectrons);
     }
     if(op_cube=="fisherp")
     {
-     Read_fchk_wfn.rho_p_eval(auxiliar,eval);
-     Read_fchk_wfn.rho_p_grad(auxiliar,grad);
+     Read_fchk_wfn.rho_p_eval(point,eval);
+     Read_fchk_wfn.rho_p_grad(point,grad);
      if(eval<pow(TEN,-EIGHT)){eval=pow(TEN,-EIGHT);}
      eval=pow(norm3D(grad),TWO)/(eval*(double)Read_fchk_wfn.nelectrons);
     }
@@ -6156,12 +6125,12 @@ double stepy,double stepz)
     }
     if((k+1)%6==0)
     {fprintf(pFile,"\n");}
-    auxiliar[2]=auxiliar[2]+stepz;
+    point[2]=point[2]+stepz;
    }
    fprintf(pFile,"\n");
-   auxiliar[1]=auxiliar[1]+stepy;
+   point[1]=point[1]+stepy;
   }
-  auxiliar[0]=auxiliar[0]+stepx;
+  point[0]=point[0]+stepx;
  }
  fclose(pFile);
  read_cube.open((name_file+".cub_tmp").c_str());
@@ -6656,8 +6625,9 @@ double Shannon_ni_dmn(DMN_OPS &DMN, double &N)
  }
  return S/N;
 }
-//Local version for Dynamic corr indcator
-void ID_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &ID_alpha,double &ID_beta)
+
+//Local version for Nondynamic and Dynamic corr indcators
+void ID_IND_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &ID_alpha,double &ID_beta,double &IND_alpha,double &IND_beta)
 {
  int nbasis,i,j;
  double **NO_orb_grad,occ;
@@ -6671,276 +6641,159 @@ void ID_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &ID_alpha,doub
   {NO_orb_grad[i][j]=ZERO;}
  }
 ////////////////////////////////////////////
-  if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
-///////////////////////////////////////////
-  if((Read_fchk_wfn.correlated && Read_fchk_wfn.open_shell) && (Read_fchk_wfn.wfn && firstcall))
-  {cout<<"Warning open-shell correlated wfn file!"<<endl;}
-  ID_alpha=ZERO;
-  ID_beta=ZERO;
-  if(Read_fchk_wfn.wfn)
+ if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
+//////////////////////////////////////////
+ if((Read_fchk_wfn.correlated && Read_fchk_wfn.open_shell) && (Read_fchk_wfn.wfn && firstcall))
+ {cout<<"Warning open-shell correlated wfn file!"<<endl;}
+ ID_alpha=ZERO;
+ ID_beta=ZERO;
+ IND_alpha=ZERO;
+ IND_beta=ZERO;
+ if(Read_fchk_wfn.wfn)
+ {
+  if(!Read_fchk_wfn.wfx)
   {
-   if(!Read_fchk_wfn.wfx)
+   if(!Read_fchk_wfn.correlated)
    {
-    if(!Read_fchk_wfn.correlated)
-    {
-     ID_alpha=ZERO;
-     ID_beta=ZERO;
-    }
-    else
-    {
-     if(Read_fchk_wfn.open_shell)
-     {
-      if(firstcall)
-      {
-       cout<<"Warning! Unable to compute ID_alpha and ID_beta with open-shell"<<endl;
-       cout<<"correlated wfn file!"<<endl;
-       firstcall=false;
-      }
-      ID_alpha=ZERO;
-      ID_beta=ZERO;
-     }
-     else
-     {
-      for(i=0;i<nbasis;i++)
-      {
-       if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
-       else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-       if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
-       else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-       ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
-               *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-      ID_beta=ID_alpha;
-     }
-    }
+    ID_alpha=ZERO;
+    ID_beta=ZERO;
+    IND_alpha=ZERO;
+    IND_beta=ZERO;
    }
    else
    {
     if(Read_fchk_wfn.open_shell)
     {
-     for(i=0;i<nbasis;i++)
+     if(firstcall)
      {
-      if(i%2==0)
-      {
-       ID_alpha=ID_alpha+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)-HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))
-               *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-      else
-      {
-       ID_beta=ID_beta+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)-HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))
-              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
+      cout<<"Warning! Unable to compute local indicators with open-shell"<<endl;
+      cout<<"correlated wfn file!"<<endl;
+      firstcall=false;
      }
-    }
-    else
-    {
-     for(i=0;i<nbasis;i++)
-     {
-      if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
-      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-      if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
-      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-      ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
-              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-     }
-     ID_beta=ID_alpha;
-    }
-   }
-  }
-  else
-  {
-   if(Read_fchk_wfn.overlap)
-   {
-    if(Read_fchk_wfn.uhf)
-    {
-     for(i=0;i<nbasis;i++)
-     {
-      if(i%2==0)
-      {
-       ID_alpha=ID_alpha+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)-HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))
-               *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-      else
-      {
-       ID_beta=ID_beta+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)-HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))
-              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-     }
-    }
-    else
-    {
-     for(i=0;i<nbasis;i++)
-     {
-      if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
-      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-      if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
-      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
-      ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
-              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-     }
-     ID_beta=ID_alpha;
-    }
-   }
-   else if(firstcall)
-   {
-    cout<<"Warning! Unable to compute ID_alpha and ID_beta without the"<<endl;
-    cout<<"S^1/2 P S^1/2 matrix (tau_alpha and tau_beta will be 0.0e0)."<<endl;
-    firstcall=false;
-    ID_alpha=ZERO;
-    ID_beta=ZERO;
-   }
-   else
-   {
-    firstcall=false;
-    ID_alpha=ZERO;
-    ID_beta=ZERO;
-   }
-  }
-  //"There is no Normalization factor"
-  ID_alpha=ONE*ID_alpha;
-  ID_beta=ONE*ID_beta;
- //delete dynamic arrays
-  for(i=0;i<4;i++)
-  {delete[] NO_orb_grad[i];}
-  delete[] NO_orb_grad;
-}
-//Local version for Non-dynamic corr indcator
-void IND_local(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &IND_alpha,double &IND_beta)
-{
- int nbasis,i,j;
- double **NO_orb_grad;
- nbasis=Read_fchk_wfn.nbasis();
- NO_orb_grad=new double*[4];
- for(i=0;i<4;i++)
- {NO_orb_grad[i]=new double[nbasis];}
- for(i=0;i<4;i++)
- {
-  for(j=0;j<nbasis;j++)
-  {NO_orb_grad[i][j]=ZERO;}
- }
-////////////////////////////////////////////
-  if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
-///////////////////////////////////////////
-  if((Read_fchk_wfn.correlated && Read_fchk_wfn.open_shell) && (Read_fchk_wfn.wfn && firstcall))
-  {cout<<"Warning open-shell correlated wfn file!"<<endl;}
-  IND_alpha=ZERO;
-  IND_beta=ZERO;
-  if(Read_fchk_wfn.wfn)
-  {
-   if(!Read_fchk_wfn.wfx)
-   {
-    if(!Read_fchk_wfn.correlated)
-    {
+     ID_alpha=ZERO;
+     ID_beta=ZERO;
      IND_alpha=ZERO;
      IND_beta=ZERO;
     }
     else
     {
-     if(Read_fchk_wfn.open_shell)
-     {
-      if(firstcall)
-      {
-       cout<<"Warning! Unable to compute IND_alpha and IND_beta with open-shell"<<endl;
-       cout<<"correlated wfn file!"<<endl;
-       firstcall=false;
-      }
-      IND_alpha=ZERO;
-      IND_beta=ZERO;
-     }
-     else
-     {
-      for(i=0;i<nbasis;i++)
-      {
-       IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]/TWO)
-                *NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
-      }
-      IND_beta=IND_alpha;
-     }
-    }
-   }
-   else
-   {
-    if(Read_fchk_wfn.open_shell)
-    {
      for(i=0;i<nbasis;i++)
      {
-      if(i%2==0)
-      {
-       IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
-                *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-      else
-      {
-       IND_beta=IND_beta+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
-               *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-     }
-    }
-    else
-    {
-     for(i=0;i<nbasis;i++)
-     {
+      if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
+      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+      if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
+      else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+      ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
+              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
       IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]/TWO)
                *NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
      }
-     IND_alpha=IND_alpha; //Correct the ocupation!
+     ID_beta=ID_alpha;
      IND_beta=IND_alpha;
     }
    }
   }
   else
   {
-   if(Read_fchk_wfn.overlap)
+   if(Read_fchk_wfn.open_shell)
    {
-    if(Read_fchk_wfn.uhf)
+    for(i=0;i<nbasis;i++)
     {
-     for(i=0;i<nbasis;i++)
+     if(i%2==0)
      {
-      if(i%2==0)
-      {
-       IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
-                *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
-      else
-      {
-       IND_beta=IND_beta+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
+      ID_alpha=ID_alpha+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)
+              -HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
                *NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      }
      }
-    }
-    else
-    {
-     for(i=0;i<nbasis;i++)
+     else
      {
-      IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]/TWO)
-               *NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+      ID_beta=ID_beta+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)
+             -HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      IND_beta=IND_beta+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
+              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
      }
-     IND_alpha=IND_alpha; //Correct the ocupation!
-     IND_beta=IND_alpha;
     }
-   }
-   else if(firstcall)
-   {
-    cout<<"Warning! Unable to compute IND_alpha and IND_beta without the"<<endl;
-    cout<<"S^1/2 P S^1/2 matrix (tau_alpha and tau_beta will be 0.0e0)."<<endl;
-    firstcall=false;
-    IND_alpha=ZERO;
-    IND_beta=ZERO;
    }
    else
    {
-    firstcall=false;
-    IND_alpha=ZERO;
-    IND_beta=ZERO;
+    for(i=0;i<nbasis;i++)
+    {
+     if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
+     else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+     if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
+     else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+     ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
+             *NO_orb_grad[0][i]*NO_orb_grad[0][i];
+     IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]/TWO)
+              *NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+    }
+    ID_beta=ID_alpha;
+    IND_beta=IND_alpha;
    }
   }
-  //"There is no Normalization factor"
-  IND_alpha=ONE*IND_alpha;
-  IND_beta=ONE*IND_beta;
+ }
+ else
+ {
+  if(Read_fchk_wfn.overlap)
+  {
+   if(Read_fchk_wfn.uhf)
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     if(i%2==0)
+     {
+      ID_alpha=ID_alpha+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)
+              -HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
+               *NO_orb_grad[0][i]*NO_orb_grad[0][i];
+     }
+     else
+     {
+      ID_beta=ID_beta+(HALF*HALF*pow(abs(Read_fchk_wfn.Ocupation[i])*abs(ONE-Read_fchk_wfn.Ocupation[i]),HALF)
+             -HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]))*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+      IND_beta=IND_beta+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i])
+              *NO_orb_grad[0][i]*NO_orb_grad[0][i];
+     }
+    }
+   }
+   else
+   {
+    for(i=0;i<nbasis;i++)
+    {
+     if(abs(Read_fchk_wfn.Ocupation[i]/TWO)<pow(TEN,-SIX)){occ=ZERO;}
+     else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+     if(abs(Read_fchk_wfn.Ocupation[i]/TWO-ONE)<pow(TEN,-SIX)){occ=ONE;}
+     else{occ=Read_fchk_wfn.Ocupation[i]/TWO;}
+     ID_alpha=ID_alpha+(HALF*HALF*pow(abs(occ),HALF)*pow(abs(ONE-abs(occ)),HALF)-HALF*abs(occ)*(ONE-abs(occ)))
+             *NO_orb_grad[0][i]*NO_orb_grad[0][i];
+     IND_alpha=IND_alpha+HALF*Read_fchk_wfn.Ocupation[i]*(ONE-Read_fchk_wfn.Ocupation[i]/TWO)
+              *NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+    }
+    ID_beta=ID_alpha;
+    IND_beta=IND_alpha;
+   }
+  }
+  else if(firstcall)
+  {
+   cout<<"Warning! Unable to compute local indicators without the S^1/2 P S^1/2 matrix"<<endl;
+   firstcall=false;
+   ID_alpha=ZERO;
+   ID_beta=ZERO;
+  }
+  else
+  {
+   firstcall=false;
+   ID_alpha=ZERO;
+   ID_beta=ZERO;
+   IND_alpha=ZERO;
+   IND_beta=ZERO;
+  }
+ }
  //delete dynamic arrays
-  for(i=0;i<4;i++)
-  {delete[] NO_orb_grad[i];}
-  delete[] NO_orb_grad;
+ for(i=0;i<4;i++)
+ {delete[] NO_orb_grad[i];}
+ delete[] NO_orb_grad;
 }
 //Calculate the time that the program took
 void calc_time(double DATE[2][4])
