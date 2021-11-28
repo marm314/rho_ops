@@ -129,6 +129,7 @@ class READ_FCHK_WFN
    void rho_p_lapl(double [3], double &);
    void rho_p_lapl_a_b(double [3], double &,double &);
    void build_NOp_wfn(complex<double> &NOp,double Point[3],int &numMO);
+   void build_NOp_wfn_all(complex<double> *,double Point[3]);
    void build_MOp_fchk(complex<double> &MOp,double Point[3],int &numMO);
    void build_MOp_fchk2(double  **AOp,complex<double> &MOp,int &numMO);
    void grad_MOp_fchk(complex<double> Grad[3],double Point[3],int &numMO);
