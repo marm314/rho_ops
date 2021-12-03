@@ -90,15 +90,16 @@ class READ_FCHK_WFN
    //Variables
    int natoms,nprimitv,smap,prim_exp,nbasisf,multiplicity,nelectrons,Pair[2];
    int *shell_type, *n_prim_per_shell, *shell_map;
-   double *Nu_charge,*Ocupation,**Cartesian_Coor,**Total_rho,**MOcoefA,**MOcoefB;
+   double *Nu_charge,*Ocupation,**Cartesian_Coor,**Total_rho,**MOcoefA,**MOcoefB,**MOcoefA_im;
    double *Prim_exp, *Contr_Coef, *SP_Contr_Coef,Rot_ICM[3][3];
-   double  **Spin_rho,**P,**Pbeta,**S,**Sbeta,**Sao;
-   bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx;
+   double **Spin_rho,**P,**Pbeta,**S,**Sbeta,**Sao;
+   bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx,im_wfn;
    string identity;
    ////////////
    //for both//
    ////////////
    void Quant_fill(int **Quant,int styp);
+   void Init_MOim(double **MO_coef_in);
    //Position space
    void build_AO_AOgrad2(double *AO,double **AO_grad,double Point[3]);
    void rho_eval(double [3],double &);
@@ -108,8 +109,10 @@ class READ_FCHK_WFN
    void rho_lapl(double [3],double &);
    void rho_lapl_a_b(double [3],double &,double &);
    void orb_grad(double [3],double **res);
+   void orb_gradCC(double [3],complex<double> **res);
    void build_NO_grad_wfn(double &,double [3],double [3],int &);
    void build_NO_grad_wfn_all(double *,double **,double [3]);
+   void build_NO_grad_wfn_allC(complex<double> *,complex<double> **,double [3]);
    void build_NO_grad_fchk(double &,double [3],double [3],int &);
    void build_NO_grad_fchk2(double *,double **,double &,double [3],int &);
    void build_MO_grad_fchk(double &,double [3],double [3],int &);

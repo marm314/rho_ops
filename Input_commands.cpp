@@ -8,7 +8,7 @@ Input::Input(string rho_in)
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;gnuplot=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;
- int_pol_hyperpol=false;extracule=false;r1_moment=false;symrotdens=false;symgrad=false;intra_1rdm=false;
+ int_pol_hyperpol=false;extracule=false;r1_moment=false;symrotdens=false;symgrad=false;intra_1rdm=false;im_wfn=false;
  multiplicity=0;ncores=1;extra_lines=0;
  string name=rho_in;
  ifstream rho_input_file;
@@ -144,6 +144,16 @@ Input::Input(string rho_in)
     rho_input_file>>step_cube_x>>step_cube_y>>step_cube_z;
     if(opcube=="mo" || opcube=="no")
     {rho_input_file>>mo_no_cube;}
+   }
+   else if(rho_in=="$im_wfn")
+   {
+    im_wfn=true;
+    do
+    {
+     getline(rho_input_file,rho_in);
+     rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
+    }while(rho_in=="");
+    second_fchk_wfn=rho_in;
    }
    else if(rho_in=="$intracule")
    {

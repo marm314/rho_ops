@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
  double **Inertia,**Quadrupole,**eigenV,**cps,**aux,**TPS,shannon,shannonp,fisher,fisherp,Tw,Ttf,Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
  char direct;
- string method,operation,region_string,line;
+ string method,operation,region_string,line,name_saved;
  ofstream Results;
  ifstream my_chk,date_file,CM_file;
 /////////////////////
@@ -153,6 +153,33 @@ int main(int argc, char *argv[])
      exit(EXIT_FAILURE);
     }
    }
+  }
+  // If there are Imag Coefs store them
+  if(Input_commands.im_wfn)
+  {
+   name_saved=name_file;
+   /////////////////////////////////////////////////
+   //Store 2nd WFN or WFX
+   /////////////////////////////////////////////////
+   wfn_fchk=false;
+   name_file=Input_commands.second_fchk_wfn;
+   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+   {
+    wfn_fchk=true;//True for wfn
+   }
+   READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
+   Input_commands.multiplicity);//Construct with parametric construction.
+   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+   {
+    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
+   }
+   else
+   {
+    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+   }
+   name_file=name_saved;
+   Read_fchk_wfn.im_wfn=Input_commands.im_wfn;
+   Read_fchk_wfn.Init_MOim(Read_fchk_wfn_2.MOcoefA);
   }
   //If everything is ok and is an fchk file, we set BETA_MOS variable in the Read_fchk_wfn object.
   //Be aware that set BETA_MOS=true will imply that impaired MOs are built using Beta MOs not Alpha MOs from fchk
@@ -3129,7 +3156,7 @@ int main(int argc, char *argv[])
    Results<<"The second FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
    Results<<endl;
    /////////////////////////////////////////////////
-   //Point to the two FCHKs or WFNs
+   //Point to two FCHKs or WFNs
    /////////////////////////////////////////////////
    N_FCHKS_WFNS two_fchks_wfns;
    two_fchks_wfns.read_fchk_wfn[0]=&Read_fchk_wfn;
@@ -3595,7 +3622,7 @@ int main(int argc, char *argv[])
    Results<<endl;
    name_file=name_file_saved;
    /////////////////////////////////////////////////
-   //Point to the two FCHKs or WFNs
+   //Point to five FCHKs or WFNs
    /////////////////////////////////////////////////
    N_FCHKS_WFNS five_fchks_wfns;
    five_fchks_wfns.read_fchk_wfn[0]=&Read_fchk_wfn;

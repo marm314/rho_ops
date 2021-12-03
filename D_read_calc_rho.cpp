@@ -24,7 +24,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
   cart_coor=false;nprimsh=false;satmap=false;exponents=false;mocoef=false;
   mo_beta_coef=false;open_shell=true;rhf=false;uhf=false;CI=false;CAS=false;
   correlated=false;virtuals=false;relaxed=false;error_opens_wfn=false;PS_bool=false;overlap=false;
-  BETA_MOS=false;no_beta_wfn=false;scf_dens_found=false;wfx=false;
+  BETA_MOS=false;no_beta_wfn=false;scf_dens_found=false;wfx=false;im_wfn=false;
   if(!wfn)
   {
    string aux;
@@ -1728,6 +1728,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
  }
  else
  {
+   if(RHO.im_wfn){cout<<"Warning! The Imag part of the NOs was not copied"<<endl;}
    wfn=RHO.wfn;
    nbasisf=RHO.nbasisf;
    MO_coef=nbasisf;
@@ -2044,8 +2045,15 @@ READ_FCHK_WFN::~READ_FCHK_WFN()
  }
  else
  {
+  if(im_wfn)
+  {
+   for(i=0;i<MO_coef;i++)
+   {delete[] MOcoefA_im[i];}
+   delete[] MOcoefA_im;
+  }
   for(i=0;i<MO_coef;i++)
   {delete[] MOcoefA[i];}
+  delete[] MOcoefA;
   for(i=0;i<natoms;i++)
   {delete[] Cartesian_Coor[i];}
   delete[] Cartesian_Coor;
@@ -2116,31 +2124,62 @@ void READ_FCHK_WFN::rho_eval(double point[3],double &result)
  }
  else
  {
-  double *NOs,**NOs_grad;
-  NOs=new double[MO_coef];
-  NOs_grad=new double*[3];
-  for(i[0]=0;i[0]<3;i[0]++)
-  { 
-   NOs_grad[i[0]]=new double[MO_coef];
-  }
-  build_NO_grad_wfn_all(NOs,NOs_grad,point);
-  density=ZERO;
-  result=ZERO;
-  for(i[0]=0;i[0]<MO_coef;i[0]++)
+  if(im_wfn)
   {
-   if(Ocupation[i[0]]!=ZERO)
-   {
-    density=density+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]];
+   complex<double> *NOs,**NOs_grad;
+   NOs=new complex<double>[MO_coef];
+   NOs_grad=new complex<double>*[3];
+   for(i[0]=0;i[0]<3;i[0]++)
+   { 
+    NOs_grad[i[0]]=new complex<double>[MO_coef];
    }
+   build_NO_grad_wfn_allC(NOs,NOs_grad,point);
+   density=ZERO;
+   result=ZERO;
+   for(i[0]=0;i[0]<MO_coef;i[0]++)
+   {
+    if(Ocupation[i[0]]!=ZERO)
+    {
+     //density=density+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]];
+     density=density+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]];
+    }
+   }
+   //Return result
+   result=density;
+   for(i[0]=0;i[0]<3;i[0]++)
+   { 
+    delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
+   }
+   delete[] NOs; NOs=NULL;
   }
-  //Return result
-  result=density;
-  for(i[0]=0;i[0]<3;i[0]++)
-  { 
-   delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
+  else
+  {
+   double *NOs,**NOs_grad;
+   NOs=new double[MO_coef];
+   NOs_grad=new double*[3];
+   for(i[0]=0;i[0]<3;i[0]++)
+   { 
+    NOs_grad[i[0]]=new double[MO_coef];
+   }
+   build_NO_grad_wfn_all(NOs,NOs_grad,point);
+   density=ZERO;
+   result=ZERO;
+   for(i[0]=0;i[0]<MO_coef;i[0]++)
+   {
+    if(Ocupation[i[0]]!=ZERO)
+    {
+     density=density+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]];
+    }
+   }
+   //Return result
+   result=density;
+   for(i[0]=0;i[0]<3;i[0]++)
+   { 
+    delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
+   }
+   delete[] NOs; NOs=NULL;
+   delete[] NOs_grad; NOs_grad=NULL;
   }
-  delete[] NOs; NOs=NULL;
-  delete[] NOs_grad; NOs_grad=NULL;
  }
  delete[] i;
  delete[] j;
@@ -2214,41 +2253,75 @@ void READ_FCHK_WFN::rho_eval_a_b(double point[3],double &rhoa,double &rhob)
   {
    rhoa=ZERO;
    rhob=ZERO;
-   double *NOs,**NOs_grad;
-   NOs=new double[MO_coef];
-   NOs_grad=new double*[3];
-   for(i[0]=0;i[0]<3;i[0]++)
-   { 
-    NOs_grad[i[0]]=new double[MO_coef];
-   }
    if(!correlated)
    {
-    build_NO_grad_wfn_all(NOs,NOs_grad,point);
-    for(i[0]=0;i[0]<MO_coef;i[0]++)
+    if(im_wfn)
     {
-     if(Ocupation[i[0]]!=ZERO)
+     complex<double> *NOs,**NOs_grad;
+     NOs=new complex<double>[MO_coef];
+     NOs_grad=new complex<double>*[3];
+     for(i[0]=0;i[0]<3;i[0]++)
+     { 
+      NOs_grad[i[0]]=new complex<double>[MO_coef];
+     }
+     build_NO_grad_wfn_allC(NOs,NOs_grad,point);
+     for(i[0]=0;i[0]<MO_coef;i[0]++)
      {
-      if(i[0]%2==0)
+      if(Ocupation[i[0]]!=ZERO)
       {
-       rhoa=rhoa+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]]; //calculate rhoa
-      }
-      else
-      {
-       rhob=rhob+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]]; //calculate rhob
+       if(i[0]%2==0)
+       {
+        rhoa=rhoa+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]]; //calculate rhoa
+       }
+       else
+       {
+        rhob=rhob+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]]; //calculate rhob
+       }
       }
      }
+     for(i[0]=0;i[0]<3;i[0]++)
+     { 
+      delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
+     }
+     delete[] NOs; NOs=NULL;
+     delete[] NOs_grad; NOs_grad=NULL;
+    }
+    else
+    {
+     double *NOs,**NOs_grad;
+     NOs=new double[MO_coef];
+     NOs_grad=new double*[3];
+     for(i[0]=0;i[0]<3;i[0]++)
+     { 
+      NOs_grad[i[0]]=new double[MO_coef];
+     }
+     build_NO_grad_wfn_all(NOs,NOs_grad,point);
+     for(i[0]=0;i[0]<MO_coef;i[0]++)
+     {
+      if(Ocupation[i[0]]!=ZERO)
+      {
+       if(i[0]%2==0)
+       {
+        rhoa=rhoa+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]]; //calculate rhoa
+       }
+       else
+       {
+        rhob=rhob+NOs[i[0]]*NOs[i[0]]*Ocupation[i[0]]; //calculate rhob
+       }
+      }
+     }
+     for(i[0]=0;i[0]<3;i[0]++)
+     { 
+      delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
+     }
+     delete[] NOs; NOs=NULL;
+     delete[] NOs_grad; NOs_grad=NULL;
     }
    }
    else      //Not calculate for Open Shell correlated .wfn files
    {
     error_opens_wfn=true;
    }
-   for(i[0]=0;i[0]<3;i[0]++)
-   { 
-    delete[] NOs_grad[i[0]]; NOs_grad[i[0]]=NULL;
-   }
-   delete[] NOs; NOs=NULL;
-   delete[] NOs_grad; NOs_grad=NULL;
   }
  }
  delete[] i;
@@ -2297,41 +2370,66 @@ void READ_FCHK_WFN::rho_grad(double point[3],double Grad[3])
   AO_grad=NULL;
  }
  else
- {
-  double *MOs,**MO_grad;
-  ///////////////////////////////////////
-  //dynamic arrays
-  MO_grad=new double*[3];
-  for(i[0]=0;i[0]<3;i[0]++)
-  {MO_grad[i[0]]=new double[MO_coef];}
-  MOs=new double[MO_coef];
-  ///////////////////////////////////////
-  //Initialize
-  for(i[0]=0;i[0]<3;i[0]++)
+ { // MAU
+  if(im_wfn)
   {
-   for(j[0]=0;j[0]<MO_coef;j[0]++)
-   {MO_grad[i[0]][j[0]]=ZERO;}
-  }
-  for(i[0]=0;i[0]<MO_coef;i[0]++)
-  {MOs[i[0]]=ZERO;}
-  ////////////////////////////////////////
-  //Build NO
-  build_NO_grad_wfn_all(MOs,MO_grad,point);
-  ////////////////////////////////////////////////////////////////////////////
-  //Once the NO gradients and NOs were calculated, we proceed to calculate the
-  //gradient
-  for(i[0]=0;i[0]<3;i[0]++)
-  {Grad[i[0]]=ZERO;
-   for(j[0]=0;j[0]<MO_coef;j[0]++)
+   complex<double> *MOs,**MO_grad;
+   MOs=new complex<double>[MO_coef];
+   MO_grad=new complex<double>*[3];
+   for(i[0]=0;i[0]<3;i[0]++)
    {
-    Grad[i[0]]=Grad[i[0]]+Ocupation[j[0]]*TWO*MO_grad[i[0]][j[0]]*MOs[j[0]];
+    MO_grad[i[0]]=new complex<double>[MO_coef];
    }
+   build_NO_grad_wfn_allC(MOs,MO_grad,point);
+   for(i[0]=0;i[0]<3;i[0]++)
+   {
+    complex<double>res(ZERO,ZERO);
+    for(j[0]=0;j[0]<MO_coef;j[0]++)
+    {
+     // OCC Grad (MO* x MO) 
+     res=res+Ocupation[j[0]]*(conj(MOs[j[0]])*MO_grad[i[0]][j[0]]+conj(MO_grad[i[0]][j[0]])*MOs[j[0]]);
+    }
+    Grad[i[0]]=real(res);
+   }
+   for(i[0]=0;i[0]<3;i[0]++)
+   {
+    delete[] MO_grad[i[0]];MO_grad[i[0]]=NULL;
+   }
+   delete[] MO_grad;MO_grad=NULL;
+   delete[] MOs;MOs=NULL;
   }
-  //delete arrays
-  for(i[0]=0;i[0]<3;i[0]++)
-  {delete[] MO_grad[i[0]];MO_grad[i[0]]=NULL;}
-  delete[] MO_grad;MO_grad=NULL;
-  delete[] MOs;MOs=NULL;
+  else
+  {
+   double *MOs,**MO_grad;
+   MO_grad=new double*[3];
+   for(i[0]=0;i[0]<3;i[0]++)
+   {MO_grad[i[0]]=new double[MO_coef];}
+   MOs=new double[MO_coef];
+   for(i[0]=0;i[0]<3;i[0]++)
+   {
+    for(j[0]=0;j[0]<MO_coef;j[0]++)
+    {
+     MO_grad[i[0]][j[0]]=ZERO;
+    }
+   }
+   for(i[0]=0;i[0]<MO_coef;i[0]++)
+   {
+    MOs[i[0]]=ZERO;
+   }
+   build_NO_grad_wfn_all(MOs,MO_grad,point);
+   for(i[0]=0;i[0]<3;i[0]++)
+   {
+    Grad[i[0]]=ZERO;
+    for(j[0]=0;j[0]<MO_coef;j[0]++)
+    {
+     Grad[i[0]]=Grad[i[0]]+Ocupation[j[0]]*TWO*MO_grad[i[0]][j[0]]*MOs[j[0]];
+    }
+   }
+   for(i[0]=0;i[0]<3;i[0]++)
+   {delete[] MO_grad[i[0]];MO_grad[i[0]]=NULL;}
+   delete[] MO_grad;MO_grad=NULL;
+   delete[] MOs;MOs=NULL;
+  }
  }
  delete[] i;
  delete[] j;
@@ -2416,44 +2514,81 @@ void READ_FCHK_WFN::rho_grad_a_b(double point[3],double Grada[3],double Gradb[3]
   }
   else
   {
-   double **MO_grad,*MOs;
-   //dynamic arrays
-   MO_grad=new double*[3];
-   for(i=0;i<3;i++)
-   {MO_grad[i]=new double[MO_coef];}
-   MOs=new double[MO_coef];
    if(!correlated)
    {
-    //Build NOs
-    build_NO_grad_wfn_all(MOs,MO_grad,point);
-    for(i=0;i<MO_coef;i++)
+    if(im_wfn)
     {
-     if(Ocupation[i]!=ZERO)
+     complex<double> *MOs,**MO_grad;
+     MOs=new complex<double>[MO_coef];
+     MO_grad=new complex<double>*[3];
+     for(i=0;i<3;i++)
      {
-      if(i%2==0)
+      MO_grad[i]=new complex<double>[MO_coef];
+     }
+     build_NO_grad_wfn_allC(MOs,MO_grad,point);
+     for(i=0;i<3;i++)
+     {
+      complex<double>resa(ZERO,ZERO);
+      complex<double>resb(ZERO,ZERO);
+      for(j=0;j<MO_coef;j++)
       {
-       for(k=0;k<3;k++)
+       // OCC Grad (MO* x MO) 
+       if(i%2==0)
        {
-        Grada[k]=Grada[k]+TWO*MOs[i]*Ocupation[i]*MO_grad[i][k]; //calculate grada
+        resa=resa+Ocupation[j]*(conj(MOs[j])*MO_grad[i][j]+conj(MO_grad[i][j])*MOs[j]);
+       }
+       else
+       {
+        resb=resb+Ocupation[j]*(conj(MOs[j])*MO_grad[i][j]+conj(MO_grad[i][j])*MOs[j]);
        }
       }
-      else
+      Grada[i]=real(resa);
+      Gradb[i]=real(resb);
+     }
+     for(i=0;i<3;i++)
+     {
+      delete[] MO_grad[i];MO_grad[i]=NULL;
+     }
+     delete[] MO_grad;MO_grad=NULL;
+     delete[] MOs;MOs=NULL;
+    }
+    else
+    {
+     double **MO_grad,*MOs;
+     MO_grad=new double*[3];
+     for(i=0;i<3;i++)
+     {MO_grad[i]=new double[MO_coef];}
+     MOs=new double[MO_coef];
+     build_NO_grad_wfn_all(MOs,MO_grad,point);
+     for(i=0;i<MO_coef;i++)
+     {
+      if(Ocupation[i]!=ZERO)
       {
-       for(k=0;k<3;k++)
+       if(i%2==0)
        {
-        Gradb[k]=Gradb[k]+TWO*MOs[i]*Ocupation[i]*MO_grad[i][k]; //calculate grada
+        for(k=0;k<3;k++)
+        {
+         Grada[k]=Grada[k]+TWO*MOs[i]*Ocupation[i]*MO_grad[i][k]; //calculate grada
+        }
+       }
+       else
+       {
+        for(k=0;k<3;k++)
+        {
+         Gradb[k]=Gradb[k]+TWO*MOs[i]*Ocupation[i]*MO_grad[i][k]; //calculate grada
+        }
        }
       }
      }
+     //delete arrays
+     for(i=0;i<3;i++)
+     {delete[] MO_grad[i];MO_grad[i]=NULL;}
+     delete[] MO_grad;MO_grad=NULL;
+     delete[] MOs;MOs=NULL;
     }
    }
    else
    {}
-   //delete arrays
-   for(i=0;i<3;i++)
-   {delete[] MO_grad[i];MO_grad[i]=NULL;}
-   delete[] MO_grad;MO_grad=NULL;
-   delete[] MOs;MOs=NULL;
   }
  }
 }
@@ -2530,9 +2665,9 @@ void READ_FCHK_WFN::rho_lapl_a_b(double point[3],double &result1,double &result2
     result1=result1+temp;
     result2=result2+temp2;
    }
-  rho_eval_a_b(point,temp,temp2);
-  result1=(result1-SIX*temp)/pow(delta,TWO);
-  result2=(result2-SIX*temp2)/pow(delta,TWO);
+   rho_eval_a_b(point,temp,temp2);
+   result1=(result1-SIX*temp)/pow(delta,TWO);
+   result2=(result2-SIX*temp2)/pow(delta,TWO);
   }
   else
   {}
@@ -2582,6 +2717,37 @@ void READ_FCHK_WFN::orb_grad(double point[3],double **res)
   delete[] MOs;MOs=NULL;
  }
 }
+
+void READ_FCHK_WFN::orb_gradCC(double point[3],complex<double> **res)
+{
+ int i,j;
+ if(!wfn)
+ {
+  cout<<"Warning! Not implemented for FCHK files!"<<endl;
+ }
+ else
+ {
+  complex<double> **MO_grad,*MOs;
+  //dynamic arrays
+  MO_grad=new complex<double>*[3];
+  MOs=new complex<double>[MO_coef];
+  for(i=0;i<3;i++)
+  {MO_grad[i]=new complex<double>[MO_coef];}
+  build_NO_grad_wfn_allC(MOs,MO_grad,point);
+  for(i=0;i<nbasisf;i++)
+  {
+   res[0][i]=MOs[i];
+   for(j=0;j<3;j++)
+   {res[j+1][i]=MO_grad[j][i];}
+  }
+  //delete arrays
+  for(i=0;i<3;i++)
+  {delete[] MO_grad[i];MO_grad[i]=NULL;}
+  delete[] MO_grad;MO_grad=NULL;
+  delete[] MOs;MOs=NULL;
+ }
+}
+
 void READ_FCHK_WFN::build_NO_grad_wfn(double &NO,double grad[3],double Point[3], int &numMO)
 {
   int *i,*j,*k,*nlm;
@@ -2685,6 +2851,63 @@ void READ_FCHK_WFN::build_NO_grad_wfn_all(double *NO,double **NO_grad,double Poi
  delete[] Quant;Quant=NULL;
 }
 
+void READ_FCHK_WFN::build_NO_grad_wfn_allC(complex<double> *NO,complex<double> **NO_grad,double Point[3])
+{
+ int i,iprim,ishell,idir,iNO,nlm[3];
+ double pos_nuclei[3],exponent,grad_prim,val_prim;
+ int **Quant;
+ complex<double>ztmp0(ZERO,ZERO);
+ ///////////////////////////////////////
+ //Dynamic array
+ Quant=new int*[35];
+ for(i=0;i<35;i++)
+ {Quant[i]=new int[3];}
+ ///////////////////////////////////////
+ //Initialize
+ Quant_fill(Quant,0); //0 because no type is needed
+ for(idir=0;idir<3;idir++)
+ {
+  for(iNO=0;iNO<MO_coef;iNO++)
+  {
+   NO_grad[idir][iNO]=ztmp0;
+   if(idir==0)
+   {
+    NO[iNO]=ztmp0;
+   }
+  }
+ }
+ //////////////////////////////////////////
+ //Build NOs and their gradients 
+ for(iprim=0;iprim<nprimitv;iprim++)
+ {
+  for(ishell=0;ishell<3;ishell++)
+  {
+   pos_nuclei[ishell]=Cartesian_Coor[shell_map[iprim]-1][ishell];
+   nlm[ishell]=Quant[shell_type[iprim]-1][ishell];
+  }
+  exponent=Prim_exp[iprim];
+  val_prim=eval_Primitive_wfn(Point,pos_nuclei,nlm,exponent);
+  complex<double>eval_prim(val_prim,ZERO);
+  for(idir=0;idir<3;idir++)
+  {
+   grad_prim=grad_Primitive_wfn(Point,idir,pos_nuclei,nlm,exponent);
+   complex<double>eval_grad(grad_prim,ZERO);
+   for(iNO=0;iNO<MO_coef;iNO++)
+   {
+    complex<double>mo_coef(MOcoefA[iNO][iprim],MOcoefA_im[iNO][iprim]);
+    NO_grad[idir][iNO]=NO_grad[idir][iNO]+mo_coef*eval_grad;
+    if(idir==0)
+    {
+     NO[iNO]=NO[iNO]+mo_coef*eval_prim;
+    }
+   }
+  }
+ }
+ //Delete allocated arrays
+ for(i=0;i<35;i++)
+ {delete[] Quant[i];Quant[i]=NULL;}
+ delete[] Quant;Quant=NULL;
+}
 
 void READ_FCHK_WFN::build_NO_grad_fchk(double &NO,double grad[3],double point[3],int &numMO)
 {
@@ -4268,8 +4491,9 @@ void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &n
   int *i,*j;
   i=new int[1];j=new int[1];
   double  **AOp;
+  complex<double>ztmp0(ZERO,ZERO);
   //Point comes from outside
-  MOp=(ZERO,ZERO);
+  MOp=ztmp0;
   AOp=new double*[2];
   for(i[0]=0;i[0]<2;i[0]++)
   {AOp[i[0]]=new double[nbasisf];}
@@ -4286,7 +4510,7 @@ void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &n
    {
     for(j[0]=0;j[0]<nbasisf;j[0]++)
     { 
-     complex<double>ztmp=(ZERO,AOp[1][j[0]]);
+     complex<double>ztmp(ZERO,AOp[1][j[0]]);
      MOp=MOp+(MOcoefA[numMO/2][j[0]])*(AOp[0][j[0]]+ztmp);
     }
    }
@@ -4294,7 +4518,7 @@ void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &n
    {
     for(j[0]=0;j[0]<nbasisf;j[0]++)
     {
-     complex<double>ztmp=(ZERO,AOp[1][j[0]]);
+     complex<double>ztmp(ZERO,AOp[1][j[0]]);
      if(BETA_MOS)
      {
       MOp=MOp+(MOcoefB[(numMO-1)/2][j[0]])*(AOp[0][j[0]]+ztmp);
@@ -4310,7 +4534,8 @@ void READ_FCHK_WFN::build_MOp_fchk(complex<double> &MOp,double Point_p[3],int &n
   {
    for(j[0]=0;j[0]<nbasisf;j[0]++)
    {
-    MOp=MOp+(MOcoefA[numMO][j[0]])*(AOp[0][j[0]]+(ZERO,AOp[1][j[0]]));
+    complex<double>ztmp2(ZERO,AOp[1][j[0]]);
+    MOp=MOp+(MOcoefA[numMO][j[0]])*(AOp[0][j[0]]+ztmp2);
    }
   }
 ///////////////////////////////////////////////////////////////////////////////
@@ -4324,7 +4549,8 @@ void READ_FCHK_WFN::build_MOp_fchk2(double  **AOp,complex<double> &MOp,int &numM
 {
   int *j;
   j=new int[1];
-  MOp=(ZERO,ZERO);
+  complex<double>ztmp0(ZERO,ZERO);
+  MOp=ztmp0;
   //Build MOp
   if(extra1)
   {
@@ -4371,13 +4597,14 @@ void READ_FCHK_WFN::grad_MOp_fchk(complex<double> Grad[3],double Point_p[3],int 
  int *i,*j;
  double *h,*AUX1,*AUX2;
  complex<double> *eval1,*eval2;
+ complex<double>ztmp0(ZERO,ZERO);
  i=new int[1];j=new int[1];
  h=new double[1]; AUX1=new double[3];
  AUX2=new double[3]; eval1=new complex<double>[1];
  eval2=new complex<double>[1];
  h[0]=pow(TEN,-SIX);
  for(i[0]=0;i[0]<3;i[0]++)
- {Grad[i[0]]=(ZERO,ZERO);}
+ {Grad[i[0]]=ztmp0;}
  for(i[0]=0;i[0]<3;i[0]++)
  {
   for(j[0]=0;j[0]<3;j[0]++)
@@ -4403,9 +4630,10 @@ void READ_FCHK_WFN::grad_MOp_fchk2(complex<double> **AOps_Grad,complex<double> G
 {
   int *i,*j;
   i=new int[1];j=new int[1];
+  complex<double>ztmp0(ZERO,ZERO);
   for(i[0]=0;i[0]<3;i[0]++)
   {
-   Grad[i[0]]=(ZERO,ZERO);
+   Grad[i[0]]=ztmp0;
    //Build MOp
    if(extra1)
    {
@@ -5140,6 +5368,21 @@ void READ_FCHK_WFN::Quant_fill(int **Quant,int styp)
   Quant[32][0]=2;Quant[32][1]=1;Quant[32][2]=1;
   Quant[33][0]=1;Quant[33][1]=2;Quant[33][2]=1;
   Quant[34][0]=1;Quant[34][1]=1;Quant[34][2]=2;
+ }
+}
+
+//Store im part of wfn coefs
+void READ_FCHK_WFN::Init_MOim(double **MOcoef_in)
+{
+ int i,j;
+ MOcoefA_im=new double*[MO_coef];
+ for(i=0;i<MO_coef;i++)
+ {
+  MOcoefA_im[i]=new double[nprimitv];
+  for(j=0;j<nprimitv;j++)
+  {
+   MOcoefA_im[i][j]=MOcoef_in[i][j];
+  }
  }
 }
 
