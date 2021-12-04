@@ -58,7 +58,7 @@ double &tau_alpha,double &tau_beta,double &k_F_alpha,double &k_F_beta,double &k_
 double &k_s_beta,double &s_r_alpha,double &s_r_beta,double &q_red_alpha,double &q_red_beta,
 bool wfn_fchk);
 void pre_elf(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &Density_alpha,double &Density_beta,
-double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta);
+double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta,double &tcurr_alpha,double &tcurr_beta);
 void mos_to_nos_int_fchk_dm1(READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands,double **ORBITALS,int &total_grid,int &nbasis);
 void mos_to_nos_dmn_sij(double **SIJ,READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands);
 void print_int(READ_FCHK_WFN &Read_fchk_wfn,string name_file,double **Sij, int nbasis,double &rho,double &rhoa,double &rhob,
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
  bool r1=false,r2=false,rm1=false,p1=false,p2=false,not_elf=false,sij=false,r1_moment=false,mos_to_nos_dmn=false,dipolar=false,not_indic=false;
  double counter,Density,Density_alpha,Density_beta,Nelec,tauW_alpha,ELF,ELFa,ELFb,coef_elf;
  double Grad_norm,Grad_norm_alpha,Grad_norm_beta,tauW_beta,tau_alpha,tau_beta,k_F_alpha;
- double k_F_beta,k_s_alpha,k_s_beta,q_red_alpha,q_red_beta,s_r_alpha,s_r_beta;
+ double k_F_beta,k_s_alpha,k_s_beta,q_red_alpha,q_red_beta,s_r_alpha,s_r_beta,tcurr_alpha,tcurr_beta;
  double laplacian_r,laplacian_alpha,laplacian_beta,laplacian_p,step,I_dyn,I_ndyn,ID_alpha,ID_beta;
  double IND_alpha,IND_beta,Intracule,Extracule,DORI;
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
     Point[0]=Input_commands.init_coord_elf[0];
     Point[1]=Input_commands.init_coord_elf[1];
     Point[2]=Input_commands.init_coord_elf[2];
-    pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+    pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta,tcurr_alpha,tcurr_beta);
     Density=Density_alpha+Density_beta;
     step=Input_commands.step_elf;
     points=Input_commands.points_scan_elf;
@@ -827,21 +827,21 @@ int main(int argc, char *argv[])
     {
      if(pow(Density,FIVE/THREE)>pow(TEN,-TEN))
      {
-      ELF=TWO*(tau_alpha+tau_beta-tauW_alpha-tauW_beta)/(coef_elf*pow(Density,FIVE/THREE));
+      ELF=TWO*(tau_alpha+tau_beta-tauW_alpha-tauW_beta-tcurr_alpha-tcurr_beta)/(coef_elf*pow(Density,FIVE/THREE));
       ELF=ONE/(ONE+ELF*ELF);
      }
      else
      {ELF=ZERO;}
      if(pow(Density_alpha,FIVE/THREE)>pow(TEN,-TEN))
      {
-      ELFa=TWO*(tau_alpha-tauW_alpha)/(coef_elf*pow(Density_alpha,FIVE/THREE));
+      ELFa=TWO*(tau_alpha-tauW_alpha-tcurr_alpha)/(coef_elf*pow(Density_alpha,FIVE/THREE));
       ELFa=ONE/(ONE+ELFa*ELFa);
      }
      else
      {ELFa=ZERO;}
      if(pow(Density_beta,FIVE/THREE)>pow(TEN,-TEN))
      {
-      ELFb=TWO*(tau_beta-tauW_beta)/(coef_elf*pow(Density_beta,FIVE/THREE));
+      ELFb=TWO*(tau_beta-tauW_beta-tcurr_beta)/(coef_elf*pow(Density_beta,FIVE/THREE));
       ELFb=ONE/(ONE+ELFb*ELFb);
      }
      else
@@ -854,7 +854,7 @@ int main(int argc, char *argv[])
      {Point[1]=Point[1]+step;}
      else
      {Point[2]=Point[2]+step;}
-     pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+     pre_elf(Read_fchk_wfn,Point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta,tcurr_alpha,tcurr_beta);
      Density=Density_alpha+Density_beta;
     }
     Results<<"#[JCP,92,5397(1990)]"<<endl;
@@ -5490,105 +5490,156 @@ bool wfn_fchk)
 }
 //Compute intermediate quantities used by ELF
 void pre_elf(READ_FCHK_WFN &Read_fchk_wfn,double Point[3],double &Density_alpha,double &Density_beta,
-double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta)
+double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta,double &tcurr_alpha,double &tcurr_beta)
 {
  if(Read_fchk_wfn.wfn)
  {
   int nbasis,i,j,k;
-  double **NO_orb_grad,AUX[3]={ZERO},shift_min=pow(TEN,-TWO*TEN);
-  double Grad_alpha[3]={ZERO},Grad_beta[3]={ZERO};
-  double Grad_norm_alpha,Grad_norm_beta;
+  double Grad_norm_alpha,shift_min=pow(TEN,-TWO*TEN);
   nbasis=Read_fchk_wfn.nbasis();
-  NO_orb_grad=new double*[4];
-  for(i=0;i<4;i++)
-  {NO_orb_grad[i]=new double[nbasis];}
-  for(i=0;i<4;i++)
+  Density_alpha=ZERO;Density_beta=ZERO;tauW_alpha=ZERO;tauW_beta=ZERO,tau_alpha=ZERO;tau_beta=ZERO;tcurr_alpha=ZERO;tcurr_beta=ZERO;
+  if(Read_fchk_wfn.im_wfn)
   {
-   for(j=0;j<nbasis;j++)
-   {NO_orb_grad[i][j]=ZERO;}
-  }
-  Density_alpha=ZERO;Density_beta=ZERO;tauW_alpha=ZERO;tauW_beta=ZERO,tau_alpha=ZERO;tau_beta=ZERO;
-  if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
-  if(!Read_fchk_wfn.correlated)
-  {
+   complex<double>rhoa(ZERO,ZERO);
+   complex<double>ztmp0(ZERO,ZERO);
+   complex<double>ztmpI(ZERO,ONE);
+   complex<double> **NO_orb_grad,AUX[3],gradA[3],grad_currA[3];
+   NO_orb_grad=new complex<double>*[4];
+   for(i=0;i<4;i++)
+   {
+    gradA[i]=ztmp0;grad_currA[i]=ztmp0;
+   }
+   for(i=0;i<4;i++)
+   {
+    NO_orb_grad[i]=new complex<double>[nbasis];
+    for(j=0;j<nbasis;j++)
+    {NO_orb_grad[i][j]=ztmp0;}
+   }
+   Read_fchk_wfn.orb_gradCC(Point,NO_orb_grad);
    if(Read_fchk_wfn.open_shell)
    {
-    for(i=0;i<nbasis;i++)
-    {
-     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-     if(i%2==0)
-     {
-      for(k=0;k<3;k++)
-      {
-       Grad_alpha[k]=Grad_alpha[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
-      }
-      Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-     }
-     else
-     {
-      for(k=0;k<3;k++)
-      {
-       Grad_beta[k]=Grad_beta[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
-      }
-      Density_beta=Density_beta+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
-      tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
-     }
-    }
+    cout<<"Warning! pre_elf not prepared for open shell"<<endl;
    }
    else
    {
     for(i=0;i<nbasis;i++)
     {
+     rhoa=rhoa+(HALF*Read_fchk_wfn.Ocupation[i])*conj(NO_orb_grad[0][i])*NO_orb_grad[0][i];
      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-     for(k=0;k<3;k++)
+     tau_alpha=tau_alpha+(HALF*Read_fchk_wfn.Ocupation[i])*pow(norm3DCC(AUX),TWO);
+     for(j=0;j<3;j++)
      {
-      Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
-      Grad_beta[k]=Grad_alpha[k];
+      gradA[j]=gradA[j]+(HALF*Read_fchk_wfn.Ocupation[i])
+              *(conj(NO_orb_grad[0][i])*NO_orb_grad[j+1][i]+conj(NO_orb_grad[j+1][i])*NO_orb_grad[0][i]);
+      grad_currA[j]=grad_currA[j]-ztmpI*HALF*(HALF*Read_fchk_wfn.Ocupation[i])
+              *(conj(NO_orb_grad[0][i])*NO_orb_grad[j+1][i]-conj(NO_orb_grad[j+1][i])*NO_orb_grad[0][i]);
      }
-     Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
-     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
     }
-    tau_beta=tau_alpha;
-    Density_beta=Density_alpha;
+    Grad_norm_alpha=norm3DCC(gradA);
+    Density_alpha=real(rhoa);Density_beta=Density_alpha;
+    tau_alpha=HALF*tau_alpha;tau_beta=tau_alpha;
+    tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);tauW_beta=tauW_alpha;
+    tcurr_alpha=HALF*pow(norm3DCC(grad_currA),TWO)/(Density_alpha+shift_min);tcurr_beta=tcurr_alpha;
    }
+   //delete dynamic arrays
+   for(i=0;i<4;i++)
+   {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
+   delete[] NO_orb_grad;NO_orb_grad=NULL;
   }
   else
   {
-   if(Read_fchk_wfn.open_shell)
+   double Grad_alpha[3]={ZERO},Grad_beta[3]={ZERO};
+   double Grad_norm_beta;
+   double **NO_orb_grad,AUX[3]={ZERO};
+   NO_orb_grad=new double*[4];
+   for(i=0;i<4;i++)
    {
-    Density_alpha=ZERO;
-    Density_beta=ZERO;
-    tau_alpha=ZERO;
-    tau_beta=ZERO;
+    NO_orb_grad[i]=new double[nbasis];
+    for(j=0;j<nbasis;j++)
+    {NO_orb_grad[i][j]=ZERO;}
+   }
+   if(Read_fchk_wfn.overlap || Read_fchk_wfn.wfn){Read_fchk_wfn.orb_grad(Point,NO_orb_grad);}//Get NOs and NO gradients
+   if(!Read_fchk_wfn.correlated)
+   {
+    if(Read_fchk_wfn.open_shell)
+    {
+     for(i=0;i<nbasis;i++)
+     {
+      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+      if(i%2==0)
+      {
+       for(k=0;k<3;k++)
+       {
+        Grad_alpha[k]=Grad_alpha[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+       }
+       Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+       tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+      }
+      else
+      {
+       for(k=0;k<3;k++)
+       {
+        Grad_beta[k]=Grad_beta[k]+TWO*NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+       }
+       Density_beta=Density_beta+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i];
+       tau_beta=tau_beta+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO);
+      }
+     }
+    }
+    else
+    {
+     for(i=0;i<nbasis;i++)
+     {
+      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+      for(k=0;k<3;k++)
+      {
+       Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+       Grad_beta[k]=Grad_alpha[k];
+      }
+      Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+     }
+     tau_beta=tau_alpha;
+     Density_beta=Density_alpha;
+    }
    }
    else
    {
-    for(i=0;i<nbasis;i++)
+    if(Read_fchk_wfn.open_shell)
     {
-     for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
-     for(k=0;k<3;k++)
-     {
-      Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
-      Grad_beta[k]=Grad_alpha[k];
-     }
-     Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
-     tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+     Density_alpha=ZERO;
+     Density_beta=ZERO;
+     tau_alpha=ZERO;
+     tau_beta=ZERO;
     }
-    tau_beta=tau_alpha;
-    Density_beta=Density_alpha;
+    else
+    {
+     for(i=0;i<nbasis;i++)
+     {
+      for(j=1;j<4;j++){AUX[j-1]=NO_orb_grad[j][i];}
+      for(k=0;k<3;k++)
+      {
+       Grad_alpha[k]=Grad_alpha[k]+NO_orb_grad[0][i]*Read_fchk_wfn.Ocupation[i]*NO_orb_grad[k+1][i];
+       Grad_beta[k]=Grad_alpha[k];
+      }
+      Density_alpha=Density_alpha+Read_fchk_wfn.Ocupation[i]*NO_orb_grad[0][i]*NO_orb_grad[0][i]/TWO;
+      tau_alpha=tau_alpha+Read_fchk_wfn.Ocupation[i]*pow(norm3D(AUX),TWO)/TWO;
+     }
+     tau_beta=tau_alpha;
+     Density_beta=Density_alpha;
+    }
    }
+   Grad_norm_alpha=norm3D(Grad_alpha);
+   Grad_norm_beta=norm3D(Grad_beta);
+   tau_alpha=HALF*tau_alpha;
+   tau_beta=HALF*tau_beta;
+   tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);
+   tauW_beta=pow(Grad_norm_beta,TWO)/(EIGHT*Density_beta+shift_min);
+   //delete dynamic arrays
+   for(i=0;i<4;i++)
+   {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
+   delete[] NO_orb_grad;NO_orb_grad=NULL;
   }
-  Grad_norm_alpha=norm3D(Grad_alpha);
-  Grad_norm_beta=norm3D(Grad_beta);
-  tau_alpha=HALF*tau_alpha;
-  tau_beta=HALF*tau_beta;
-  tauW_alpha=pow(Grad_norm_alpha,TWO)/(EIGHT*Density_alpha+shift_min);
-  tauW_beta=pow(Grad_norm_beta,TWO)/(EIGHT*Density_beta+shift_min);
-  //delete dynamic arrays
-  for(i=0;i<4;i++)
-  {delete[] NO_orb_grad[i];NO_orb_grad[i]=NULL;}
-  delete[] NO_orb_grad;NO_orb_grad=NULL;
  }
  else
  {
@@ -5946,15 +5997,11 @@ double stepy,double stepz)
 {
  int i,j,k,termsx,termsy,termsz;
  double eval,point[3],grad[3];
- //double Grad_alpha[3],Grad_beta[3];
- double Density,Density_alpha,Density_beta;//,Grad_norm,Grad_norm_alpha,Grad_norm_beta,laplacian_r;
- //double laplacian_alpha,laplacian_beta;
- double tauW_alpha,tauW_beta,tau_alpha,tau_beta;
- //double k_F_alpha,k_F_beta;
- //double k_s_alpha,k_s_beta,s_r_alpha,s_r_beta,q_red_alpha,q_red_beta;
+ double Density,Density_alpha,Density_beta;
+ double tauW_alpha,tauW_beta,tau_alpha,tau_beta,tcurr_alpha,tcurr_beta;
  double IND_alpha,IND_beta,ID_alpha,ID_beta;
  double coef_elf=(THREE/FIVE)*pow(SIX*PI*PI,TWO/THREE);
- bool not_elf,not_indic;//,wfn_fchk;
+ bool not_elf,not_indic;
  ofstream cube;
  ifstream read_cube;
  string name_cube,aux;
@@ -6029,14 +6076,14 @@ double stepy,double stepz)
      }
      if(!not_elf)
      {
-      pre_elf(Read_fchk_wfn,point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta);
+      pre_elf(Read_fchk_wfn,point,Density_alpha,Density_beta,tauW_alpha,tauW_beta,tau_alpha,tau_beta,tcurr_alpha,tcurr_beta);
       Density=Density_alpha+Density_beta;
      }
      if(op_cube=="elf")
      {
       if(pow(Density,FIVE/THREE)>pow(TEN,-TEN))
       {
-       eval=TWO*(tau_alpha+tau_beta-tauW_alpha-tauW_beta)/(coef_elf*pow(Density,FIVE/THREE));
+       eval=TWO*(tau_alpha+tau_beta-tauW_alpha-tauW_beta-tcurr_alpha-tcurr_beta)/(coef_elf*pow(Density,FIVE/THREE));
        eval=ONE/(ONE+eval*eval);
       }
       else
@@ -6048,7 +6095,7 @@ double stepy,double stepz)
      {
       if(pow(Density_alpha,FIVE/THREE)>pow(TEN,-TEN))
       {
-       eval=TWO*(tau_alpha-tauW_alpha)/(coef_elf*pow(Density_alpha,FIVE/THREE));
+       eval=TWO*(tau_alpha-tauW_alpha-tcurr_alpha)/(coef_elf*pow(Density_alpha,FIVE/THREE));
        eval=ONE/(ONE+eval*eval);
       }
       else
@@ -6060,7 +6107,7 @@ double stepy,double stepz)
      {
       if(pow(Density_beta,FIVE/THREE)>pow(TEN,-TEN))
       {
-       eval=TWO*(tau_beta-tauW_beta)/(coef_elf*pow(Density_beta,FIVE/THREE));
+       eval=TWO*(tau_beta-tauW_beta-tcurr_beta)/(coef_elf*pow(Density_beta,FIVE/THREE));
        eval=ONE/(ONE+eval*eval);
       }
       else

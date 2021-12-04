@@ -112,7 +112,7 @@ class READ_FCHK_WFN
    void orb_gradCC(double [3],complex<double> **res);
    void build_NO_grad_wfn(double &,double [3],double [3],int &);
    void build_NO_grad_wfn_all(double *,double **,double [3]);
-   void build_NO_grad_wfn_allC(complex<double> *,complex<double> **,double [3]);
+   void build_NO_grad_wfn_allCC(complex<double> *,complex<double> **,double [3]);
    void build_NO_grad_fchk(double &,double [3],double [3],int &);
    void build_NO_grad_fchk2(double *,double **,double &,double [3],int &);
    void build_MO_grad_fchk(double &,double [3],double [3],int &);

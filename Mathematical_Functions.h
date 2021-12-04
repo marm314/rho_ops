@@ -31,6 +31,7 @@ int factorial(int n);//factorial
 int dfact(int n);//double factorial (2k-1)!!
 void permutation(int *indexes,int order,int &permutation_term);//Permutes the indexes (Orders indexes first)
 double norm3D(double vec[3]);//Norm for 3D vectors
+double norm3DCC(complex<double> vec[3]);//Norm for 3D vectors complex
 double dot(int &n,double *a,double *b);//Dot product
 void proyect(int &n,double *a,double *b,double *res);//Project vector a in b.
 void print_mat(int &n,double **A);

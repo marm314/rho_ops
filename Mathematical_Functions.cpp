@@ -8,6 +8,13 @@ double norm3D(double vec[3])
 {
 return sqrt(pow(vec[0],TWO)+pow(vec[1],TWO)+pow(vec[2],TWO));
 }
+//Euclidean norm for 3D complex
+double norm3DCC(complex<double> vec[3])
+{
+ complex<double>ztmp;
+ ztmp=conj(vec[0])*vec[0]+conj(vec[1])*vec[1]+conj(vec[2])*vec[2];
+return sqrt(real(ztmp));
+}
 //Double factorial (2k-1)!!
 int dfact(int n)
 {

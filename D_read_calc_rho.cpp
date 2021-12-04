@@ -2133,14 +2133,13 @@ void READ_FCHK_WFN::rho_eval(double point[3],double &result)
    { 
     NOs_grad[i[0]]=new complex<double>[MO_coef];
    }
-   build_NO_grad_wfn_allC(NOs,NOs_grad,point);
+   build_NO_grad_wfn_allCC(NOs,NOs_grad,point);
    density=ZERO;
    result=ZERO;
    for(i[0]=0;i[0]<MO_coef;i[0]++)
    {
     if(Ocupation[i[0]]!=ZERO)
     {
-     //density=density+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]];
      density=density+pow(abs(NOs[i[0]]),TWO)*Ocupation[i[0]];
     }
    }
@@ -2264,7 +2263,7 @@ void READ_FCHK_WFN::rho_eval_a_b(double point[3],double &rhoa,double &rhob)
      { 
       NOs_grad[i[0]]=new complex<double>[MO_coef];
      }
-     build_NO_grad_wfn_allC(NOs,NOs_grad,point);
+     build_NO_grad_wfn_allCC(NOs,NOs_grad,point);
      for(i[0]=0;i[0]<MO_coef;i[0]++)
      {
       if(Ocupation[i[0]]!=ZERO)
@@ -2370,7 +2369,7 @@ void READ_FCHK_WFN::rho_grad(double point[3],double Grad[3])
   AO_grad=NULL;
  }
  else
- { // MAU
+ { 
   if(im_wfn)
   {
    complex<double> *MOs,**MO_grad;
@@ -2380,7 +2379,7 @@ void READ_FCHK_WFN::rho_grad(double point[3],double Grad[3])
    {
     MO_grad[i[0]]=new complex<double>[MO_coef];
    }
-   build_NO_grad_wfn_allC(MOs,MO_grad,point);
+   build_NO_grad_wfn_allCC(MOs,MO_grad,point);
    for(i[0]=0;i[0]<3;i[0]++)
    {
     complex<double>res(ZERO,ZERO);
@@ -2525,7 +2524,7 @@ void READ_FCHK_WFN::rho_grad_a_b(double point[3],double Grada[3],double Gradb[3]
      {
       MO_grad[i]=new complex<double>[MO_coef];
      }
-     build_NO_grad_wfn_allC(MOs,MO_grad,point);
+     build_NO_grad_wfn_allCC(MOs,MO_grad,point);
      for(i=0;i<3;i++)
      {
       complex<double>resa(ZERO,ZERO);
@@ -2733,7 +2732,7 @@ void READ_FCHK_WFN::orb_gradCC(double point[3],complex<double> **res)
   MOs=new complex<double>[MO_coef];
   for(i=0;i<3;i++)
   {MO_grad[i]=new complex<double>[MO_coef];}
-  build_NO_grad_wfn_allC(MOs,MO_grad,point);
+  build_NO_grad_wfn_allCC(MOs,MO_grad,point);
   for(i=0;i<nbasisf;i++)
   {
    res[0][i]=MOs[i];
@@ -2851,7 +2850,7 @@ void READ_FCHK_WFN::build_NO_grad_wfn_all(double *NO,double **NO_grad,double Poi
  delete[] Quant;Quant=NULL;
 }
 
-void READ_FCHK_WFN::build_NO_grad_wfn_allC(complex<double> *NO,complex<double> **NO_grad,double Point[3])
+void READ_FCHK_WFN::build_NO_grad_wfn_allCC(complex<double> *NO,complex<double> **NO_grad,double Point[3])
 {
  int i,iprim,ishell,idir,iNO,nlm[3];
  double pos_nuclei[3],exponent,grad_prim,val_prim;
