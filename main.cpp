@@ -29,6 +29,7 @@
 #include"DMN_ops_p_class.h"
 #include"gnuplot.h"
 #include"N_fchks_wfns.h"
+#include"gitver.h"
 //////////////////////////////
 //This class already loads  //
 //#include <string>         //
@@ -95,9 +96,13 @@ int main(int argc, char *argv[])
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
  double **Inertia,**Quadrupole,**eigenV,**cps,**aux,**TPS,shannon,shannonp,fisher,fisherp,Tw,Ttf,Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
  char direct;
- string method,operation,region_string,line,name_saved;
+ string method,operation,region_string,line,name_saved,sha;
  ofstream Results;
  ifstream my_chk,date_file,CM_file;
+/////////////////////
+//Get git version  //
+/////////////////////
+ gitversion(sha);
 /////////////////////
 //Begin clock      //
 /////////////////////
@@ -5309,6 +5314,9 @@ int main(int argc, char *argv[])
   Results<<"#::::::-:.`'..`'.:-::::::                                                 #"<<endl;
   Results<<"#::::::::\\ `--' /::::::::              -Yoda                              #"<<endl;
   Results<<"#*************************************************************************#";
+  Results<<endl;
+  Results<<endl;
+  Results<<"Git sha: "<<sha<<endl;
   Results<<endl;
   Results<<setprecision(0)<<fixed;
   Results<<"# It took "<<DATE[0][0]<<" days "<<DATE[0][1]<<" hours "<<DATE[0][2]<<" min. ";
