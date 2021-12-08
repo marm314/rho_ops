@@ -6193,14 +6193,14 @@ double stepy,double stepz)
     }
     if((k%6==0))
     {
-     if(eval>ZERO)
+     if(eval>=ZERO)
      {fprintf(pFile," %11.5E ",eval);}
      else
      {fprintf(pFile,"%11.5E ",eval);}
     }
     else
     {
-     if(eval>ZERO)
+     if(eval>=ZERO)
      {fprintf(pFile," %11.5E ",eval);}
      else
      {fprintf(pFile,"%11.5E ",eval);}
