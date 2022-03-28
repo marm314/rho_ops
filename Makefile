@@ -14,10 +14,10 @@ LIB=libcuba.a
 
 all:
 	./gitversion.sh 
-	make rhoops
+	make RHO_OPS
 
-rhoops: $(OBJECTS) $(SCR)  $(LIB) cuba.h Makefile 
-	$(CPP) $(CPPFLAGS) $(OBJECTS) $(LIB) -o $(NAME)_EXE
+RHO_OPS: $(OBJECTS) $(SCR)  $(LIB) cuba.h Makefile 
+	$(CPP) $(CPPFLAGS) $(OBJECTS) $(LIB) -o RHO_OPS
 
 %.o: %.cpp   
 	$(CPP) $(CPPFLAGS) -c $*.cpp 
@@ -26,7 +26,7 @@ rhoops: $(OBJECTS) $(SCR)  $(LIB) cuba.h Makefile
 
 clean:
 	$(Cln) *.o
-	$(Cln) *$(NAME)_EXE
+	$(Cln) *RHO_OPS
 	$(Cln) *~
 	$(Cln) $(NAME).tar.gz 
 tar:

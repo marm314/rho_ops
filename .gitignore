@@ -18,7 +18,7 @@ NO_class.o
 NO_DMN_class.o
 sphere_lebedev_rule.o
 String_ops.o
-rho_ops_EXE
+RHO_OPS
 gitver.o
 gitver.cpp
 gitver.h
