@@ -1,9 +1,9 @@
 # Makefile for rho_ops
 #
-CPP = icc
-CPPFLAGS = -Wall -O3 -fopenmp -lstdc++
-#CPP = g++
-#CPPFLAGS = -Wall -O2 -fopenmp -llapack -lstdc++
+#CPP = icc
+#CPPFLAGS = -Wall -O3 -fopenmp -lstdc++
+CPP = g++
+CPPFLAGS = -Wall -O3 -fopenmp -llapack -lstdc++
 Cln = /bin/rm -rf
 NAME=rho_ops
 ###########################################
@@ -28,6 +28,7 @@ clean:
 	$(Cln) *.o
 	$(Cln) *RHO_OPS
 	$(Cln) *~
+	$(Cln) gitver.cpp gitver.o gitver.h
 	$(Cln) $(NAME).tar.gz 
 tar:
 	mkdir $(NAME)
