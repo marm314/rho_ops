@@ -24,7 +24,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
   cart_coor=false;nprimsh=false;satmap=false;exponents=false;mocoef=false;
   mo_beta_coef=false;open_shell=true;rhf=false;uhf=false;CI=false;CAS=false;
   correlated=false;virtuals=false;relaxed=false;error_opens_wfn=false;PS_bool=false;overlap=false;
-  BETA_MOS=false;no_beta_wfn=false;scf_dens_found=false;wfx=false;im_wfn=false;
+  BETA_MOS=false;no_beta_wfn=false;scf_dens_found=false;wfx=false;im_wfn_wfx=false;
   if(!wfn)
   {
    string aux;
@@ -1728,7 +1728,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
  }
  else
  {
-   if(RHO.im_wfn){cout<<"Warning! The Imag part of the NOs was not copied"<<endl;}
+   if(RHO.im_wfn_wfx){cout<<"Warning! The Imag part of the NOs was not copied"<<endl;}
    wfn=RHO.wfn;
    nbasisf=RHO.nbasisf;
    MO_coef=nbasisf;
@@ -2045,7 +2045,7 @@ READ_FCHK_WFN::~READ_FCHK_WFN()
  }
  else
  {
-  if(im_wfn)
+  if(im_wfn_wfx)
   {
    for(i=0;i<MO_coef;i++)
    {delete[] MOcoefA_im[i];}
@@ -2124,7 +2124,7 @@ void READ_FCHK_WFN::rho_eval(double point[3],double &result)
  }
  else
  {
-  if(im_wfn)
+  if(im_wfn_wfx)
   {
    complex<double> *NOs,**NOs_grad;
    NOs=new complex<double>[MO_coef];
@@ -2254,7 +2254,7 @@ void READ_FCHK_WFN::rho_eval_a_b(double point[3],double &rhoa,double &rhob)
    rhob=ZERO;
    if(!correlated)
    {
-    if(im_wfn)
+    if(im_wfn_wfx)
     {
      complex<double> *NOs,**NOs_grad;
      NOs=new complex<double>[MO_coef];
@@ -2370,7 +2370,7 @@ void READ_FCHK_WFN::rho_grad(double point[3],double Grad[3])
  }
  else
  { 
-  if(im_wfn)
+  if(im_wfn_wfx)
   {
    complex<double> *MOs,**MO_grad;
    MOs=new complex<double>[MO_coef];
@@ -2515,7 +2515,7 @@ void READ_FCHK_WFN::rho_grad_a_b(double point[3],double Grada[3],double Gradb[3]
   {
    if(!correlated)
    {
-    if(im_wfn)
+    if(im_wfn_wfx)
     {
      complex<double> *MOs,**MO_grad;
      MOs=new complex<double>[MO_coef];

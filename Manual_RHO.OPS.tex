@@ -535,12 +535,17 @@ To use it include
    procedure            -> (i.e. Cuhre, Vegas, etc.)
 \end{verbatim}
 Please, notice that only Cuba library is available for this calculation. 
-\section{\tbl{Complex NO orbitals in WFN}}}
+\section{\tbl{Complex NO orbitals in WFN or WFX}}}
 When natural orbitals are complex, two wfn files need to be read. One under the \$name keyword (the real part) and then include the 
 following keyword followed by the name of the wfn file that contains the imaginary part of the coefficients. See
 \begin{verbatim}
-  $im_wfn
+  $im_wfn 
   name_file_imaginary.wfn
+\end{verbatim}
+or
+\begin{verbatim}
+  $im_wfx 
+  name_file_imaginary.wfx
 \end{verbatim}
 \section*{\tbl{\textbf{Glossary}}}
 AO=Atomic Orbital\\

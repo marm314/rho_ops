@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
    }
   }
   // If there are Imag Coefs store them
-  if(Input_commands.im_wfn)
+  if(Input_commands.im_wfn_wfx)
   {
    name_saved=name_file;
    /////////////////////////////////////////////////
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
    }
    name_file=name_saved;
-   Read_fchk_wfn.im_wfn=Input_commands.im_wfn;
+   Read_fchk_wfn.im_wfn_wfx=Input_commands.im_wfn_wfx;
    Read_fchk_wfn.Init_MOim(Read_fchk_wfn_2.MOcoefA);
   }
   //If everything is ok and is an fchk file, we set BETA_MOS variable in the Read_fchk_wfn object.
@@ -5506,7 +5506,7 @@ double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta,double &
   double Grad_norm_alpha,shift_min=pow(TEN,-TWO*TEN);
   nbasis=Read_fchk_wfn.nbasis();
   Density_alpha=ZERO;Density_beta=ZERO;tauW_alpha=ZERO;tauW_beta=ZERO,tau_alpha=ZERO;tau_beta=ZERO;tcurr_alpha=ZERO;tcurr_beta=ZERO;
-  if(Read_fchk_wfn.im_wfn)
+  if(Read_fchk_wfn.im_wfn_wfx)
   {
    complex<double>rhoa(ZERO,ZERO);
    complex<double>ztmp0(ZERO,ZERO);

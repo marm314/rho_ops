@@ -93,7 +93,7 @@ class READ_FCHK_WFN
    double *Nu_charge,*Ocupation,**Cartesian_Coor,**Total_rho,**MOcoefA,**MOcoefB,**MOcoefA_im;
    double *Prim_exp, *Contr_Coef, *SP_Contr_Coef,Rot_ICM[3][3];
    double **Spin_rho,**P,**Pbeta,**S,**Sbeta,**Sao;
-   bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx,im_wfn;
+   bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx,im_wfn_wfx;
    string identity;
    ////////////
    //for both//
