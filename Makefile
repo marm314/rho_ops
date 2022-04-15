@@ -3,7 +3,7 @@
 #CPP = icc
 #CPPFLAGS = -Wall -O3 -fopenmp -lstdc++
 CPP = g++
-CPPFLAGS = -Wall -O3 -fopenmp -llapack -lstdc++
+CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -llapack -lstdc++
 Cln = /bin/rm -rf
 NAME=rho_ops
 ###########################################
