@@ -1,7 +1,7 @@
 # Makefile for rho_ops
 #
 #CPP = icc
-#CPPFLAGS = -Wall -O3 -fopenmp -lstdc++
+#CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -lstdc++
 CPP = g++
 CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -llapack -lstdc++
 Cln = /bin/rm -rf
