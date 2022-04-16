@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////
-// Build the density from any fchk or wfn file (also including   //
-// DMN files information and preform several operations with it  //
+// Build the density from any fchk, wfn or wfx  files            //
+// preform several operations with it                            //
 // (e.g., Complexity analysis[Shannon entropy, Fisher Integral,  //
 // etc.])                                                        //
 // This program belongs to Mauricio Rodriguez Mayorga            //
@@ -207,9 +207,7 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;
-  Results<<"# Program developed for building the density from any fchk,  wfn file or       #";
-  Results<<endl;
-  Results<<"# DMN file plus fchk file (DMN files from DMN program of Dr. Eduard Matito)    #";
+  Results<<"# Program developed for building the density from fchk, wfn, or wfx files      #";
   Results<<endl;
   Results<<"# then perform several operations with it (e.g., Complexity analysis[Shannon   #";
   Results<<endl;
@@ -223,31 +221,11 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"# Copyright (C) 2014 M.Sc. Mauricio Rodriguez-Mayorga                          #";
   Results<<endl;
-  Results<<"# Ph.D. student at University of the Girona                                    #";
+  Results<<"# Ph.D. student at University of the Girona (2018)                             #";
+  Results<<endl;
+  Results<<"# Postdoctoral reseracher at Vrije Universiteit Amsterdam (2021)               #";
   Results<<endl;
   Results<<"# for support and comments send an email to: marm3.14@gmail.com                #";
-  Results<<endl;
-  Results<<"#******************************************************************************#";
-  Results<<endl;
-  Results<<"#  This program is free software: you can redistribute it and/or modify        #";
-  Results<<endl;
-  Results<<"#  it under the terms of the GNU General Public License as published by        #";
-  Results<<endl;
-  Results<<"#  the Free Software Foundation, either version 3 of the License, or           #";
-  Results<<endl;
-  Results<<"#  (at your option) any later version.                                         #";
-  Results<<endl;
-  Results<<"#  This program is distributed in the hope that it will be useful,             #";
-  Results<<endl;
-  Results<<"#  but WITHOUT ANY WARRANTY; without even the implied warranty of              #";
-  Results<<endl;
-  Results<<"#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #";
-  Results<<endl;
-  Results<<"#  GNU General Public License for more details.                                #";
-  Results<<endl;
-  Results<<"#  You should have received a copy of the GNU General Public License           #";
-  Results<<endl;
-  Results<<"#  along with this program.  If not, see <http://www.gnu.org/licenses/>.       #";
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;
