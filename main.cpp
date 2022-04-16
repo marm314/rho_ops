@@ -728,6 +728,7 @@ int main(int argc, char *argv[])
    Read_fchk_wfn.rho_eval(Point,Density);
    Read_fchk_wfn.rho_grad(Point,Grad);
    Read_fchk_wfn.rho_lapl(Point,laplacian_r);
+   Grad_norm=norm3D(Grad);
    step=Input_commands.step_r;
    points=Input_commands.points_scan_r;
    direct=Input_commands.dir_r;
@@ -744,6 +745,7 @@ int main(int argc, char *argv[])
     Read_fchk_wfn.rho_eval(Point,Density);
     Read_fchk_wfn.rho_grad(Point,Grad);
     Read_fchk_wfn.rho_lapl(Point,laplacian_r);
+    Grad_norm=norm3D(Grad);
    }
    Results<<"#*************************************************************************#";
    Results<<endl;
