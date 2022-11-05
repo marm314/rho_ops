@@ -3581,9 +3581,6 @@ int main(int argc, char *argv[])
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
    }
-   Results<<"Note that if the LOG file was included or the MULTIPLICITY."<<endl;
-   Results<<"The second FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
-   Results<<endl;
    /////////////////////////////////////////////////
    //Store 5th FCHK or WFN or WFX
    /////////////////////////////////////////////////
@@ -3603,8 +3600,8 @@ int main(int argc, char *argv[])
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
    }
-   Results<<"Note that if the LOG file was included or the MULTIPLICITY."<<endl;
-   Results<<"The 2nd, 3rd, 4th and 5th FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
+   Results<<"Note that if the LOG file was included or the MULTIPLICITY,"<<endl;
+   Results<<"the 2nd, 3rd, 4th, and 5th FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
    Results<<endl;
    name_file=name_file_saved;
    /////////////////////////////////////////////////
