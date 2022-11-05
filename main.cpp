@@ -3492,6 +3492,7 @@ int main(int argc, char *argv[])
   //////////////////////////////////////////////////////
   if(Input_commands.int_pol_hyperpol)
   {
+   cout<<"Computing integrated polarizabilities"<<endl;
    Results<<"#*************************************************************************#";
    Results<<endl;
    Results<<"#      Use field densities to compute polarizabilities and                #";
@@ -3631,13 +3632,14 @@ int main(int argc, char *argv[])
    Results<<"The result of the integration N_3 = "<<setw(17)<<res_integration[2]<<endl;
    Results<<"The result of the integration N_4 = "<<setw(17)<<res_integration[3]<<endl;
    Results<<"The result of the integration N_5 = "<<setw(17)<<res_integration[4]<<endl;
-   Results<<"The result of alpha_ii            = "<<setw(17)<<res_integration[5]/(TWO*field)<<endl;
-   Results<<"The result of gamma_iiii          = "<<setw(17)<<res_integration[6]/(TWO*SIX*pow(field,THREE))<<endl;
+   Results<<"The result of alpha_ii            = "<<setw(17)<<-res_integration[5]/(TWO*field)<<endl;
+   Results<<"The result of gamma_iiii          = "<<setw(17)<<-res_integration[6]/(TWO*pow(field,THREE))<<endl;
    Results<<"[i = coordinate used x, y or z]"<<endl;
    Results<<"The result of the integration QD1 = "<<setw(17)<<sqrt(res_integration[7])/(TWO*field*Nelec)<<endl; 
    Results<<"The result of the integration QD2 = "<<setw(17)<<sqrt(res_integration[8])/(TWO*pow(field,THREE)*Nelec)<<endl;
    Results<<"QD1[rho(r,F)] = 1/2FN (int [rho(r,F)-rho(r,-F)]^2 dr)^1/2"<<endl;    
    Results<<"QD2[rho(r,F)] = 1/2F^3 N (int [rho(r,2F)-rho(r,-2F)-2(rho(r,F)-rho(r,-F))]^2 dr)^1/2"<<endl;    
+   Results<<"Note: The 1/2! and 1/3! terms are not included in alpha_ii and gamma_iiii."<<endl;    
    Results<<endl;
    Results<<endl;
    Results<<" obtained with "<<Input_commands.method_cuba<<" fail report: "<<fail<<endl;
