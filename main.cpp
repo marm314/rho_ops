@@ -5052,6 +5052,7 @@ int main(int argc, char *argv[])
        read_hf_fchk>>tot_density[i];
        tot_density[i]=ZERO;
       }
+      cout<<"See file "<<name_file.substr(0,(name_file.length()-5))+"_dm1.fchk"<<endl;
       DMN_OPS dmn(Input_commands.name_dm1,1);
       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);

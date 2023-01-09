@@ -9,7 +9,7 @@ Input::Input(string rho_in)
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrotdens=false;symgrad=false;intra_1rdm=false;im_wfn_wfx=false;
- multiplicity=0;ncores=1;extra_lines=0;
+ multiplicity=0;ncores=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
  ifstream rho_input_file;
  rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());

@@ -137,6 +137,7 @@ void DMN_OPS::dmnincore(bool store_or_not,double mem)
     {
      total_terms=2*FCHK_for_DMN[0].nbasisf*2*FCHK_for_DMN[0].nbasisf;
      storable_terms=(int)(mem*BILLION/(EIGHT));
+     cout<<"Number of DM1 terms "<<total_terms<<endl;
     }
     if(dm2)
     {
@@ -155,15 +156,14 @@ void DMN_OPS::dmnincore(bool store_or_not,double mem)
       for(i=0;i<2*FCHK_for_DMN[0].nbasisf;i++)
       {
        DM1[i]=new double[2*FCHK_for_DMN[0].nbasisf];
-      }
-      for(i=0;i<2*FCHK_for_DMN[0].nbasisf;i++)
-      {
        for(j=0;j<2*FCHK_for_DMN[0].nbasisf;j++)
        {
         DM1[i][j]=ZERO;
        }
       }
+      cout<<"DM1 array stored"<<endl;
       Read_use_DMN();
+      cout<<"DM1 stored"<<endl;
      }
      if(dm2)
      {
@@ -907,6 +907,7 @@ void DMN_OPS::Read_use_DMN()
  ifstream input_data(name_file.c_str(), ios::binary);
  if(dm1 && dmn_file)
  {
+  cout<<"Storing/Using the DM1 matrix with threshold "<<threshold<<endl;
   element[0]=10;element_prime[0]=10;
   // open file in binary mode
   if(input_data.good())
@@ -920,6 +921,7 @@ void DMN_OPS::Read_use_DMN()
     input_data.seekg(RECORD_DELIMITER_LENGTH, ios::cur);
     if(abs(Dij)>=threshold)
     {
+     //cout<<element[0]<<" "<<element_prime[0]<<" "<<Dij<<endl;
      if(trace)
      {
       if(element[0]==element_prime[0])
