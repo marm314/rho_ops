@@ -3088,6 +3088,7 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<endl;
    Results<<setprecision(10)<<fixed<<scientific;
+   bool wfn_fchk_in=false;
    int fail=1000,k;
    double res_integration[19]={ZERO},error_abs,error_rel,MIN_EVALS,MAX_EVALS;
    string name_file_saved;
@@ -3105,14 +3106,13 @@ int main(int argc, char *argv[])
    /////////////////////////////////////////////////
    Results<<"Storing second FCHK/WFN/WFX file..."<<endl;
    Results<<endl;
-   wfn_fchk=false;
    name_file_saved=name_file;
    name_file=Input_commands.second_fchk_wfn;
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
-    wfn_fchk=true;//True for wfn
+    wfn_fchk_in=true;//True for wfn
    }
-   READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
+   READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk_in,Input_commands.log,Input_commands.cas,
    Input_commands.multiplicity);//Construct with parametric construction.
    //Print inertia tensor of nuclei CM and coord. reorientation
    Results<<"Reorientation for file "<<name_file<<endl;
