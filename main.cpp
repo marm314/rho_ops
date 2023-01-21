@@ -3211,8 +3211,11 @@ int main(int argc, char *argv[])
     Integrals_interval[4]=phi_rad(aux2);
     Results<<"Computing Inertia Tensor for "<<name_file_saved<<" density"<<endl;
     Results<<endl;
-    integrate_cuba(Read_fchk_wfn,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-    fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+    if(!Input_commands.symrot_no)
+    {
+     integrate_cuba(Read_fchk_wfn,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
+     fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+    }
     Results<<"The result of the integration N_1 = "<<setw(17)<<res_integration[0]<<endl;
     if(abs(res_integration[0]-(int)res_integration[0])>=HALF)
     {Density=ceil(res_integration[0]);}
@@ -3313,8 +3316,11 @@ int main(int argc, char *argv[])
     for(i=0;i<19;i++){res_integration[i]=ZERO;}
     Results<<"Computing Inertia Tensor for "<<name_file<<" density"<<endl;
     Results<<endl;
-    integrate_cuba(Read_fchk_wfn_2,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-    fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+    if(!Input_commands.symrot_no)
+    {
+     integrate_cuba(Read_fchk_wfn_2,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
+     fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+    }
     Results<<"The result of the integration N_2 = "<<setw(17)<<res_integration[0]<<endl;
     if(abs(res_integration[0]-(int)res_integration[0])>=HALF)
     {Density=ceil(res_integration[0]);}
@@ -3425,6 +3431,17 @@ int main(int argc, char *argv[])
    }
    name_file=name_file_saved;
    Results<<"The final rotation matrix for "<<Input_commands.second_fchk_wfn<<" file is"<<endl;
+   if(Input_commands.symrot_no)
+   {
+    for(i=0;i<3;i++)
+    {
+     for(j=0;j<3;j++)
+     {
+      Rot_grid_matrix[i][j]=ZERO;
+      if(i==j) Rot_grid_matrix[i][j]=ONE;
+     }
+    }
+   }
    Results<<endl;
    for(i=0;i<3;i++)
    {
