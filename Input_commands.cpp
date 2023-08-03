@@ -7,7 +7,7 @@ Input::Input(string rho_in)
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;gnuplot=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
- print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;
+ print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm=false;im_wfn_wfx=false;
  multiplicity=0;ncores=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
@@ -121,6 +121,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}
@@ -174,6 +175,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}
@@ -198,6 +200,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}
@@ -215,6 +218,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}
@@ -225,9 +229,10 @@ Input::Input(string rho_in)
      rho_input_file>>second_moments_tps[i];
     }
    }
-   else if(rho_in=="$dens_sim")
+   else if(rho_in=="$dens_sim" || rho_in=="$v_hartree")
    {
-    dens_sim=true;
+    if(rho_in=="$dens_sim"){dens_sim=true;}
+    else{v_hartree=true;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -243,6 +248,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}
@@ -252,15 +258,21 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
-    if(rho_in=="density"){symrotdens=true;}
+    if(rho_in=="density" && dens_sim){symrotdens=true;}
+    if(v_hartree)
+    {
+     rho_input_file>>init_coord_r[0];
+     rho_input_file>>init_coord_r[1];
+     rho_input_file>>init_coord_r[2];
+    }
     do
     {
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
-    }while(rho_in=="");
-    if(rho_in=="gradient"){symgrad=true;}
-    if(rho_in=="nosym"){symrot_no=true;} // Use nosym after density to skip rot matrix
-    if(rho_in=="nosym_grad"){symrot_no=true;symgrad=true;} // Use nosym_grad after density to skip rot matrix but compute sym for the gradient
+    }while(rho_in=="" && dens_sim);
+    if(rho_in=="gradient" && dens_sim){symgrad=true;}
+    if(rho_in=="nosym" && dens_sim){symrot_no=true;} // Use nosym after density to skip rot matrix
+    if(rho_in=="nosym_grad" && dens_sim){symrot_no=true;symgrad=true;} // Use nosym_grad after density to skip rot matrix but compute sym for the gradient
    }
    else if(rho_in=="$int_pol_hyperpol")
    {
@@ -298,6 +310,7 @@ Input::Input(string rho_in)
      getline(rho_input_file,rho_in);
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
+    lowercase(rho_in);
     if(rho_in=="vegas"){method_cuba="Vegas";}
     else if(rho_in=="suave"){method_cuba="Suave";}
     else if(rho_in=="divonne"){method_cuba="Divonne";}

@@ -37,7 +37,10 @@ const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
 double **SIJ, int &fail,double Integrals_interval[6],int &ncores,string MOorNO);
 void  integrate_dens_sim(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
-double res_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3]);
+double res_integration[3], int &fail,int &ncores,double ROT_MATRIX[3][3]);
+void  integrate_V_Hartree(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
+const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
+double res_integration[7], int &fail,int &ncores,double displacement[3]);
 void  integrate_dens_sim2(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
 double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3]);
@@ -66,6 +69,8 @@ void *userdata);
 int Integrand_divergences2(const int *ndim, const double xx[],const int *ncomp, double ff[],
 void *userdata);
 int Integrand_pol_hyper(const int *ndim, const double xx[],const int *ncomp, double ff[],
+void *userdata);
+int Integrand_v_hartree(const int *ndim, const double xx[],const int *ncomp, double ff[],
 void *userdata);
 //Cubature
 void I_cubature(READ_FCHK_WFN &Rho,string Operation,double presc,double &result_integration,

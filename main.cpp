@@ -30,6 +30,8 @@
 #include"gnuplot.h"
 #include"N_fchks_wfns.h"
 #include"gitver.h"
+#define Angs2au 1.8897259886
+#define au2eV 27.211399
 //////////////////////////////
 //This class already loads  //
 //#include <string>         //
@@ -94,7 +96,8 @@ int main(int argc, char *argv[])
  double laplacian_r,laplacian_alpha,laplacian_beta,laplacian_p,step,I_dyn,I_ndyn,ID_alpha,ID_beta;
  double IND_alpha,IND_beta,Intracule,Extracule,DORI;
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
- double **Inertia,**Quadrupole,**eigenV,**cps,**aux,**TPS,shannon,shannonp,fisher,fisherp,Tw,Ttf,Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
+ double **Inertia,**Quadrupole,**eigenV,**cps,**aux,**TPS,shannon=ZERO,shannonp=ZERO,fisher=ZERO,fisherp=ZERO,Tw,Ttf;
+ double Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
  char direct;
  string method,operation,region_string,line,name_saved,sha;
  ofstream Results;
@@ -3069,22 +3072,35 @@ int main(int argc, char *argv[])
   // Divergences as dissimilarities between densities //
   // Quadratic distance, Quantum similarity and       //
   // Kullback-Leibler distance                        //
+  // &                                                //
+  // V_Hartree                                        //
   //////////////////////////////////////////////////////
-  if(Input_commands.dens_sim)
+  if(Input_commands.dens_sim || Input_commands.v_hartree)
   {
-   Results<<"#*************************************************************************#";
-   Results<<endl;
-   Results<<"#      Use two densities to quantify the dissimilarities:                 #";
-   Results<<endl;
-   Results<<"#      Quadratic distance (QD), Quantum similarity index (QSI) and        #";
-   Results<<endl;
-   Results<<"#      Kullback-Leibler distance (KL).                                    #";
-   Results<<endl;
-   Results<<"#      See Chapter 9 in Information-theoretic measures of atomic and      #";
-   Results<<endl;
-   Results<<"#      molecular systems. PhD Thesis of Sheila Lopez Rosa. UGR 2010       #";
-   Results<<endl;
-   Results<<"#*************************************************************************#";
+   if(Input_commands.dens_sim)
+   {
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+    Results<<"#      Use two densities to quantify the dissimilarities:                 #";
+    Results<<endl;
+    Results<<"#      Quadratic distance (QD), Quantum similarity index (QSI) and        #";
+    Results<<endl;
+    Results<<"#      Kullback-Leibler distance (KL).                                    #";
+    Results<<endl;
+    Results<<"#      See Chapter 9 in Information-theoretic measures of atomic and      #";
+    Results<<endl;
+    Results<<"#      molecular systems. PhD Thesis of Sheila Lopez Rosa. UGR 2010       #";
+    Results<<endl;
+    Results<<"#*************************************************************************#";
+   }
+   else
+   {
+    Results<<"#*************************************************************************#";
+    Results<<endl;
+    Results<<"#      Use two densities to compute V_Hartree                             #";
+    Results<<endl;
+    Results<<"#*************************************************************************#";
+   }
    Results<<endl;
    Results<<endl;
    Results<<setprecision(10)<<fixed<<scientific;
@@ -3115,8 +3131,11 @@ int main(int argc, char *argv[])
    READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk_in,Input_commands.log,Input_commands.cas,
    Input_commands.multiplicity);//Construct with parametric construction.
    //Print inertia tensor of nuclei CM and coord. reorientation
-   Results<<"Reorientation for file "<<name_file<<endl;
-   Results<<endl;
+   if(Input_commands.dens_sim)
+   {
+    Results<<"Reorientation for file "<<name_file<<endl;
+    Results<<endl;
+   }
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     CM_file.open((name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -3430,45 +3449,65 @@ int main(int argc, char *argv[])
     }
    }
    name_file=name_file_saved;
-   Results<<"The final rotation matrix for "<<Input_commands.second_fchk_wfn<<" file is"<<endl;
-   if(Input_commands.symrot_no)
+   if(Input_commands.dens_sim)
    {
+    Results<<"The final rotation matrix for "<<Input_commands.second_fchk_wfn<<" file is"<<endl;
+    if(Input_commands.symrot_no)
+    {
+     for(i=0;i<3;i++)
+     {
+      for(j=0;j<3;j++)
+      {
+       Rot_grid_matrix[i][j]=ZERO;
+       if(i==j) Rot_grid_matrix[i][j]=ONE;
+      }
+     }
+    }
+    Results<<endl;
     for(i=0;i<3;i++)
     {
      for(j=0;j<3;j++)
      {
-      Rot_grid_matrix[i][j]=ZERO;
-      if(i==j) Rot_grid_matrix[i][j]=ONE;
+      if(abs(Rot_grid_matrix[i][j])<pow(TEN,-TEN)){Rot_grid_matrix[i][j]=ZERO;}
+      Results<<setw(17)<<Rot_grid_matrix[i][j];
      }
-    }
-   }
-   Results<<endl;
-   for(i=0;i<3;i++)
-   {
-    for(j=0;j<3;j++)
-    {
-     if(abs(Rot_grid_matrix[i][j])<pow(TEN,-TEN)){Rot_grid_matrix[i][j]=ZERO;}
-     Results<<setw(17)<<Rot_grid_matrix[i][j];
+     Results<<endl;
     }
     Results<<endl;
+    integrate_dens_sim(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,Rot_grid_matrix);
    }
-   Results<<endl;
-   integrate_dens_sim(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,Rot_grid_matrix);
+   else
+   {
+    for(i=0;i<3;i++){Input_commands.init_coord_r[i]=Input_commands.init_coord_r[i]*Angs2au;}
+    integrate_V_Hartree(two_fchks_wfns,method,6,2,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,
+    Input_commands.init_coord_r);
+   }
    Density_alpha=res_integration[0];
    Density_beta=res_integration[1];
-   Results<<"The result of the integration N_1 = "<<setw(17)<<res_integration[0]<<endl;
-   Results<<"The result of the integration N_2 = "<<setw(17)<<res_integration[1]<<endl;
-   Results<<"The result of < rho_1 >           = "<<setw(17)<<res_integration[2]<<endl;
-   Results<<"The result of < rho_2 >           = "<<setw(17)<<res_integration[3]<<endl;
-   Results<<"The result of int rho_1 rho_2 dr  = "<<setw(17)<<res_integration[4]<<endl;
-   Results<<"The result of the integration QD  = "<<setw(17)<<pow(res_integration[5],HALF)<<endl;
-   Results<<"QD[rho_1,rho_2] = (int [rho_1-rho_2]^2 dr)^1/2"<<endl;
-   Results<<"The result of the integration QSI = "<<setw(17)<<res_integration[4]/sqrt(pow(TEN,-TEN)+abs(res_integration[2]*res_integration[3]))<<endl;
-   Results<<"QSI[rho_1,rho_2] = int rho_1 rho_2 dr/sqrt[< rho_1 > < rho_2 >]"<<endl;
-   Results<<"The result of the integration KL  = "<<setw(17)<<(res_integration[6]/(double)Read_fchk_wfn.nelectrons)
-                                                  +log((round(res_integration[1])+pow(TEN,-TEN))/(round(res_integration[0])+pow(TEN,-TEN)))<<endl;
-   Results<<"KL[rho_1,rho_2] = int rho_1 ln [rho_1/rho_2]"<<endl;
-   Results<<endl;
+   if(Input_commands.dens_sim)
+   {
+    Results<<"The result of the integration N_1 = "<<setw(17)<<res_integration[0]<<endl;
+    Results<<"The result of the integration N_2 = "<<setw(17)<<res_integration[1]<<endl;
+    Results<<"The result of < rho_1 >           = "<<setw(17)<<res_integration[2]<<endl;
+    Results<<"The result of < rho_2 >           = "<<setw(17)<<res_integration[3]<<endl;
+    Results<<"The result of int rho_1 rho_2 dr  = "<<setw(17)<<res_integration[4]<<endl;
+    Results<<"The result of the integration QD  = "<<setw(17)<<pow(res_integration[5],HALF)<<endl;
+    Results<<"QD[rho_1,rho_2] = (int [rho_1-rho_2]^2 dr)^1/2"<<endl;
+    Results<<"The result of the integration QSI = "<<setw(17)<<res_integration[4]/sqrt(pow(TEN,-TEN)+abs(res_integration[2]*res_integration[3]))<<endl;
+    Results<<"QSI[rho_1,rho_2] = int rho_1 rho_2 dr/sqrt[< rho_1 > < rho_2 >]"<<endl;
+    Results<<"The result of the integration KL  = "<<setw(17)<<(res_integration[6]/(double)Read_fchk_wfn.nelectrons)
+                                                   +log((round(res_integration[1])+pow(TEN,-TEN))/(round(res_integration[0])+pow(TEN,-TEN)))<<endl;
+    Results<<"KL[rho_1,rho_2] = int rho_1 ln [rho_1/rho_2]"<<endl;
+    Results<<endl;
+   }
+   else
+   {
+    Results<<"The result of N_1 x N_2           = "<<setw(17)<<res_integration[0]<<endl;
+    Results<<"The result of V_Hartree (au)      = "<<setw(17)<<HALF*res_integration[1]<<endl;
+    Results<<"The result of V_Hartree (eV)      = "<<setw(17)<<HALF*res_integration[1]*au2eV<<endl;
+    Results<<"V_Hartree = 1/2 int rho(r) rho(r') / | r - r' | dr dr' "<<endl;
+    Results<<endl;
+   }
    Results<<endl;
    Results<<" obtained with "<<Input_commands.method_cuba<<" fail report: "<<fail<<endl;
    Results<<endl;
@@ -5510,7 +5549,7 @@ double &tauW_alpha,double &tauW_beta,double &tau_alpha,double &tau_beta,double &
    complex<double>ztmpI(ZERO,ONE);
    complex<double> **NO_orb_grad,AUX[3],gradA[3],grad_currA[3];
    NO_orb_grad=new complex<double>*[4];
-   for(i=0;i<4;i++)
+   for(i=0;i<3;i++)
    {
     gradA[i]=ztmp0;grad_currA[i]=ztmp0;
    }
@@ -6002,7 +6041,7 @@ double stepy,double stepz)
 {
  int i,j,k,termsx,termsy,termsz;
  double eval,point[3],grad[3];
- double Density,Density_alpha,Density_beta;
+ double Density=ZERO,Density_alpha,Density_beta;
  double tauW_alpha,tauW_beta,tau_alpha,tau_beta,tcurr_alpha,tcurr_beta;
  double IND_alpha,IND_beta,ID_alpha,ID_beta;
  double coef_elf=(THREE/FIVE)*pow(SIX*PI*PI,TWO/THREE);

@@ -439,6 +439,59 @@ double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
  }
 }
 
+void  integrate_V_Hartree(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
+const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
+double result_integration[2], int &fail,int &ncores,double displacement[3])
+{
+  int i,verbose=0,nregions,neval;
+  double integral[NCOMP], error[NCOMP], prob[NCOMP];
+  void * USERDATA=NULL;
+  //Point void pointer to N_FCHKS_WFNS struct direction.
+  USERDATA=&two_fchks_wfns;
+  define();
+  cubacores(ncores,PCORE);
+  for(i=0;i<3;i++)
+  {
+   Point_Vr[i]=displacement[i];
+  }
+ //Regard that for cout and to access void * have to cast the
+ //pointer to the corresponding type(int, double, string, object...). See e.g.,
+ // int i=5;
+ // void *a=NULL;
+ // a=&i;  //a points to the direction of i
+ // cout<<*((int*)a)<<endl; // The first * access to the data and the (int)*
+ //casts to int pointer the void pointer.
+ //See bellow the assignation of a pointer to object DENSITY in integration function.
+ if(method=="Cuhre")
+ {
+  Cuhre(NDIM, NCOMP, Integrand_v_hartree, USERDATA, NVEC1,EPSREL, EPSABS, verbose | LAST,MINEVAL,
+  MAXEVAL, KEY,STATEFILE,SPIN,&nregions, &neval, &fail, integral, error, prob);
+ }
+ else if(method=="Divone")
+ {
+  Divonne(NDIM, NCOMP, Integrand_v_hartree, USERDATA, NVEC1,EPSREL, EPSABS, verbose, SEED,
+  MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,BORDER, MAXCHISQ, MINDEVIATION,
+  NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,STATEFILE,SPIN,&nregions, &neval, &fail,
+  integral, error, prob);
+ }
+ else if(method=="Suave")
+ {
+  Suave(NDIM, NCOMP, Integrand_v_hartree, USERDATA, NVEC1,EPSREL, EPSABS, verbose | LAST, SEED,
+  MINEVAL, MAXEVAL, NNEW, FLATNESS,STATEFILE,SPIN,&nregions, &neval, &fail, integral,
+  error, prob);
+ }
+ else
+ {
+  Vegas(NDIM, NCOMP, Integrand_v_hartree, USERDATA, NVEC1,EPSREL, EPSABS, verbose, SEED,MINEVAL,
+  MAXEVAL, NSTART, NINCREASE, NBATCH,GRIDNO, STATEFILE,SPIN,&neval, &fail, integral,
+  error, prob);
+ }
+ for(i=0;i<2;i++)
+ {
+  result_integration[i]=integral[i];
+ }
+}
+
 void  integrate_dens_sim2(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
 double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
@@ -1340,6 +1393,63 @@ void *userdata)
   f8 = factor_jacobian*gamma*gamma;
  return 0;
 }
+
+int Integrand_v_hartree(const int *ndim, const double xx[],const int *ncomp, double ff[],
+void *userdata)
+{
+/* We get 0<=xx[0],xx[1],xx[2]<=1 values and have to tranform them to the correct interval
+   defined in spherical coordinates.
+   To do so, we first define xx[0]= phi', x[1]=theta' and xx[1]=r'.
+   phi in spherical coordinates goes from 0 to 2*PI then it is straitghtforward to use:
+                              phi=2*PI*phi',
+   whose differential component is d phi=2*PI d phi'clearly this allows to integrate
+   from 0 to 1 as from 0 to 2*PI  int _0 to 2 PI  d phi = 2 PI int _0 to 1 phi' d phi'
+   then for theta the integral goes from 0 to PI and int _0 to PI sin(theta) d theta=
+   2 (remember the sphere) so we need 2= int _0 to 1  d theta'. This theta' is clearly
+                           theta' = [1-cos(theta)]/2,
+  so that
+                       2 d theta'=  sin(theta) d theta
+  and finally, r which goes from 0 to infinity int _0 to 1. To do so, we change
+                            r= r' /(1-r')
+  so that the differential takes the form:
+                           dr = dr' /(1-r')^2.                                           */
+ #ifndef f0
+ #define f0 ff[0]
+ #define f1 ff[1]
+ #define rs xx[0]/(1-xx[0])
+ #define thetas acos(1-2*xx[1])
+ #define phis xx[2]*2*PI
+ #define rt xx[3]/(1-xx[3])
+ #define thetat acos(1-2*xx[4])
+ #define phit xx[5]*2*PI
+ #endif
+ double res1,res2,one_r,factor_jacobian1,factor_jacobian2;
+ double AUX[3],AUX2[3];
+ N_FCHKS_WFNS *n_fchk_wfn_calc;                 //Pointer to an object of N_FCHKS_WFNS type.
+ n_fchk_wfn_calc=((N_FCHKS_WFNS*)userdata);
+ AUX[0]=rs*sin(thetas)*cos(phis);
+ AUX[1]=rs*sin(thetas)*sin(phis);
+ AUX[2]=rs*cos(thetas);
+ AUX2[0]=rt*sin(thetat)*cos(phit);
+ AUX2[1]=rt*sin(thetat)*sin(phit);
+ AUX2[2]=rt*cos(thetat); 
+ //Rotate point for second FCHK/WFN/WFX file. To make the Inertia tensors coincide by means of the grid rotation.
+ (*((n_fchk_wfn_calc[0]).read_fchk_wfn[0])).rho_eval(AUX,res1);
+ (*((n_fchk_wfn_calc[0]).read_fchk_wfn[1])).rho_eval(AUX2,res2);
+ AUX[0]=AUX[0]-(AUX2[0]+Point_Vr[0]);
+ AUX[1]=AUX[1]-(AUX2[1]+Point_Vr[1]);
+ AUX[2]=AUX[2]-(AUX2[2]+Point_Vr[2]);
+ one_r=ONE/norm3D(AUX);
+ n_fchk_wfn_calc=NULL;
+ factor_jacobian1=FOUR*PI*xx[0]*xx[0]*pow(ONE/(ONE-xx[0]),FOUR);
+ factor_jacobian2=FOUR*PI*xx[3]*xx[3]*pow(ONE/(ONE-xx[3]),FOUR);
+ // Density 1 x Density 2 = int dr dr' rho(r) rho(r') 
+  f0 = factor_jacobian1*factor_jacobian2*res1*res2;
+ // V_Hartree:
+  f1 = factor_jacobian1*factor_jacobian2*res1*res2*one_r;
+ return 0;
+}
+
 ///////////////////////
 //Cubature           //
 ///////////////////////
