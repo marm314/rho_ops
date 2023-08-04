@@ -911,7 +911,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
      {
       //save out of range of last-1 line!!
       if(line.length()<100)
-      {line=line+"                                         ";}
+      {line=line+"                                                                                                             ";}
       //look for special phrases and activate keywords
       if(line.substr(44,10)=="PRIMITIVES")
       {
@@ -5392,7 +5392,7 @@ void READ_FCHK_WFN::Init_MOim(double **MOcoef_in)
 void READ_FCHK_WFN::Center_of_mass()
 {
  int i,j,k;
- double **Im,**EigenV,*mass,Rcm[3]={ZERO},Mtot,Norm,Auxiliar,Auxiliar2;
+ double **Im,**EigenV,*mass,Rcm[3]={ZERO},Mtot=ZERO,Norm,Auxiliar,Auxiliar2;
  ofstream results_inert;
  if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
  {
