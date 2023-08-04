@@ -1576,11 +1576,14 @@ int main(int argc, char *argv[])
      if(dipolar)
      {
       Read_fchk_wfn.muATOMS(mu);
+      Results<<"Atomic contribution to mux        = "<<setw(17)<<mu[0]<<endl;
+      Results<<"Atomic contribution to muy        = "<<setw(17)<<mu[1]<<endl;
+      Results<<"Atomic contribution to muz        = "<<setw(17)<<mu[2]<<endl;
       mu[0]=-res_integration[15]+mu[0];mu[1]=-res_integration[16]+mu[1];mu[2]=-res_integration[17]+mu[2];
-      Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
       Results<<"The result of the integration mux = "<<setw(17)<<mu[0]<<endl;
       Results<<"The result of the integration muy = "<<setw(17)<<mu[1]<<endl;
       Results<<"The result of the integration muz = "<<setw(17)<<mu[2]<<endl;
+      Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
      }
      if(rho && !Input_commands.dmn_integrals)
      {
