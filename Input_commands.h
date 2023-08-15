@@ -20,7 +20,7 @@ class Input
  public:
  int i,punctuals_r,punctuals_p,multiplicity,minevals,maxevals,ops,*dmn_order,dmns,nregions,p_rad;
  int *dmn_orderp,dmnsp,ncores,order_grid_r,order_grid_ang,num_plot_ops,extra_lines,orb1,orb2,mo_no_cube,nwfns;
- bool punctualr,punctualp,scanr,scanp,scanelf,scanindic,cps,indicators,integrals,log,spin_calcs,cas,rotate_grid;
+ bool punctualr,punctualp,scanr,scanp,scanelf,scanindic,cps,indicators,integrals,log,spin_calcs,cas,rotate_grid,cm;
  bool cuba,cubature,quadrature,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrot_no,symrotdens,symgrad;
  bool dmn_indicators,gnuplot,dmn_plots,nopath,dim3,dim2,Beta_MOs,wfx_print,wfx_print_dmn,store_dmn,print_dm1_fchk;
  bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,v_hartree,extracule,int_pol_hyperpol,intra_1rdm_sij,mulliken,im_wfn_wfx;

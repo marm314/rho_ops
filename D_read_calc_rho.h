@@ -83,7 +83,7 @@ class READ_FCHK_WFN
    //create them outside the class                                                                          //
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
    READ_FCHK_WFN();
-   READ_FCHK_WFN(string,string,bool,bool,bool,int);
+   READ_FCHK_WFN(string,string,bool,bool,bool,bool,int);
    READ_FCHK_WFN(const READ_FCHK_WFN& RHO);
    ~READ_FCHK_WFN();
    void set_BETA_MOS(bool &);

@@ -97,7 +97,7 @@ DMN_OPS::~DMN_OPS()
  }
 }
 //Make a copy of the fchk file for DMN (get the MOs)
-void DMN_OPS::set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,int multiplicity)
+void DMN_OPS::set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,bool cm,int multiplicity)
 {
  ifstream test;
  test.open((name_fchk).c_str());
@@ -105,7 +105,7 @@ void DMN_OPS::set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,b
  {
   test.close();
   fchk=true;
-  FCHK_for_DMN=new READ_FCHK_WFN(name_fchk,name_log,wfn_fchk,log,cas,multiplicity);
+  FCHK_for_DMN=new READ_FCHK_WFN(name_fchk,name_log,wfn_fchk,log,cas,cm,multiplicity);
  }
 }
 //Set a threshold

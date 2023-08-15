@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
   else
   {Results.open((name_file.substr(0,(name_file.length()-5))+"_RHO.out").c_str());}
   READ_FCHK_WFN Read_fchk_wfn(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-  Input_commands.multiplicity);//Construct with parametric construction.
+  Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
   //Check if wfn is correlated and print warning for spin dependant properties
   if((Read_fchk_wfn.wfn)&&(!Read_fchk_wfn.error_opens_wfn))
   {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     wfn_fchk=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -272,25 +272,28 @@ int main(int argc, char *argv[])
   ///////////////////////////////////////////////////////////////
   //Print inertia tensor of nuclei CM and coord. reorientation //
   ///////////////////////////////////////////////////////////////
-  Results<<"Reorientation for file "<<name_file<<endl;
-  Results<<endl;
-  if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
-  {
-   CM_file.open((name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
-   while(getline(CM_file,line))
+  if(Input_commands.cm)
+  { 
+   Results<<"Reorientation for file "<<name_file<<endl;
+   Results<<endl;
+   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
-    Results<<line<<endl;
+    CM_file.open((name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
+    while(getline(CM_file,line))
+    {
+     Results<<line<<endl;
+    }
+    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
    }
-   system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
-  }
-  else
-  {
-   CM_file.open((name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
-   while(getline(CM_file,line))
+   else
    {
-    Results<<line<<endl;
+    CM_file.open((name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+    while(getline(CM_file,line))
+    {
+     Results<<line<<endl;
+    }
+    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
    }
-   system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
   }
   ////////////////////////////////////////////
   // Deviation from idempotency & other     //
@@ -303,7 +306,7 @@ int main(int argc, char *argv[])
    if(Input_commands.dmn_indicators)
    {
     DMN_OPS dmn(Input_commands.name_dm1,1);
-    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
     dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
     if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
     Nelec=dmn.calc_tr();
@@ -1083,7 +1086,7 @@ int main(int argc, char *argv[])
    for(i=0;i<Input_commands.dmns;i++)
    {
     DMN_OPS dmn(Input_commands.name_dmn[i],Input_commands.dmn_order[i]);
-    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
     if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
     if(dmn.dm1)
     {
@@ -1223,7 +1226,7 @@ int main(int argc, char *argv[])
    for(i=0;i<Input_commands.dmnsp;i++)
    {
     DMN_P_OPS dmnp(Input_commands.name_dmnp[i],Input_commands.dmn_orderp[i]);
-    dmnp.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+    dmnp.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
     if(Input_commands.dmn_thresh){dmnp.set_thershold(Input_commands.dmn_threshold);}
     if(dmnp.dm1)
     {
@@ -1497,7 +1500,7 @@ int main(int argc, char *argv[])
        cout<<"Convert the DM1 file + FCHK file into a DM1_FCHK file"<<endl;
       }
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       integrate_dmnr(dmn,method,3,18,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
@@ -1708,7 +1711,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_integrals && !wfn_fchk)
      {
       DMN_P_OPS dmnp(Input_commands.name_dm1,1);
-      dmnp.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmnp.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmnp.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmnp.set_thershold(Input_commands.dmn_threshold);}
       integrate_dmnp(dmnp,method,3,18,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
@@ -1966,7 +1969,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnr(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -1999,7 +2002,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2017,7 +2020,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2035,7 +2038,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2053,7 +2056,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2071,7 +2074,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2091,7 +2094,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnr(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2117,7 +2120,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2143,7 +2146,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnr(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2165,7 +2168,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_P_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnp(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2187,7 +2190,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       I_cubature_dmnr(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2211,7 +2214,7 @@ int main(int argc, char *argv[])
       if(Input_commands.dmn_integrals && !wfn_fchk)
       {
        DMN_OPS dmn(Input_commands.name_dm1,1);
-       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+       dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
        dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
        if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
        I_cubature_dmnr(dmn,operation,error_abs,result_integration,error,Integrals_interval);
@@ -2333,7 +2336,7 @@ int main(int argc, char *argv[])
        cout<<"Convert the DM1 file + FCHK file into a DM1_FCHK file"<<endl;
       }
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       I_cubature2_dmnr(dmn,error_abs,res_integration,error,Integrals_interval,shan,fish,r1,r2,dipolar);
@@ -2388,7 +2391,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_integrals && !wfn_fchk)
      {
       DMN_P_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       I_cubature2_dmnp(dmn,error_abs,res_integration,error,Integrals_interval,shanp,fishp,p1,p2);
@@ -2518,7 +2521,7 @@ int main(int argc, char *argv[])
        cout<<"Convert the DM1 file + FCHK file into a DM1_FCHK file"<<endl;
       }
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       data=&dmn;
@@ -2840,7 +2843,7 @@ int main(int argc, char *argv[])
      else
      {
       DMN_P_OPS dmn1(Input_commands.name_dm1,1);
-      dmn1.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn1.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn1.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn1.set_thershold(Input_commands.dmn_threshold);}
       data2=&dmn1;
@@ -3242,36 +3245,39 @@ int main(int argc, char *argv[])
     wfn_fchk_in=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk_in,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    //Print inertia tensor of nuclei CM and coord. reorientation
-   if(Input_commands.dens_sim)
+   if(Input_commands.cm) // Include $cm KEYWORD
    {
-    Results<<"Reorientation for file "<<name_file<<endl;
+    if(Input_commands.dens_sim)
+    {
+     Results<<"Reorientation for file "<<name_file<<endl;
+     Results<<endl;
+    }
+    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+    {
+     CM_file.open((name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
+     while(getline(CM_file,line))
+     {
+      Results<<line<<endl;
+     }
+     CM_file.close();
+     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
+    }
+    else
+    {
+     CM_file.open((name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+     while(getline(CM_file,line))
+     {
+      Results<<line<<endl;
+     }
+     CM_file.close();
+     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+    }
+    Results<<"Note that if the LOG file was included or the MULTIPLICITY."<<endl;
+    Results<<"The second FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
     Results<<endl;
    }
-   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
-   {
-    CM_file.open((name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
-    while(getline(CM_file,line))
-    {
-     Results<<line<<endl;
-    }
-    CM_file.close();
-    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
-   }
-   else
-   {
-    CM_file.open((name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
-    while(getline(CM_file,line))
-    {
-     Results<<line<<endl;
-    }
-    CM_file.close();
-    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
-   }
-   Results<<"Note that if the LOG file was included or the MULTIPLICITY."<<endl;
-   Results<<"The second FCHK/WFN/WFX will use the same information as for the first FCHK/WFN/WFX."<<endl;
-   Results<<endl;
    /////////////////////////////////////////////////
    //Point to two FCHKs or WFNs
    /////////////////////////////////////////////////
@@ -3703,7 +3709,7 @@ int main(int argc, char *argv[])
     wfn_fchk=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -3722,7 +3728,7 @@ int main(int argc, char *argv[])
     wfn_fchk=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_3(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -3741,7 +3747,7 @@ int main(int argc, char *argv[])
     wfn_fchk=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_4(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -3760,7 +3766,7 @@ int main(int argc, char *argv[])
     wfn_fchk=true;//True for wfn
    }
    READ_FCHK_WFN Read_fchk_wfn_5(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
-   Input_commands.multiplicity);//Construct with parametric construction.
+   Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
@@ -3940,7 +3946,7 @@ int main(int argc, char *argv[])
    double error_abs,error_rel;
    string method;
    DMN_OPS dmn(Input_commands.name_dm2,2);
-   dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+   dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
    dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
    if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
    error_abs=Input_commands.error_abs;
@@ -3994,7 +4000,7 @@ int main(int argc, char *argv[])
    double error_abs,error_rel;
    string method;
    DMN_OPS dmn(Input_commands.name_dm2,2);
-   dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+   dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
    dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
    if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
    error_abs=Input_commands.error_abs;
@@ -4129,7 +4135,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_plots)
      {
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       for(var1=Input_commands.points_scan_1[0];var1<=Input_commands.points_scan_1[1];var1=var1+Input_commands.grid_1)
@@ -4222,7 +4228,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_plots)
      {
       DMN_P_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       for(var1=Input_commands.points_scan_1[0];var1<=Input_commands.points_scan_1[1];var1=var1+Input_commands.grid_1)
@@ -4466,7 +4472,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_plots)
      {
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       for(var1=Input_commands.points_scan_1[0];var1<=Input_commands.points_scan_1[1];var1=var1+Input_commands.grid_1)
@@ -4678,7 +4684,7 @@ int main(int argc, char *argv[])
      if(Input_commands.dmn_plots)
      {
       DMN_P_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       for(var1=Input_commands.points_scan_1[0];var1<=Input_commands.points_scan_1[1];var1=var1+Input_commands.grid_1)
@@ -5223,7 +5229,7 @@ int main(int argc, char *argv[])
       }
       cout<<"See file "<<name_file.substr(0,(name_file.length()-5))+"_dm1.fchk"<<endl;
       DMN_OPS dmn(Input_commands.name_dm1,1);
-      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+      dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       dmn.tot_dens_fchk(tot_density,aos);
@@ -5372,7 +5378,7 @@ int main(int argc, char *argv[])
     wfx_file_out<<"<Number of Occupied Molecular Orbitals>"<<endl;
     //Always alpha and beta separated for dmn
     DMN_OPS dmn(Input_commands.name_dm1,1);
-    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+    dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
     dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
     if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
     dmn.diagonalize_ab();
@@ -5811,7 +5817,7 @@ void mos_to_nos_int_fchk_dm1(READ_FCHK_WFN &Read_fchk_wfn,Input &Input_commands,
  double *NO_at_r;
  NO_at_r=new double[nbasis];
  DMN_OPS dmn(Input_commands.name_dm1,1);
- dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+ dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
  dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
  if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
  dmn.diagonalize_ab();
@@ -5878,7 +5884,7 @@ void mos_to_nos_dmn_sij(double **SIJ,READ_FCHK_WFN &Read_fchk_wfn,Input &Input_c
   }
  }
  DMN_OPS dmn(Input_commands.name_dm1,1);
- dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.multiplicity);
+ dmn.set_fchk(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,Input_commands.cm,Input_commands.multiplicity);
  dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
  if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
  if(Read_fchk_wfn.uhf)

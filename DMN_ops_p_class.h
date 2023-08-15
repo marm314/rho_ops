@@ -28,7 +28,7 @@ using namespace std;
   ~DMN_P_OPS();
   DMN_P_OPS(const DMN_P_OPS &);
   //Set fchk file
-  void set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,int multiplicity);
+  void set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,bool cm,int multiplicity);
   //Set threshold
   void set_thershold(double );
   //Set store or not the DMN

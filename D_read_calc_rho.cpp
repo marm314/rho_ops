@@ -13,7 +13,7 @@
 //Public functions.
 READ_FCHK_WFN::READ_FCHK_WFN(){cout<<"Not allowed default constructor"<<endl;}
 //Build Density object from fchk or wfn (read all required variables)
-READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,bool cas,int mult_in)
+READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,bool cas,bool CM_in,int mult_in)
 {
   int i,j,k;
   wfn=false;
@@ -1654,7 +1654,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,
   }
   else  cout<<"Unable to open file xxx.wfn or xxx.wfx"<<endl;
  }
- Center_of_mass();
+ if(CM_in){Center_of_mass();}
 }
 //Copy density objects
 //WARNING! WARNING! WARNING!
@@ -5417,7 +5417,7 @@ void READ_FCHK_WFN::Center_of_mass()
   for(i=0;i<natoms;i++)
   {
    mass[i]=ZERO;
-   //Silly if to cheack that initialization was correct!
+   //Silly if to check that the initialization was correct!
  if(mass[i]==ZERO)
  {
   if(Nu_charge[i]==ZERO)

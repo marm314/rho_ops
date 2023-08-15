@@ -3,7 +3,7 @@ Input::Input(){cout<<"Not allowed default constructor"<<endl;}
 Input::Input(string rho_in)
 {
  punctualr=false;punctualp=false;scanr=false;scanp=false;scanelf=false;cps=false;indicators=false;
- integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;
+ integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;cm=false;
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;gnuplot=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
@@ -133,6 +133,7 @@ Input::Input(string rho_in)
    else if(rho_in=="$beta_mos"){Beta_MOs=true;}
    else if(rho_in=="$dmnincore"){store_dmn=true;rho_input_file>>mem;}
    else if(rho_in=="$wfx_print"){wfx_print=true;}
+   else if(rho_in=="$cm"){cm=true;}
    else if(rho_in=="$cube")
    {
     cube=true;

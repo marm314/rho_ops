@@ -41,7 +41,7 @@ using namespace std;
   ~DMN_OPS();
   DMN_OPS(const DMN_OPS &);
   //Set fchk file
-  void set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,int multiplicity);
+  void set_fchk(string name_fchk,string name_log,bool wfn_fchk,bool log,bool cas,bool cm,int multiplicity);
   //Set threshold
   void set_thershold(double );
   //Set point for intracule
