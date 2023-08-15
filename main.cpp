@@ -177,13 +177,16 @@ int main(int argc, char *argv[])
    }
    READ_FCHK_WFN Read_fchk_wfn_2(name_file,Input_commands.name_log,wfn_fchk,Input_commands.log,Input_commands.cas,
    Input_commands.cm,Input_commands.multiplicity);//Construct with parametric construction.
-   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+   if(Input_commands.cm)
    {
-    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
-   }
-   else
-   {
-    system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+    {
+     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-4))+"_inert.tmp").c_str());
+    }
+    else
+    {
+     system(("/bin/rm  "+name_file.substr(0,(name_file.length()-5))+"_inert.tmp").c_str());
+    }
    }
    name_file=name_saved;
    Read_fchk_wfn.im_wfn_wfx=Input_commands.im_wfn_wfx;
