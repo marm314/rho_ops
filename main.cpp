@@ -658,8 +658,8 @@ int main(int argc, char *argv[])
       for(j=0;j<Read_fchk_wfn.nbasis();j++)
       {
        if(abs(Smunu[i][j])<pow(TEN,-EIGHT)){Smunu[i][j]=ZERO;}
-       if(i!=j && abs(Smunu[i][j])>pow(TEN,-EIGHT)){Results<<" Warning orbitals "<<setw(5)<<i<<setw(5)<<j<<" are not orthonormal."<<endl;}
-       if(i==j && abs(Smunu[i][i]-ONE)>pow(TEN,-EIGHT)){Results<<" Warning orbital  "<<setw(5)<<i<<setw(5)<<i<<" is not orthonormal."<<endl;}
+       //if(i!=j && abs(Smunu[i][j])>pow(TEN,-SEVEN)){Results<<" Warning orbitals "<<setw(5)<<i+1<<setw(5)<<j+1<<" are not orthonormal."<<endl;}
+       //if(i==j && abs(Smunu[i][i]-ONE)>pow(TEN,-SEVEN)){Results<<" Warning orbital  "<<setw(5)<<i+1<<setw(5)<<i+1<<" is not orthonormal."<<endl;}
        overlap_out2<<setw(20)<<Smunu[i][j]; // Stored in there the S_mu,nu value
        k++;
        if(k==5){overlap_out2<<endl;k=0;}
