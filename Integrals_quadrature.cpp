@@ -1166,7 +1166,7 @@ void calc_mij_mat(double **Sij,double **ORBITALS,double interval[6],int &order_r
 }
 // Integrate intracule like for 1RDM
 void integrate_intra_coord(double **Intrac,double Dij,double exp_i,double exp_j,double Atom1[3],double Atom2[3],int nx_exp[2],int ny_exp[2],
-int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r, int order_ang,bool last)
+int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r, int order_ang,bool last,bool overlap)
 {
  int i,j,k;
  double zeta_ij,zeta_ij_m1h,zeta_ij_m1h_s,Aij,alpha_ij,alpha_ij_m_12,alpha_ij_p_12,Xij,Yij,Zij,Coef_ij,Point[3],RpRimRj[3],VijX,VijY,VijZ,Iu;
@@ -1201,17 +1201,24 @@ int nz_exp[2],int Nroot_Lmax_plus_1,double *r_gauss,double *w_gauss,int order_r,
     VijZ=VijZ+w_gauss[k]*pow(zeta_ij_m1h_s+alpha_ij_m_12*Point[2]+Zij-Atom1[2],double(nz_exp[0]))
                         *pow(zeta_ij_m1h_s+alpha_ij_p_12*Point[2]+Zij-Atom2[2],double(nz_exp[1]));
    }
-   Intrac[i][j]=Intrac[i][j]+Coef_ij*VijX*VijY*VijZ;
+   if(!overlap)
+   {
+    Intrac[i][j]=Intrac[i][j]+Coef_ij*VijX*VijY*VijZ;
+   }
+   else
+   {
+    Intrac[0][0]=Coef_ij*VijX*VijY*VijZ; // S_mu,nu recalling that order_r = order_ang = 1
+   }
   }
  }
- if(last)
+ if(last && !overlap)
  {
   for(i=0;i<order_r;i++)
   {
    Iu=ZERO;
    for(j=0;j<order_ang;j++)
    {
-    // Do not use 4*PI as we want I(0) = Nelectrons. Is like, spherical-averaged quantity.
+    // Do not use 4*PI because we want I(0) = Nelectrons. Is like, spherical-averaged quantity.
     Iu=Iu+w_theta_phi[j]*Intrac[i][j];
    }
    if(abs(Iu)<pow(TEN,-EIGHT)){Iu=ZERO;}

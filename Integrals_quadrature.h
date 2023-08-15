@@ -25,7 +25,7 @@ void integral_calc(string,int &,int &,double **,double **,double [6],double &);
 void integral_calc_p(string,int &,int &,double **,double **,double [6],double &);
 void calc_sij_mat(double **,double**,double [6],int &,int &,int &);
 void calc_mij_mat(double **,double**,double [6],int &,int &,int &);
-void integrate_intra_coord(double **,double,double,double,double [3],double[3],int[2],int[2],int[2],int,double*,double*,int,int,bool);
+void integrate_intra_coord(double **,double,double,double,double [3],double[3],int[2],int[2],int[2],int,double*,double*,int,int,bool,bool);
 void grid_avail(int &);
 void clean_quadrature(string,int mode=0);
 double theta_rad(double &);

@@ -8,7 +8,7 @@ Input::Input(string rho_in)
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;gnuplot=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
- int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm=false;im_wfn_wfx=false;
+ int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
  multiplicity=0;ncores=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
  ifstream rho_input_file;
@@ -43,10 +43,11 @@ Input::Input(string rho_in)
    else if(rho_in=="$multiplicity"){rho_input_file>>multiplicity;}
    else if(rho_in=="$spin_calcs"){spin_calcs=true;}
    else if(rho_in=="$cas"){cas=true;}
-   else if(rho_in=="$intra_1rdm")
+   else if(rho_in=="$intra_1rdm" || rho_in=="$overlap")
    {
-    intra_1rdm=true;
+    intra_1rdm_sij=true;
     rho_input_file>>order_grid_r>>order_grid_ang;
+    if(rho_in=="$overlap"){order_grid_r=-1;order_grid_ang=-1;} // will be set to 1 inside main
    }
    else if(rho_in=="$punctual_r")
    {

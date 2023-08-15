@@ -366,31 +366,31 @@ int main(int argc, char *argv[])
    Results<<"#*************************************************************************#";
    Results<<endl;
   }
-  ////////////////////////////////////////////
-  // Prepare .basis and pseudo dm2 file     //
-  // from wfn files -> intracule 1rdm       //
-  ////////////////////////////////////////////
-  if(Input_commands.intra_1rdm)
+  ///////////////////////////////////////////////////
+  // Prepare .basis file, copute intracule 1rdm    //
+  // and overlap matrix in primitives              //
+  ///////////////////////////////////////////////////
+  if(Input_commands.intra_1rdm_sij)
   {
    if(name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')
    {
     Results<<"#*************************************************************************#";
     Results<<endl;
-    Results<<"#            Preparing basis and dm1 files in primitives                  #";
+    Results<<"#            Preparing basis and dm1 files in primitives,                 #";
     Results<<endl;
-    Results<<"#               also computing intracule-like integrals                   #";
+    Results<<"#   computing intracule-like integrals, and primitives overlap matrix     #";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
     string name_basis,name_dm1,name_in;
-    bool last=false;
+    bool overlap=false,last=false;
     int mode=1,nucleous,nr,nang,elements[2];
     int **Quant,Lmax=0,Nroot_Lmax_plus_1,nx_exp[2],ny_exp[2],nz_exp[2];
     double nx,ny,nz,Exp,Dij,alpha,a,b;
     double Atom_coord[3]={ZERO},Atom_coord2[3]={ZERO};
-    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Intra_1,*r_gauss,*w_gauss;
+    double **Coef,**CoefT,**Temp,**dm1_prim,**dm1,**Smunu,**Intra_1,*r_gauss,*w_gauss;
     Quant=new int*[35];
     for(i=0;i<35;i++)
     {
@@ -490,6 +490,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+     if(nr==-1 && nang==-1){overlap=true;}
      nr=1;nang=1;mode=3;
     }
     Intra_1=new double*[nr];
@@ -501,10 +502,13 @@ int main(int argc, char *argv[])
       Intra_1[i][j]=ZERO;
      }
     }
+    int k=0;
     void *data=NULL; // This is not used to we can passed it as NULL
     double **nth1=NULL,**nth2=NULL;
     integrate_quadrature(data,name_in,false,nr,nang,false,nth1,nth2,mode);
     ofstream dm1_out(name_dm1.c_str(),ios::out | ios::binary);
+    ofstream overlap_out((name_in+"overlap").c_str());
+    overlap_out<<setprecision(10)<<fixed<<scientific;
     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
     {
      Atom_coord[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[i]-1][0];
@@ -515,28 +519,62 @@ int main(int argc, char *argv[])
      nz_exp[0]=Quant[Read_fchk_wfn.shell_type[i]-1][2];
      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
      {
-      if(abs(dm1_prim[i][j])>pow(TEN,-TEN)||(i==j && i==(Read_fchk_wfn.nprimitv-1))) 
+      if(!overlap)
       {
-       if(i==j && i==(Read_fchk_wfn.nprimitv-1))
+       if(abs(dm1_prim[i][j])>pow(TEN,-TEN)||(i==j && i==(Read_fchk_wfn.nprimitv-1))) 
        {
-        last=true;
+        if(i==j && i==(Read_fchk_wfn.nprimitv-1))
+        {
+         last=true;
+        }
+        Atom_coord2[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][0];
+        Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
+        Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
+        nx_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][0];
+        ny_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][1];
+        nz_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][2];
+        Dij=dm1_prim[i][j];
+        integrate_intra_coord(Intra_1,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,nx_exp,ny_exp,nz_exp,
+        Nroot_Lmax_plus_1,r_gauss,w_gauss,nr,nang,last,overlap);
+        elements[0]=i+1;
+        elements[1]=j+1;
+        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+        dm1_out.write((char*) &elements[0], sizeof(elements[0]));
+        dm1_out.write((char*) &elements[1], sizeof(elements[1]));
+        dm1_out.write((char*) &Dij, sizeof(Dij));
+        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
        }
+      }
+      else
+      {
+       if(abs(dm1_prim[i][j])>pow(TEN,-TEN))
+       {
+        Dij=dm1_prim[i][j];
+        elements[0]=i+1;
+        elements[1]=j+1;
+        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+        dm1_out.write((char*) &elements[0], sizeof(elements[0]));
+        dm1_out.write((char*) &elements[1], sizeof(elements[1]));
+        dm1_out.write((char*) &Dij, sizeof(Dij));
+        dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+       } 
        Atom_coord2[0]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][0];
        Atom_coord2[1]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][1];
        Atom_coord2[2]=Read_fchk_wfn.Cartesian_Coor[Read_fchk_wfn.shell_map[j]-1][2];
        nx_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][0];
        ny_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][1];
        nz_exp[1]=Quant[Read_fchk_wfn.shell_type[j]-1][2];
-       Dij=dm1_prim[i][j];
+       Dij=ONE;
+       if(i==j && i==(Read_fchk_wfn.nprimitv-1))
+       {
+        last=true;
+       }
        integrate_intra_coord(Intra_1,Dij,Read_fchk_wfn.Prim_exp[i],Read_fchk_wfn.Prim_exp[j],Atom_coord,Atom_coord2,nx_exp,ny_exp,nz_exp,
-       Nroot_Lmax_plus_1,r_gauss,w_gauss,nr,nang,last);
-       elements[0]=i+1;
-       elements[1]=j+1;
-       dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
-       dm1_out.write((char*) &elements[0], sizeof(elements[0]));
-       dm1_out.write((char*) &elements[1], sizeof(elements[1]));
-       dm1_out.write((char*) &Dij, sizeof(Dij));
-       dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
+       Nroot_Lmax_plus_1,r_gauss,w_gauss,nr,nang,last,overlap);
+       if(abs(Intra_1[0][0])<pow(TEN,-TEN)){Intra_1[0][0]=ZERO;}
+       overlap_out<<setw(20)<<Intra_1[0][0]; // Stored in there the S_mu,nu value
+       k++;
+       if(k==5){overlap_out<<endl;k=0;}
       }
      }
     }
@@ -549,12 +587,89 @@ int main(int argc, char *argv[])
     dm1_out.write((char*) &Dij, sizeof(Dij));
     dm1_out.seekp(RECORD_DELIMITER_LENGTH, ios::cur);
     dm1_out.close();
-    Results<<"# In the following: I(u) is spherically-averaged [ I(u) / 4*PI ]"<<endl;
-    Results<<"#      u                  I(u)                I(u)u**2"<<endl;
-    Results<<setprecision(10)<<fixed<<scientific;
-    for(i=0;i<nr;i++)
+    overlap_out.close();
+    if(!overlap)
     {
-     Results<<setw(20)<<Intra_1[i][0]<<setw(20)<<Intra_1[i][1]<<setw(20)<<Intra_1[i][2]<<endl;
+     system(("/bin/rm -rf "+name_in+"overlap").c_str()); // Delete it, if it is empty.
+     Results<<"# In the following: I(u) is spherically-averaged [ I(u) / 4*PI ]"<<endl;
+     Results<<"#      u                  I(u)                I(u)u**2"<<endl;
+     Results<<setprecision(10)<<fixed<<scientific;
+     for(i=0;i<nr;i++)
+     {
+      Results<<setw(20)<<Intra_1[i][0]<<setw(20)<<Intra_1[i][1]<<setw(20)<<Intra_1[i][2]<<endl;
+     }
+     for(i=0;i<Read_fchk_wfn.nbasis();i++)
+     {
+      delete[] dm1[i];dm1[i]=NULL;
+      delete[] Coef[i];Coef[i]=NULL;
+      delete[] Temp[i];Temp[i]=NULL;
+     }
+    }
+    else
+    {
+     for(i=0;i<Read_fchk_wfn.nbasis();i++)
+     {
+      delete[] Temp[i];Temp[i]=NULL;
+      delete[] dm1[i];dm1[i]=NULL;
+     }
+     delete[] Temp;Temp=NULL;
+     Smunu=new double*[Read_fchk_wfn.nprimitv];
+     Temp=new double*[Read_fchk_wfn.nprimitv];
+     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+     {
+      Smunu[i]=new double[Read_fchk_wfn.nprimitv];
+      Temp[i]=new double[Read_fchk_wfn.nprimitv];
+      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
+      {
+       Temp[i][j]=ZERO;
+       Smunu[i][j]=ZERO;
+      }
+     }
+     ifstream read_Smunu((name_in+"overlap").c_str());
+     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+     {
+      for(j=0;j<Read_fchk_wfn.nprimitv;j++)
+      {
+       read_Smunu>>Smunu[i][j];
+      }
+     }
+     read_Smunu.close();
+     matmul(Read_fchk_wfn.nprimitv,Smunu,dm1_prim,Temp);
+     // Use this double precision variable to store Tr [1D S] = N electrons
+     Intra_1[0][0]=ZERO;
+     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+     {
+      Intra_1[0][0]=Intra_1[0][0]+Temp[i][i];
+      for(j=0;j<Read_fchk_wfn.nprimitv;j++){Temp[i][j]=ZERO;}
+     }
+     Results<<endl;
+     Results<<" N electrons:"<<setprecision(6)<<fixed<<setw(12)<<Intra_1[0][0]<<endl;
+     Results<<endl;
+     // S^MO = C S^Prim C^T
+     matmul_full(Read_fchk_wfn.nbasis(),Read_fchk_wfn.nprimitv,Read_fchk_wfn.nprimitv,Coef,Smunu,Temp);
+     matmul_full(Read_fchk_wfn.nprimitv,Read_fchk_wfn.nprimitv,Read_fchk_wfn.nbasis(),Temp,CoefT,Smunu);
+     ofstream overlap_out2((name_in+"overlap_mo").c_str());
+     overlap_out2<<setprecision(10)<<fixed<<scientific;
+     // Now delete Coef and Temp
+     k=0;
+     for(i=0;i<Read_fchk_wfn.nbasis();i++)
+     {
+      delete[] Coef[i];Coef[i]=NULL;
+      for(j=0;j<Read_fchk_wfn.nbasis();j++)
+      {
+       if(abs(Smunu[i][j])<pow(TEN,-EIGHT)){Smunu[i][j]=ZERO;}
+       if(i!=j && abs(Smunu[i][j])>pow(TEN,-EIGHT)){Results<<" Warning orbitals "<<setw(5)<<i<<setw(5)<<j<<" are not orthonormal."<<endl;}
+       if(i==j && abs(Smunu[i][i]-ONE)>pow(TEN,-EIGHT)){Results<<" Warning orbital  "<<setw(5)<<i<<setw(5)<<i<<" is not orthonormal."<<endl;}
+       overlap_out2<<setw(20)<<Smunu[i][j]; // Stored in there the S_mu,nu value
+       k++;
+       if(k==5){overlap_out2<<endl;k=0;}
+      }
+     }
+     overlap_out2.close();
+     for(i=0;i<Read_fchk_wfn.nprimitv;i++)
+     {
+      delete[] Temp[i];Temp[i]=NULL;
+     }
     } 
     // Deallocate arrays
     clean_quadrature(name_in,mode);
@@ -566,12 +681,6 @@ int main(int argc, char *argv[])
     {
      delete[] CoefT[i];CoefT[i]=NULL;
      delete[] dm1_prim[i];dm1_prim[i]=NULL;
-    }
-    for(i=0;i<Read_fchk_wfn.nbasis();i++)
-    {
-     delete[] dm1[i];dm1[i]=NULL;
-     delete[] Coef[i];Coef[i]=NULL;
-     delete[] Temp[i];Temp[i]=NULL;
     }
     for(i=0;i<35;i++)
     {
@@ -587,7 +696,8 @@ int main(int argc, char *argv[])
     delete[] r_gauss;r_gauss=NULL;
     delete[] w_gauss;w_gauss=NULL;
     Results<<endl;
-    Results<<" See the files "<<name_basis<<" "<<name_dm1<<endl;
+    if(!overlap){Results<<" See the files "<<name_basis<<" "<<name_dm1<<endl;}
+    else{Results<<" See the files "<<name_in+"overlap"<<" "<<name_in+"overlap_mo"<<endl;}
     Results<<endl;
     Results<<"#*************************************************************************#";
     Results<<endl;
