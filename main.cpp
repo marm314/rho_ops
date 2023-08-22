@@ -1543,7 +1543,11 @@ int main(int argc, char *argv[])
       else
       {Density=floor(res_integration[0]);}
       if(Density==ZERO){Density=ONE;}
-      for(i=0;i<3;i++){RCC[i]=res_integration[i+4]/Density;}
+      for(i=0;i<3;i++)
+      {
+       RCC[i]=res_integration[i+4]/Density;
+       if(abs(RCC[i])<pow(TEN,-SIX)){RCC[i]=ZERO;}
+      }
       Im[0][0]=pow(RCC[1],TWO)+pow(RCC[2],TWO);
       Im[0][1]=-RCC[0]*RCC[1];
       Im[0][2]=-RCC[0]*RCC[2];
@@ -1553,7 +1557,6 @@ int main(int argc, char *argv[])
       Im[2][0]=Im[0][2];
       Im[2][1]=Im[1][2];
       Im[2][2]=pow(RCC[0],TWO)+pow(RCC[1],TWO);
-      for(i=0;i<3;i++){if(RCC[i]<pow(TEN,-SIX)){RCC[i]=ZERO;}}
       Results<<endl;
       Results<<"Coordinates of the CC: \t";
       Results<<setprecision(10)<<fixed<<scientific;
