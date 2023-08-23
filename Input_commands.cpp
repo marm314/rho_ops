@@ -5,7 +5,7 @@ Input::Input(string rho_in)
  punctualr=false;punctualp=false;scanr=false;scanp=false;scanelf=false;cps=false;indicators=false;
  integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;cm=false;
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;
- dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;gnuplot=false;
+ dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;becke=false;gnuplot=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
@@ -473,7 +473,7 @@ Input::Input(string rho_in)
      rho_input_file>>interval_integralsCUB[2]>>interval_integralsCUB[3];
      rho_input_file>>interval_integralsCUB[4]>>interval_integralsCUB[5];
     }
-    else  //Quadrature
+    else if(cuba_cubature=="quadrature")  //Quadrature
     {
      quadrature=true;
      rho_input_file>>order_grid_r>>order_grid_ang;
@@ -511,6 +511,14 @@ Input::Input(string rho_in)
        if(rho_in=="no"){MOorNO="no";}
       }
      }
+    }
+    else //Becke Quadrature
+    {
+     becke=true;
+     rho_input_file>>order_grid_r>>order_grid_ang>>stiff;
+     if(order_grid_ang<=70){order_grid_ang=70;}
+     if(order_grid_r<=30){order_grid_r=30;}
+     if(stiff<=3){stiff=30;}
     }
    }
    else if(rho_in=="$dmn_r")

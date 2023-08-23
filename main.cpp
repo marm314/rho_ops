@@ -22,6 +22,7 @@
 #include"Integrals.h"
 #include"Integrals_DMN.h"
 #include"Integrals_quadrature.h"
+#include"Integrals_Becke.h"
 #include"gauss_quad.h"
 #include"Numbers.h"
 #include"String_ops.h"
@@ -2462,7 +2463,7 @@ int main(int argc, char *argv[])
     }
     Results<<endl;
    }
-   else  //Quadrature
+   else if(Input_commands.quadrature) 
    {
     int grid_theta_phi;
     double **evals_density,**evals_grad_mod,res;
@@ -3186,6 +3187,27 @@ int main(int argc, char *argv[])
      delete[] ORBITALS; ORBITALS=NULL;
      delete[] Sij; Sij=NULL;
     }
+   }
+   else
+   {
+    int grid_theta_phi;
+    double *res_integration;
+    res_integration=new double[Read_fchk_wfn.natoms+1];
+    method="Becke quadrature";
+    grid_theta_phi=Input_commands.order_grid_ang;
+    grid_avail_becke(grid_theta_phi);
+    Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
+    Integrate_becke(Read_fchk_wfn,res_integration);
+    Density=res_integration[Read_fchk_wfn.natoms];
+    for(i=0;i<Read_fchk_wfn.natoms;i++)
+    {
+     Results<<" N for atom "<<setw(5)<<i+1<<" = "<<setw(17)<<res_integration[i];
+     Results<<"\t obtained with "<<method<<endl;
+    }
+    Results<<"The result of the integration  N  = "<<setw(17)<<Density;
+    Results<<"\t obtained with "<<method<<endl;
+    Results<<endl;
+    clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
    }
    Results<<"#*************************************************************************#";
    Results<<endl;

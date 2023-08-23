@@ -25,3 +25,4 @@ gitver.h
 test/
 rho_ops.tar.gz
 libcuba.a_old
+Integrals_Becke.o
