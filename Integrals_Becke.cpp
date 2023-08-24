@@ -138,13 +138,19 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
 {
  int i,j,k;
- double Point[3],density;
+ double Point[3],density,fact_jacob_weight;
  // Molecular init.
- res_integration[Rho.natoms]=ZERO;
+ res_integration[4*Rho.natoms]=ZERO;
+ res_integration[4*Rho.natoms+1]=ZERO;
+ res_integration[4*Rho.natoms+2]=ZERO;
+ res_integration[4*Rho.natoms+3]=ZERO;
  // Calc. integrals
  for(i=0;i<Rho.natoms;i++)
  {
-  res_integration[i]=ZERO;
+  res_integration[i*4]=ZERO;
+  res_integration[i*4+1]=ZERO;
+  res_integration[i*4+2]=ZERO;
+  res_integration[i*4+3]=ZERO;
   for(j=0;j<nrad_becke;j++)
   { 
    for(k=0;k<nang_becke;k++)
@@ -153,14 +159,26 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
     Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
     Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
     Rho.rho_eval(Point,density);
-    res_integration[i]+=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*density*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    res_integration[i*4]+=density*fact_jacob_weight;
+    res_integration[i*4+1]+=density*fact_jacob_weight*Point[0]; // rho \times x
+    res_integration[i*4+2]+=density*fact_jacob_weight*Point[1]; // rho \times y
+    res_integration[i*4+3]+=density*fact_jacob_weight*Point[2]; // rho \times z
    }
   }
  } 
  for(i=0;i<Rho.natoms;i++)
  {
-  res_integration[i]=FOUR*PI*res_integration[i];   // For each atom
-  res_integration[Rho.natoms]+=res_integration[i]; // The whole molecule
+  // Times 4 Pi
+  res_integration[i*4]=FOUR*PI*res_integration[i*4];       // For each atom
+  res_integration[i*4+1]=FOUR*PI*res_integration[i*4+1];   // 
+  res_integration[i*4+2]=FOUR*PI*res_integration[i*4+2];   // 
+  res_integration[i*4+3]=FOUR*PI*res_integration[i*4+3];   // 
+  // Sum atoms
+  res_integration[4*Rho.natoms]+=res_integration[i*4];     // The whole molecule
+  res_integration[4*Rho.natoms+1]+=res_integration[i*4+1]; // 
+  res_integration[4*Rho.natoms+2]+=res_integration[i*4+2]; // 
+  res_integration[4*Rho.natoms+3]+=res_integration[i*4+3]; // 
  }
 }
 

@@ -3191,26 +3191,53 @@ int main(int argc, char *argv[])
    else
    {
     int grid_theta_phi;
-    double *res_integration;
-    res_integration=new double[Read_fchk_wfn.natoms+1];
+    double *res_integration,mu[3];
+    res_integration=new double[4*Read_fchk_wfn.natoms+4]; // N, mu_x, mu_y, mu_z (per atom) + total N, mu_x, mu_y and mu_z
     method="Becke quadrature";
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
     Integrate_becke(Read_fchk_wfn,res_integration);
-    Density=res_integration[Read_fchk_wfn.natoms];
+    Results<<endl;
     for(i=0;i<Read_fchk_wfn.natoms;i++)
     {
-     Results<<" N electrons for atom "<<setw(4)<<i+1<<" = "<<setw(17)<<res_integration[i];
-     Results<<"\t obtained with "<<method<<endl;
+     Results<<" Atom "<<setw(4)<<i+1<<endl;
+     if(abs(res_integration[i*4])<pow(TEN,-EIGHT)){res_integration[i*4]=ZERO;}
+     if(abs(res_integration[i*4+1])<pow(TEN,-EIGHT)){res_integration[i*4+1]=ZERO;}
+     if(abs(res_integration[i*4+2])<pow(TEN,-EIGHT)){res_integration[i*4+2]=ZERO;}
+     if(abs(res_integration[i*4+3])<pow(TEN,-EIGHT)){res_integration[i*4+3]=ZERO;}
+     Results<<" N electrons   = "<<setw(17)<<res_integration[i*4]<<endl;
+     Results<<" mux           = "<<setw(17)<<res_integration[i*4+1]<<endl;;
+     Results<<" muy           = "<<setw(17)<<res_integration[i*4+2]<<endl;
+     Results<<" muz           = "<<setw(17)<<res_integration[i*4+3]<<endl;
     }
+    Results<<endl;
+    Density=res_integration[4*Read_fchk_wfn.natoms];
+    Read_fchk_wfn.muATOMS(mu);
+    if(abs(mu[0])<pow(TEN,-EIGHT)){mu[0]=ZERO;}
+    if(abs(mu[1])<pow(TEN,-EIGHT)){mu[1]=ZERO;}
+    if(abs(mu[2])<pow(TEN,-EIGHT)){mu[2]=ZERO;}
+    Results<<"Atomic contribution to mux        = "<<setw(17)<<mu[0]<<endl;
+    Results<<"Atomic contribution to muy        = "<<setw(17)<<mu[1]<<endl;
+    Results<<"Atomic contribution to muz        = "<<setw(17)<<mu[2]<<endl;
+    mu[0]=-res_integration[4*Read_fchk_wfn.natoms+1]+mu[0];
+    mu[1]=-res_integration[4*Read_fchk_wfn.natoms+2]+mu[1];
+    mu[2]=-res_integration[4*Read_fchk_wfn.natoms+3]+mu[2];
+    if(abs(mu[0])<pow(TEN,-EIGHT)){mu[0]=ZERO;}
+    if(abs(mu[1])<pow(TEN,-EIGHT)){mu[1]=ZERO;}
+    if(abs(mu[2])<pow(TEN,-EIGHT)){mu[2]=ZERO;}
+    Results<<"The result of the integration mux = "<<setw(17)<<mu[0]<<endl;
+    Results<<"The result of the integration muy = "<<setw(17)<<mu[1]<<endl;
+    Results<<"The result of the integration muz = "<<setw(17)<<mu[2]<<endl;
+    Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
     Results<<"\t obtained with "<<method<<endl;
     Results<<endl;
-    Results<<"Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
-    Results<<"Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
+    Results<<" Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
+    Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
     Results<<endl;
     clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
+    delete[] res_integration; res_integration=NULL;
    }
    Results<<"#*************************************************************************#";
    Results<<endl;
