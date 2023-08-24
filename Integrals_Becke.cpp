@@ -328,96 +328,97 @@ double Xi_XY_val(int &Z1, int &Z2)
  return set_radii(Z1)/set_radii(Z2);
 } 
 
+// See J. C. Slater, J. Chem. Phys., 41, 3199 (1964)
 double set_radii(int &Z)
 {
  double val=ZERO;
- if(Z==1){val=0.53;}
- else if(Z==2){val= 0.31;} 
- else if(Z==3){val= 1.67;}    
- else if(Z==4){val= 1.12;}
- else if(Z==5){val= 0.87;} 
- else if(Z==6){val= 0.67;} 
- else if(Z==7){val= 0.56;} 
- else if(Z==8){val= 0.48;} 
- else if(Z==9){val= 0.42;} 
- else if(Z==10){val=0.38;} 
- else if(Z==11){val=1.90;}
- else if(Z==12){val=1.45;}
- else if(Z==13){val=1.18;}
- else if(Z==14){val=1.11;} 
- else if(Z==15){val=0.98;} 
- else if(Z==16){val=0.88;} 
- else if(Z==17){val=0.79;} 
- else if(Z==18){val=0.71;} 
- else if(Z==19){val=2.43;}
- else if(Z==20){val=1.94;}
- else if(Z==21){val=1.84;}
- else if(Z==22){val=1.76;}
- else if(Z==23){val=1.71;}
- else if(Z==24){val=1.66;}
- else if(Z==25){val=1.61;}
- else if(Z==26){val=1.56;} 
- else if(Z==27){val=1.52;}
- else if(Z==28){val=1.49;}
- else if(Z==29){val=1.45;}
- else if(Z==30){val=1.42;}
- else if(Z==31){val=1.36;}
+ if(Z==1){val=0.25;}
+ else if(Z==2){val= 0.85;} // Avg 
+ else if(Z==3){val= 1.45;}    
+ else if(Z==4){val= 1.05;}
+ else if(Z==5){val= 0.85;} 
+ else if(Z==6){val= 0.70;} 
+ else if(Z==7){val= 0.65;} 
+ else if(Z==8){val= 0.60;} 
+ else if(Z==9){val= 0.50;} 
+ else if(Z==10){val=1.15;} // Avg 
+ else if(Z==11){val=1.80;}
+ else if(Z==12){val=1.50;}
+ else if(Z==13){val=1.25;}
+ else if(Z==14){val=1.10;} 
+ else if(Z==15){val=1.00;} 
+ else if(Z==16){val=1.00;} 
+ else if(Z==17){val=1.00;} 
+ else if(Z==18){val=1.60;} // Avg 
+ else if(Z==19){val=2.20;}
+ else if(Z==20){val=1.80;}
+ else if(Z==21){val=1.60;}
+ else if(Z==22){val=1.40;}
+ else if(Z==23){val=1.35;}
+ else if(Z==24){val=1.40;}
+ else if(Z==25){val=1.40;}
+ else if(Z==26){val=1.40;} 
+ else if(Z==27){val=1.35;}
+ else if(Z==28){val=1.35;}
+ else if(Z==29){val=1.35;}
+ else if(Z==30){val=1.35;}
+ else if(Z==31){val=1.30;}
  else if(Z==32){val=1.25;}
- else if(Z==33){val=1.14;}
- else if(Z==34){val=1.03;}
- else if(Z==35){val=0.94;} 	
- else if(Z==36){val=2.02;}
- else if(Z==37){val=2.65;}
- else if(Z==38){val=2.19;} 
- else if(Z==39){val=2.12;}
- else if(Z==40){val=2.06;}
- else if(Z==41){val=1.98;}
- else if(Z==42){val=1.90;}
- else if(Z==43){val=1.83;}
- else if(Z==44){val=1.78;}
- else if(Z==45){val=1.73;}
- else if(Z==46){val=1.69;}
- else if(Z==47){val=1.65;}
- else if(Z==48){val=1.61;}
- else if(Z==49){val=1.56;}
+ else if(Z==33){val=1.15;}
+ else if(Z==34){val=1.15;}
+ else if(Z==35){val=1.15;} 	
+ else if(Z==36){val=1.75;} // Avg
+ else if(Z==37){val=2.35;}
+ else if(Z==38){val=2.00;} 
+ else if(Z==39){val=1.80;}
+ else if(Z==40){val=1.55;}
+ else if(Z==41){val=1.45;}
+ else if(Z==42){val=1.45;}
+ else if(Z==43){val=1.35;}
+ else if(Z==44){val=1.30;}
+ else if(Z==45){val=1.35;}
+ else if(Z==46){val=1.40;}
+ else if(Z==47){val=1.60;}
+ else if(Z==48){val=1.55;}
+ else if(Z==49){val=1.55;}
  else if(Z==50){val=1.45;} 
- else if(Z==51){val=1.33;}
- else if(Z==52){val=1.23;}
- else if(Z==53){val=1.15;}
- else if(Z==54){val=2.16;}
- else if(Z==55){val=2.98;}
- else if(Z==56){val=2.53;}
- else if(Z==57){val=2.26;}
- else if(Z==58){val=2.10;}
- else if(Z==59){val=2.47;}
- else if(Z==60){val=2.06;}
- else if(Z==61){val=2.05;}
- else if(Z==62){val=2.38;} 
- else if(Z==63){val=2.31;}
- else if(Z==64){val=2.33;}
- else if(Z==65){val=2.25;}
- else if(Z==66){val=2.28;}
- else if(Z==67){val=2.26;}
- else if(Z==68){val=2.26;}
- else if(Z==69){val=2.22;}
- else if(Z==70){val=2.22;}
- else if(Z==71){val=2.17;}
- else if(Z==72){val=2.08;}
- else if(Z==73){val=2.00;}
- else if(Z==74){val=1.93;} 
- else if(Z==75){val=1.88;}
- else if(Z==76){val=1.85;}
- else if(Z==77){val=1.80;}
- else if(Z==78){val=1.77;}
- else if(Z==79){val=1.74;}
- else if(Z==80){val=1.71;}
- else if(Z==81){val=1.56;}
- else if(Z==82){val=1.54;}	
- else if(Z==83){val=1.43;}
- else if(Z==84){val=1.35;}
- else if(Z==85){val=2.02;} 	
- else if(Z==86){val=2.20;} 	
- else if(Z==87){val=3.48;} 			
+ else if(Z==51){val=1.45;}
+ else if(Z==52){val=1.40;}
+ else if(Z==53){val=1.40;}
+ else if(Z==54){val=2.00;} // Avg
+ else if(Z==55){val=2.60;}
+ else if(Z==56){val=2.15;}
+ else if(Z==57){val=1.95;}
+ else if(Z==58){val=1.85;}
+ else if(Z==59){val=1.85;}
+ else if(Z==60){val=1.85;}
+ else if(Z==61){val=1.85;}
+ else if(Z==62){val=1.85;} 
+ else if(Z==63){val=1.85;}
+ else if(Z==64){val=1.80;}
+ else if(Z==65){val=1.75;}
+ else if(Z==66){val=1.75;}
+ else if(Z==67){val=1.75;}
+ else if(Z==68){val=1.75;}
+ else if(Z==69){val=1.75;}
+ else if(Z==70){val=1.75;}
+ else if(Z==71){val=1.75;}
+ else if(Z==72){val=1.55;}
+ else if(Z==73){val=1.45;}
+ else if(Z==74){val=1.35;} 
+ else if(Z==75){val=1.35;}
+ else if(Z==76){val=1.30;}
+ else if(Z==77){val=1.35;}
+ else if(Z==78){val=1.35;}
+ else if(Z==79){val=1.35;}
+ else if(Z==80){val=1.50;}
+ else if(Z==81){val=1.90;}
+ else if(Z==82){val=1.75;} // Avg	
+ else if(Z==83){val=1.60;}
+ else if(Z==84){val=1.90;}
+ else if(Z==85){val=2.03;} // Avg 	
+ else if(Z==86){val=2.03;} // Avg	
+ else if(Z==87){val=2.03;} // Avg			
  else if(Z==88){val=2.15;}
  else if(Z==89){val=1.95;}
  else if(Z==90){val=1.80;}
@@ -426,10 +427,6 @@ double set_radii(int &Z)
  else if(Z==93){val=1.75;}
  else if(Z==94){val=1.75;}
  else if(Z==95){val=1.75;}
- else if(Z==96){val=1.76;}
- else if(Z==97){val=1.70;}
- else if(Z==98){val=1.86;} 
- else if(Z==99){val=1.86;}
  else
  {
   cout<<"Warning! Atom with Z "<<Z<<" does not have a Bohr radius available."<<endl;

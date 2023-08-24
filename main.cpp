@@ -3201,7 +3201,7 @@ int main(int argc, char *argv[])
     Density=res_integration[Read_fchk_wfn.natoms];
     for(i=0;i<Read_fchk_wfn.natoms;i++)
     {
-     Results<<" N for atom "<<setw(5)<<i+1<<" = "<<setw(17)<<res_integration[i];
+     Results<<" N electrons for atom "<<setw(4)<<i+1<<" = "<<setw(17)<<res_integration[i];
      Results<<"\t obtained with "<<method<<endl;
     }
     Results<<"The result of the integration  N  = "<<setw(17)<<Density;

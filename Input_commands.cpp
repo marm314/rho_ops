@@ -518,7 +518,7 @@ Input::Input(string rho_in)
      rho_input_file>>order_grid_r>>order_grid_ang>>stiff;
      if(order_grid_ang<=70){order_grid_ang=70;}
      if(order_grid_r<=30){order_grid_r=30;}
-     if(stiff<=3){stiff=30;}
+     if(stiff<4){stiff=4;}
     }
    }
    else if(rho_in=="$dmn_r")
