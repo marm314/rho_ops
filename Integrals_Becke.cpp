@@ -8,8 +8,8 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff)
 {
- int i,j,k,l;
- double r_inf,r_sup,Point[3],Diff_Point[3],mu_AB,nu_AB,rA,rB,RAB,xi_AB,Z1,Z2,SA_muAB;
+ int i,j,k,l,m,ZB,ZC;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC,xi_BC,RBC,**S_X,*P_X,Sum_PB;
  //
  // Prepare the quadrature grid for each atom
  //
@@ -60,46 +60,79 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  //
  // Prepare the quadrature weights for each atom
  //
+ P_X=new double[natom];
+ S_X=new double*[natom];
  wA=new double**[natom];
  for(i=0;i<natom;i++)
  {
-  Z1=(int)Rho.Nu_charge[i];
+  S_X[i]=new double[natom];
+ }
+ for(i=0;i<natom;i++)
+ {
   wA[i]=new double*[nrad_becke];
   for(j=0;j<nrad_becke;j++)
   {
    wA[i][j]=new double[nang_becke];
    for(k=0;k<nang_becke;k++)
    {
-    Point[0]=r_real_becke[j]*x_becke[k];
-    Point[1]=r_real_becke[j]*y_becke[k];
-    Point[2]=r_real_becke[j]*z_becke[k];
-    rA=norm3D(Point);
-    Point[0]+=Rho.Cartesian_Coor[i][0];
-    Point[1]+=Rho.Cartesian_Coor[i][1];
-    Point[2]+=Rho.Cartesian_Coor[i][2];
+    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
+    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
+    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
     for(l=0;l<natom;l++)
     {
-     if(i!=l)
+     for(m=0;m<natom;m++)
      {
-      Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[l][0];
-      Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[l][1];
-      Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[l][2];
-      rB=norm3D(Diff_Point);
-      Diff_Point[0]=Rho.Cartesian_Coor[i][0]-Rho.Cartesian_Coor[l][0];
-      Diff_Point[1]=Rho.Cartesian_Coor[i][1]-Rho.Cartesian_Coor[l][1];
-      Diff_Point[2]=Rho.Cartesian_Coor[i][2]-Rho.Cartesian_Coor[l][2];
-      RAB=norm3D(Diff_Point);
-      mu_AB=(rA-rB)/RAB;
-      Z2=(int)Rho.Nu_charge[l];
-      xi_AB=Xi_AB(Z1,Z2);
-      nu_AB=(ONE+mu_AB-xi_AB*(ONE-mu_AB))/(ONE+mu_AB+xi_AB*(ONE-mu_AB));
-      //SA_muAB=s_mu_stiff(nu_AB,stiff);
+      S_X[l][m]=ONE;
+      if(l!=m)
+      {
+       // Distance r to R_B
+       Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[l][0];
+       Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[l][1];
+       Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[l][2];
+       rB=norm3D(Diff_Point);
+       ZB=(int)Rho.Nu_charge[l];
+       // Distance r to R_C
+       Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[m][0];
+       Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[m][1];
+       Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[m][2];
+       rC=norm3D(Diff_Point);
+       ZC=(int)Rho.Nu_charge[m];
+       // Distance R_B to R_C
+       Diff_Point[0]=Rho.Cartesian_Coor[m][0]-Rho.Cartesian_Coor[l][0];
+       Diff_Point[1]=Rho.Cartesian_Coor[m][1]-Rho.Cartesian_Coor[l][1];
+       Diff_Point[2]=Rho.Cartesian_Coor[m][2]-Rho.Cartesian_Coor[l][2];
+       RBC=norm3D(Diff_Point);
+       // Compute nu_BC and S_X(nu_BC)
+       mu_BC=(rB-rC)/RBC;
+       xi_BC=Xi_XY_val(ZB,ZC);
+       nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
+       S_X[l][m]=s_mu_stiff(nu_BC,stiff);
+      }
      }
     }
-    wA[i][j][k]=ONE;
+    for(l=0;l<natom;l++)
+    {
+     P_X[l]=ONE;
+     for(m=0;m<natom;m++)
+     {
+      P_X[l]=P_X[l]*S_X[l][m];
+     }
+    }
+    Sum_PB=ZERO;
+    for(l=0;l<natom;l++)
+    {
+     Sum_PB+=P_X[l];
+    }
+    wA[i][j][k]=P_X[i]/Sum_PB;
    }
   }
  }
+ for(i=0;i<natom;i++)
+ {
+  delete[] S_X[i];S_X[i]=NULL;
+ }
+ delete[] P_X;P_X=NULL;
+ delete[] S_X;S_X=NULL;
 }
 
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
@@ -290,9 +323,9 @@ void grid_avail_becke(int & Order)
  }
 }
 
-double Xi_AB(int Z1, int Z2)
+double Xi_XY_val(int &Z1, int &Z2)
 {
- return set_radii(Z1)/set_radii(Z2); 
+ return set_radii(Z1)/set_radii(Z2);
 } 
 
 double set_radii(int &Z)

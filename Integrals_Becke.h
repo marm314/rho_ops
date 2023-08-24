@@ -20,7 +20,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration);
 void clean_quadrature_becke(string name, int &natoms);
 void grid_avail_becke(int & Order);
-double Xi_AB(int Z1, int Z2);
+double Xi_XY_val(int &Z1, int &Z2);
 double set_radii(int &Z);
 double p_mu(double &mu);
 double s_mu_stiff(double &mu,int stiff);
