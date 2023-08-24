@@ -3207,6 +3207,9 @@ int main(int argc, char *argv[])
     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
     Results<<"\t obtained with "<<method<<endl;
     Results<<endl;
+    Results<<"Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
+    Results<<"Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
+    Results<<endl;
     clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
    }
    Results<<"#*************************************************************************#";
