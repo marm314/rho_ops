@@ -26,3 +26,6 @@ test/
 rho_ops.tar.gz
 libcuba.a_old
 Integrals_Becke.o
+Manual_RHO.OPS.aux
+Manual_RHO.OPS.dvi
+Manual_RHO.OPS.log
