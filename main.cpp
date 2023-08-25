@@ -3190,10 +3190,11 @@ int main(int argc, char *argv[])
    }
    else
    {
-    int grid_theta_phi;
+    int grid_theta_phi,nprops=7; // Note: set nprops to numbers of properties !
     double *res_integration,mu[3];
-    res_integration=new double[4*Read_fchk_wfn.natoms+4]; // N, mu_x, mu_y, mu_z (per atom) + total N, mu_x, mu_y and mu_z
-    method="Becke quadrature";
+    double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
+    res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
+    method="Becke/TFVC quadrature";
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
@@ -3202,34 +3203,41 @@ int main(int argc, char *argv[])
     for(i=0;i<Read_fchk_wfn.natoms;i++)
     {
      Results<<" Atom "<<setw(4)<<i+1<<endl;
-     if(abs(res_integration[i*4])<pow(TEN,-EIGHT)){res_integration[i*4]=ZERO;}
-     if(abs(res_integration[i*4+1])<pow(TEN,-EIGHT)){res_integration[i*4+1]=ZERO;}
-     if(abs(res_integration[i*4+2])<pow(TEN,-EIGHT)){res_integration[i*4+2]=ZERO;}
-     if(abs(res_integration[i*4+3])<pow(TEN,-EIGHT)){res_integration[i*4+3]=ZERO;}
-     Results<<" N electrons   = "<<setw(17)<<res_integration[i*4]<<endl;
-     Results<<" mux           = "<<setw(17)<<res_integration[i*4+1]<<endl;;
-     Results<<" muy           = "<<setw(17)<<res_integration[i*4+2]<<endl;
-     Results<<" muz           = "<<setw(17)<<res_integration[i*4+3]<<endl;
+     for(j=0;j<nprops;j++)
+     {
+      if(abs(res_integration[i*nprops+j])<pow(TEN,-EIGHT)){res_integration[i*nprops+j]=ZERO;}
+     }
+     Results<<" N electrons   = "<<setw(17)<<res_integration[i*nprops]<<endl;
+     Results<<" mux           = "<<setw(17)<<res_integration[i*nprops+1]<<endl;;
+     Results<<" muy           = "<<setw(17)<<res_integration[i*nprops+2]<<endl;
+     Results<<" muz           = "<<setw(17)<<res_integration[i*nprops+3]<<endl;
+     Results<<" <r>           = "<<setw(17)<<res_integration[i*nprops+4]<<endl;
+     Results<<" <r^2>         = "<<setw(17)<<res_integration[i*nprops+5]<<endl;
+     Results<<" T_TF          = "<<setw(17)<<fact_TF*res_integration[i*nprops+6]<<endl;
     }
     Results<<endl;
-    Density=res_integration[4*Read_fchk_wfn.natoms];
+    Density=res_integration[nprops*Read_fchk_wfn.natoms];
     Read_fchk_wfn.muATOMS(mu);
-    if(abs(mu[0])<pow(TEN,-EIGHT)){mu[0]=ZERO;}
-    if(abs(mu[1])<pow(TEN,-EIGHT)){mu[1]=ZERO;}
-    if(abs(mu[2])<pow(TEN,-EIGHT)){mu[2]=ZERO;}
+    for(i=0;i<3;i++)
+    {
+     if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
+    }
     Results<<"Atomic contribution to mux        = "<<setw(17)<<mu[0]<<endl;
     Results<<"Atomic contribution to muy        = "<<setw(17)<<mu[1]<<endl;
     Results<<"Atomic contribution to muz        = "<<setw(17)<<mu[2]<<endl;
-    mu[0]=-res_integration[4*Read_fchk_wfn.natoms+1]+mu[0];
-    mu[1]=-res_integration[4*Read_fchk_wfn.natoms+2]+mu[1];
-    mu[2]=-res_integration[4*Read_fchk_wfn.natoms+3]+mu[2];
-    if(abs(mu[0])<pow(TEN,-EIGHT)){mu[0]=ZERO;}
-    if(abs(mu[1])<pow(TEN,-EIGHT)){mu[1]=ZERO;}
-    if(abs(mu[2])<pow(TEN,-EIGHT)){mu[2]=ZERO;}
+    for(i=0;i<3;i++)
+    {
+     mu[i]=-res_integration[nprops*Read_fchk_wfn.natoms+i+1]+mu[i];
+     if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
+    }
     Results<<"The result of the integration mux = "<<setw(17)<<mu[0]<<endl;
     Results<<"The result of the integration muy = "<<setw(17)<<mu[1]<<endl;
     Results<<"The result of the integration muz = "<<setw(17)<<mu[2]<<endl;
     Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
+    Results<<"The result of the integration <r> = "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+4]<<endl;
+    Results<<"The result of the integration <r2>= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+5]<<endl;
+    T_TF=fact_TF*res_integration[nprops*Read_fchk_wfn.natoms+6];
+    Results<<"The result of the integration T_TF= "<<setw(17)<<T_TF<<endl;
     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
     Results<<"\t obtained with "<<method<<endl;
     Results<<endl;

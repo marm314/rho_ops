@@ -1,7 +1,7 @@
 #include"Integrals_Becke.h"
 
 int nrad_becke,nang_becke;
-double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,*theta_becke,*phi_becke,***wA;
+double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,***wA;//,*theta_becke,*phi_becke;
 double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 //Functions description //
@@ -43,9 +43,10 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  y_becke=new double[nang_becke];
  z_becke=new double[nang_becke];
  w_theta_phi_becke=new double[nang_becke];
- theta_becke=new double[nang_becke];
- phi_becke=new double[nang_becke];
+// theta_becke=new double[nang_becke];
+// phi_becke=new double[nang_becke];
  ld_by_order(nang_becke,x_becke,y_becke,z_becke,w_theta_phi_becke);
+/*
  double *temp,*temp1;
  temp=new double[1];
  temp1=new double[1];
@@ -57,6 +58,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  }
  delete[] temp; temp=NULL;
  delete[] temp1; temp1=NULL;
+*/
  //
  // Prepare the quadrature weights for each atom
  //
@@ -137,20 +139,20 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
 
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
 {
- int i,j,k;
- double Point[3],density,fact_jacob_weight;
+ int i,j,k,nprops=7;
+ double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
  // Molecular init.
- res_integration[4*Rho.natoms]=ZERO;
- res_integration[4*Rho.natoms+1]=ZERO;
- res_integration[4*Rho.natoms+2]=ZERO;
- res_integration[4*Rho.natoms+3]=ZERO;
+ for(i=0;i<nprops;i++)
+ {
+  res_integration[nprops*Rho.natoms+i]=ZERO;
+ }
  // Calc. integrals
  for(i=0;i<Rho.natoms;i++)
  {
-  res_integration[i*4]=ZERO;
-  res_integration[i*4+1]=ZERO;
-  res_integration[i*4+2]=ZERO;
-  res_integration[i*4+3]=ZERO;
+  for(j=0;j<nprops;j++)
+  {
+   res_integration[i*nprops+j]=ZERO;
+  }
   for(j=0;j<nrad_becke;j++)
   { 
    for(k=0;k<nang_becke;k++)
@@ -158,27 +160,31 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
     Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
     Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
     Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
+    normPoint=norm3D(Point);
     Rho.rho_eval(Point,density);
     fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
-    res_integration[i*4]+=density*fact_jacob_weight;
-    res_integration[i*4+1]+=density*fact_jacob_weight*Point[0]; // rho \times x
-    res_integration[i*4+2]+=density*fact_jacob_weight*Point[1]; // rho \times y
-    res_integration[i*4+3]+=density*fact_jacob_weight*Point[2]; // rho \times z
+    res_integration[i*nprops]+=density*fact_jacob_weight;
+    res_integration[i*nprops+1]+=density*fact_jacob_weight*Point[0];            // rho \times x
+    res_integration[i*nprops+2]+=density*fact_jacob_weight*Point[1];            // rho \times y
+    res_integration[i*nprops+3]+=density*fact_jacob_weight*Point[2];            // rho \times z
+    res_integration[i*nprops+4]+=density*fact_jacob_weight*normPoint;           // rho \times r
+    res_integration[i*nprops+5]+=density*fact_jacob_weight*normPoint*normPoint; // rho \times r^2
+    if(abs(density)>pow(TEN,-FIFTEEN))
+    {
+     res_integration[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
+    }
    }
   }
  } 
  for(i=0;i<Rho.natoms;i++)
  {
-  // Times 4 Pi
-  res_integration[i*4]=FOUR*PI*res_integration[i*4];       // For each atom
-  res_integration[i*4+1]=FOUR*PI*res_integration[i*4+1];   // 
-  res_integration[i*4+2]=FOUR*PI*res_integration[i*4+2];   // 
-  res_integration[i*4+3]=FOUR*PI*res_integration[i*4+3];   // 
-  // Sum atoms
-  res_integration[4*Rho.natoms]+=res_integration[i*4];     // The whole molecule
-  res_integration[4*Rho.natoms+1]+=res_integration[i*4+1]; // 
-  res_integration[4*Rho.natoms+2]+=res_integration[i*4+2]; // 
-  res_integration[4*Rho.natoms+3]+=res_integration[i*4+3]; // 
+  for(j=0;j<nprops;j++)
+  {
+   // Times 4 Pi
+   res_integration[i*nprops+j]=FOUR*PI*res_integration[i*nprops+j];   // For each atom
+   // Sum atoms
+   res_integration[nprops*Rho.natoms+j]+=res_integration[i*nprops+j]; // The whole molecule
+  }
  }
 }
 
@@ -193,8 +199,8 @@ void clean_quadrature_becke(string name,int &natoms)
  delete[] z_becke; z_becke=NULL;
  delete[] r_becke; r_becke=NULL;
  delete[] r_real_becke;r_real_becke=NULL;
- delete[] theta_becke; theta_becke=NULL;
- delete[] phi_becke; phi_becke=NULL;
+// delete[] theta_becke; theta_becke=NULL;
+// delete[] phi_becke; phi_becke=NULL;
  delete[] w_radial_becke; w_radial_becke=NULL;
  delete[] w_theta_phi_becke; w_theta_phi_becke=NULL;
  for(i=0;i<natoms;i++)
