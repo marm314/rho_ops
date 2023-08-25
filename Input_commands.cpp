@@ -9,7 +9,7 @@ Input::Input(string rho_in)
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
- multiplicity=0;ncores=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
+ multiplicity=0;nprocs=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
  ifstream rho_input_file;
  rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
@@ -113,10 +113,10 @@ Input::Input(string rho_in)
    {
     Vr=true;
     rho_input_file>>Point_Vr[0]>>Point_Vr[1]>>Point_Vr[2];
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -168,10 +168,10 @@ Input::Input(string rho_in)
     }while(rho_in=="");
     name_dm2=rho_in;
     rho_input_file>>Point_intra[0]>>Point_intra[1]>>Point_intra[2];
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -193,10 +193,10 @@ Input::Input(string rho_in)
     }while(rho_in=="");
     name_dm2=rho_in;
     rho_input_file>>Point_extra[0]>>Point_extra[1]>>Point_extra[2];
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -211,10 +211,10 @@ Input::Input(string rho_in)
    else if(rho_in=="$tps")
    {
     tps=true;
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -241,10 +241,10 @@ Input::Input(string rho_in)
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
     second_fchk_wfn=rho_in;
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -303,10 +303,10 @@ Input::Input(string rho_in)
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
     fifth_fchk_wfn=rho_in;
-    rho_input_file>>ncores;
+    rho_input_file>>nprocs;
     rho_input_file>>error_abs>>error_rel;
     rho_input_file>>minevals>>maxevals;
-    if(ncores<0){ncores=0;}
+    if(nprocs<0){nprocs=0;}
     do
     {
      getline(rho_input_file,rho_in);
@@ -349,10 +349,10 @@ Input::Input(string rho_in)
     if(cuba_cubature=="cuba")
     {
      cuba=true;
-     rho_input_file>>ncores;
+     rho_input_file>>nprocs;
      rho_input_file>>error_abs>>error_rel;
      rho_input_file>>minevals>>maxevals;
-     if(ncores<0){ncores=0;}
+     if(nprocs<0){nprocs=0;}
      //Number of integral operations ops
      rho_input_file>>ops;
      integral_ops=new string[ops];

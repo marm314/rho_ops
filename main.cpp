@@ -1508,12 +1508,12 @@ int main(int argc, char *argv[])
       dmn.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmn.set_thershold(Input_commands.dmn_threshold);}
       integrate_dmnr(dmn,method,3,18,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-      fail,Integrals_interval,Input_commands.ncores,shan,fish,inertiar,r1,r2,dipolar);
+      fail,Integrals_interval,Input_commands.nprocs,shan,fish,inertiar,r1,r2,dipolar);
      }
      else
      {
       integrate_cuba(Read_fchk_wfn,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-      fail,Integrals_interval,Input_commands.ncores,shan,fish,inertiar,r1,r2,rm1,dipolar,rho);
+      fail,Integrals_interval,Input_commands.nprocs,shan,fish,inertiar,r1,r2,rm1,dipolar,rho);
      }
      Results<<"The result of the integration  N  = "<<setw(17)<<res_integration[0]<<endl;
      Nelec=(double)Read_fchk_wfn.nelectrons;
@@ -1722,12 +1722,12 @@ int main(int argc, char *argv[])
       dmnp.dmnincore(Input_commands.store_dmn,Input_commands.mem);
       if(Input_commands.dmn_thresh){dmnp.set_thershold(Input_commands.dmn_threshold);}
       integrate_dmnp(dmnp,method,3,18,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-      fail,Integrals_interval,Input_commands.ncores,shanp,fishp,inertiap,p1,p2);
+      fail,Integrals_interval,Input_commands.nprocs,shanp,fishp,inertiap,p1,p2);
      }
      else
      {
       integrate_cubap(Read_fchk_wfn,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-      fail,Integrals_interval,Input_commands.ncores,shanp,fishp,inertiap,p1,p2);
+      fail,Integrals_interval,Input_commands.nprocs,shanp,fishp,inertiap,p1,p2);
      }
      Results<<"The result of the integration  Np = "<<setw(17)<<res_integration[0]<<endl;
      Nelec=(double)Read_fchk_wfn.nelectrons;
@@ -1918,7 +1918,7 @@ int main(int argc, char *argv[])
        {Integrals_interval[j]=phi_rad(Integrals_interval[j]);}
       }
       integrate_cuba_sij(Read_fchk_wfn,method,3,Tot_Ovrlps,error_rel,error_abs,MIN_EVALS,MAX_EVALS,SIJ,
-      fail,Integrals_interval,Input_commands.ncores,Input_commands.MOorNO);
+      fail,Integrals_interval,Input_commands.nprocs,Input_commands.MOorNO);
       if(mos_to_nos_dmn)
       {
        mos_to_nos_dmn_sij(SIJ,Read_fchk_wfn,Input_commands);
@@ -3418,7 +3418,7 @@ int main(int argc, char *argv[])
     if(!Input_commands.symrot_no)
     {
      integrate_cuba(Read_fchk_wfn,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-     fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+     fail,Integrals_interval,Input_commands.nprocs,false,false,true,false,false,false,false,false);
     }
     Results<<"The result of the integration N_1 = "<<setw(17)<<res_integration[0]<<endl;
     if(abs(res_integration[0]-(int)res_integration[0])>=HALF)
@@ -3523,7 +3523,7 @@ int main(int argc, char *argv[])
     if(!Input_commands.symrot_no)
     {
      integrate_cuba(Read_fchk_wfn_2,method,3,20,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,
-     fail,Integrals_interval,Input_commands.ncores,false,false,true,false,false,false,false,false);
+     fail,Integrals_interval,Input_commands.nprocs,false,false,true,false,false,false,false,false);
     }
     Results<<"The result of the integration N_2 = "<<setw(17)<<res_integration[0]<<endl;
     if(abs(res_integration[0]-(int)res_integration[0])>=HALF)
@@ -3659,12 +3659,12 @@ int main(int argc, char *argv[])
      Results<<endl;
     }
     Results<<endl;
-    integrate_dens_sim(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,Rot_grid_matrix);
+    integrate_dens_sim(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.nprocs,Rot_grid_matrix);
    }
    else
    {
     for(i=0;i<3;i++){Input_commands.init_coord_r[i]=Input_commands.init_coord_r[i]*Angs2au;}
-    integrate_V_Hartree(two_fchks_wfns,method,6,2,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,
+    integrate_V_Hartree(two_fchks_wfns,method,6,2,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.nprocs,
     Input_commands.init_coord_r);
    }
    Density_alpha=res_integration[0];
@@ -3699,7 +3699,7 @@ int main(int argc, char *argv[])
    Results<<endl;
    if(Input_commands.symgrad)
    {
-    integrate_dens_sim2(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,Rot_grid_matrix);
+    integrate_dens_sim2(two_fchks_wfns,method,3,7,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.nprocs,Rot_grid_matrix);
     Results<<"The result of the integration G_1 = "<<setw(17)<<res_integration[0]<<endl;
     Results<<"The result of the integration G_2 = "<<setw(17)<<res_integration[1]<<endl;
     Results<<"The result of int [g(r)_1]^2      = "<<setw(17)<<res_integration[2]<<endl;
@@ -3864,7 +3864,7 @@ int main(int argc, char *argv[])
     cout<<Density<<endl;
    */
    Results<<endl;
-   integrate_pol_hyperpol(five_fchks_wfns,method,3,9,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.ncores,Input_commands.dir_pol_hyper);
+   integrate_pol_hyperpol(five_fchks_wfns,method,3,9,error_rel,error_abs,MIN_EVALS,MAX_EVALS,res_integration,fail,Input_commands.nprocs,Input_commands.dir_pol_hyper);
    Results<<"The result of the integration N_1 = "<<setw(17)<<res_integration[0]<<endl;
    Results<<"The result of the integration N_2 = "<<setw(17)<<res_integration[1]<<endl;
    Results<<"The result of the integration N_3 = "<<setw(17)<<res_integration[2]<<endl;
@@ -3907,7 +3907,7 @@ int main(int argc, char *argv[])
    for(i=0;i<3;i++){TPS[i]=new double[3];}
    Results<<setprecision(10)<<fixed<<scientific;
    integrate_tps_fchk(Read_fchk_wfn,Input_commands.method_cuba,3,10,Input_commands.error_rel,Input_commands.error_abs,
-   Input_commands.minevals,Input_commands.maxevals,res_integration_fchk,fail,Input_commands.ncores);
+   Input_commands.minevals,Input_commands.maxevals,res_integration_fchk,fail,Input_commands.nprocs);
    Results<<" N  =  Int Rho(r) dr       = "<<setw(17)<<res_integration_fchk[0]<<endl;
    Results<<"   <x>               <y>               <z>"<<endl;
    for(i=1;i<4;i++)
@@ -4040,7 +4040,7 @@ int main(int argc, char *argv[])
    Results<<Input_commands.Point_intra[2]<<endl;
    Intracule=ZERO;
    integrate_intra(dmn,method,3,1,error_rel,error_abs,MIN_EVALS,MAX_EVALS,Intracule,fail,
-   Input_commands.ncores,Input_commands.Point_intra);
+   Input_commands.nprocs,Input_commands.Point_intra);
    Results<<"I(x12,y12,z12)     : "<<setw(17)<<HALF*Intracule<<endl;
    Results<<endl;
    Results<<"\t \t Obtained with "<<method<<", fail report "<<fail<<endl;
@@ -4094,7 +4094,7 @@ int main(int argc, char *argv[])
    Results<<Input_commands.Point_extra[2]<<endl;
    Extracule=ZERO;
    integrate_extra(dmn,method,3,1,error_rel,error_abs,MIN_EVALS,MAX_EVALS,Extracule,fail,
-   Input_commands.ncores,Input_commands.Point_extra);
+   Input_commands.nprocs,Input_commands.Point_extra);
    Results<<"E(X12,Y12,Z12)     : "<<setw(17)<<HALF*Extracule<<endl;
    Results<<endl;
    Results<<"\t \t Obtained with "<<method<<", fail report "<<fail<<endl;
@@ -4119,7 +4119,7 @@ int main(int argc, char *argv[])
    double res_integration_fchk[2]={ZERO},Vn,Ve;
    Results<<setprecision(10)<<fixed<<scientific;
    integrate_vr_fchk(Read_fchk_wfn,Input_commands.method_cuba,3,2,Input_commands.error_rel,Input_commands.error_abs,
-   Input_commands.minevals,Input_commands.maxevals,res_integration_fchk,fail,Input_commands.ncores,Input_commands.Point_Vr);
+   Input_commands.minevals,Input_commands.maxevals,res_integration_fchk,fail,Input_commands.nprocs,Input_commands.Point_Vr);
    Vn=Read_fchk_wfn.Vnuclear(Input_commands.Point_Vr);
    Ve=res_integration_fchk[1];
    Results<<" N  =  Int Rho(r) dr       = "<<setw(17)<<res_integration_fchk[0]<<endl;

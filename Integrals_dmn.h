@@ -23,15 +23,15 @@ void define_interval_dmn(double Interval[6]);
 //Cuba
 void integrate_dmnr(DMN_OPS &DMNr,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[18], int &fail,double Integrals_interval[6],int &ncores,
+double result_integration[18], int &fail,double Integrals_interval[6],int &nprocs,
 bool shan,bool fish,bool inertias,bool r1,bool r2,bool dipole);
 void integrate_dmnp(DMN_P_OPS &DMNp,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[18], int &fail,double Integrals_interval[6],int &ncores,
+double result_integration[18], int &fail,double Integrals_interval[6],int &nprocs,
 bool shan,bool fish,bool inertias,bool p1,bool p2);
 void integrate_intrac(DMN_OPS &DMNr,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[18], int &fail,double Integrals_interval[6],int &ncores,
+double result_integration[18], int &fail,double Integrals_interval[6],int &nprocs,
 bool shan,bool fish,bool inertias,bool r1,bool r2,bool dipole);
 //Function redable from cuba.h
 int Integrand_dmn(const int *ndim, const double xx[],const int *ncomp, double ff[],

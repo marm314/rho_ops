@@ -50,7 +50,7 @@ void define_interval_dmn(double Interval[6])
 //////////////////////////
 void integrate_dmnr(DMN_OPS &DMNr,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[18], int &fail,double Integrals_interval[6],int &ncores,
+double result_integration[18], int &fail,double Integrals_interval[6],int &nprocs,
 bool shan,bool fish,bool inertias,bool r1,bool r2,bool dipole)
 {
   int i,verbose=0,nregions,neval;
@@ -85,7 +85,7 @@ bool shan,bool fish,bool inertias,bool r1,bool r2,bool dipole)
   void * USERDATA=NULL;
   USERDATA=&DMNr;
   define_dmn();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,
  // int i=5;
@@ -123,7 +123,7 @@ bool shan,bool fish,bool inertias,bool r1,bool r2,bool dipole)
 }
 void integrate_dmnp(DMN_P_OPS &DMNp,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[18], int &fail,double Integrals_interval[6],int &ncores,
+double result_integration[18], int &fail,double Integrals_interval[6],int &nprocs,
 bool shan,bool fish,bool inertias,bool p1,bool p2)
 {
   int i,verbose=0,nregions,neval;
@@ -157,7 +157,7 @@ bool shan,bool fish,bool inertias,bool p1,bool p2)
   void * USERDATA=NULL;
   USERDATA=&DMNp;
   define_dmn();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,
  // int i=5;
@@ -195,7 +195,7 @@ bool shan,bool fish,bool inertias,bool p1,bool p2)
 }
 void integrate_intra(DMN_OPS &DMNr,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double &result_integration, int &fail,int &ncores,double POINT_INTRA[3])
+double &result_integration, int &fail,int &nprocs,double POINT_INTRA[3])
 {
  int i,verbose=0,nregions,neval;
  double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -205,7 +205,7 @@ double &result_integration, int &fail,int &ncores,double POINT_INTRA[3])
  void * USERDATA=NULL;
  USERDATA=&DMNr;
  define_dmn();
- cubacores(ncores,PCORE);
+ cubacores(nprocs,PCORE);
  if(method=="Cuhre")
  {
   Cuhre(NDIM, NCOMP, Integrand_intra, USERDATA, NVEC1,EPSREL, EPSABS, verbose | LAST,MINEVAL,
@@ -234,7 +234,7 @@ double &result_integration, int &fail,int &ncores,double POINT_INTRA[3])
 }
 void integrate_extra(DMN_OPS &DMNr,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double &result_integration, int &fail,int &ncores,double POINT_EXTRA[3])
+double &result_integration, int &fail,int &nprocs,double POINT_EXTRA[3])
 {
  int i,verbose=0,nregions,neval;
  double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -244,7 +244,7 @@ double &result_integration, int &fail,int &ncores,double POINT_EXTRA[3])
  void * USERDATA=NULL;
  USERDATA=&DMNr;
  define_dmn();
- cubacores(ncores,PCORE);
+ cubacores(nprocs,PCORE);
  if(method=="Cuhre")
  {
   Cuhre(NDIM, NCOMP, Integrand_extra, USERDATA, NVEC1,EPSREL, EPSABS, verbose | LAST,MINEVAL,

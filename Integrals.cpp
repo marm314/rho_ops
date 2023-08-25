@@ -47,7 +47,7 @@ void define_interval(double Interval[6])
 //////////////////////////
 void integrate_cuba(READ_FCHK_WFN &read_fchk_wfn,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[20], int &fail,double Integrals_interval[6],int &ncores,bool shan,bool fish,bool inertias,
+double result_integration[20], int &fail,double Integrals_interval[6],int &nprocs,bool shan,bool fish,bool inertias,
 bool r1,bool r2,bool rm1,bool dipole,bool Rho)
 {
   int i,verbose=0,nregions,neval;
@@ -84,7 +84,7 @@ bool r1,bool r2,bool rm1,bool dipole,bool Rho)
   void * USERDATA=NULL;
   USERDATA=&read_fchk_wfn;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,
  // int i=5;
@@ -122,7 +122,7 @@ bool r1,bool r2,bool rm1,bool dipole,bool Rho)
 }
 void integrate_cubap(READ_FCHK_WFN &read_fchk_wfn,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[20], int &fail,double Integrals_interval[6],int &ncores,bool shan,bool fish,bool inertias,
+double result_integration[20], int &fail,double Integrals_interval[6],int &nprocs,bool shan,bool fish,bool inertias,
 bool p1,bool p2)
 {
   int i,verbose=0,nregions,neval;
@@ -156,7 +156,7 @@ bool p1,bool p2)
   void * USERDATA=NULL;
   USERDATA=&read_fchk_wfn;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,
  // int i=5;
@@ -194,7 +194,7 @@ bool p1,bool p2)
 }
 void integrate_cuba_sij(READ_FCHK_WFN &read_fchk_wfn,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double **SIJ, int &fail,double Integrals_interval[6],int &ncores,string MOorNO)
+double **SIJ, int &fail,double Integrals_interval[6],int &nprocs,string MOorNO)
 {
  int i,j,k,fail_tot=0,verbose=0,nregions,neval;
  double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -225,7 +225,7 @@ double **SIJ, int &fail,double Integrals_interval[6],int &ncores,string MOorNO)
  void * USERDATA=NULL;
  USERDATA=&read_fchk_wfn;
  define();
- cubacores(ncores,PCORE);
+ cubacores(nprocs,PCORE);
  if(NCOMP!=read_fchk_wfn.nbasis())
  {
   if(method=="Cuhre")
@@ -338,14 +338,14 @@ double **SIJ, int &fail,double Integrals_interval[6],int &ncores,string MOorNO)
 }
 void integrate_tps_fchk(READ_FCHK_WFN &read_fchk_wfn,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[10], int &fail,int &ncores)
+double result_integration[10], int &fail,int &nprocs)
 {
   int i,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
   void * USERDATA=NULL;
   USERDATA=&read_fchk_wfn;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,
  // int i=5;
@@ -385,7 +385,7 @@ double result_integration[10], int &fail,int &ncores)
 }
 void  integrate_dens_sim(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
-double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
+double result_integration[7], int &fail,int &nprocs,double ROT_MATRIX[3][3])
 {
   int i,j,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -393,7 +393,7 @@ double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
   //Point void pointer to N_FCHKS_WFNS struct direction.
   USERDATA=&two_fchks_wfns;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
   for(i=0;i<3;i++)
   {
    for(j=0;j<3;j++)
@@ -441,7 +441,7 @@ double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
 
 void  integrate_V_Hartree(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
-double result_integration[2], int &fail,int &ncores,double displacement[3])
+double result_integration[2], int &fail,int &nprocs,double displacement[3])
 {
   int i,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -449,7 +449,7 @@ double result_integration[2], int &fail,int &ncores,double displacement[3])
   //Point void pointer to N_FCHKS_WFNS struct direction.
   USERDATA=&two_fchks_wfns;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
   for(i=0;i<3;i++)
   {
    Point_Vr[i]=displacement[i];
@@ -494,7 +494,7 @@ double result_integration[2], int &fail,int &ncores,double displacement[3])
 
 void  integrate_dens_sim2(N_FCHKS_WFNS two_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
-double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
+double result_integration[7], int &fail,int &nprocs,double ROT_MATRIX[3][3])
 {
   int i,j,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -502,7 +502,7 @@ double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
   //Point void pointer to N_FCHKS_WFNS struct direction.
   USERDATA=&two_fchks_wfns;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
   for(i=0;i<3;i++)
   {
    for(j=0;j<3;j++)
@@ -550,7 +550,7 @@ double result_integration[7], int &fail,int &ncores,double ROT_MATRIX[3][3])
 
 void  integrate_pol_hyperpol(N_FCHKS_WFNS five_fchks_wfns,string method, const int NDIM,
 const int NCOMP, const double EPSREL,const double EPSABS, const int MINEVAL, const int MAXEVAL,
-double result_integration[9], int &fail,int &ncores,char dir_pol_hyper)
+double result_integration[9], int &fail,int &nprocs,char dir_pol_hyper)
 {
   int i,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
@@ -558,7 +558,7 @@ double result_integration[9], int &fail,int &ncores,char dir_pol_hyper)
   //Point void pointer to N_FCHKS_WFNS struct direction.
   USERDATA=&five_fchks_wfns;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
   if(dir_pol_hyper=='x' || dir_pol_hyper=='X')
   {DIR_POL_HYPER='x';}
   else if(dir_pol_hyper=='y' || dir_pol_hyper=='Y')
@@ -604,14 +604,14 @@ double result_integration[9], int &fail,int &ncores,char dir_pol_hyper)
 }
 void integrate_vr_fchk(READ_FCHK_WFN &read_fchk_wfn,string method,const int NDIM,const int NCOMP,
 const double EPSREL,const double EPSABS,const int MINEVAL, const int MAXEVAL,
-double result_integration[2], int &fail,int &ncores,double Point_Vr_in[3])
+double result_integration[2], int &fail,int &nprocs,double Point_Vr_in[3])
 {
   int i,verbose=0,nregions,neval;
   double integral[NCOMP], error[NCOMP], prob[NCOMP];
   void * USERDATA=NULL;
   USERDATA=&read_fchk_wfn;
   define();
-  cubacores(ncores,PCORE);
+  cubacores(nprocs,PCORE);
   for(i=0;i<3;i++){Point_Vr[i]=Point_Vr_in[i];}
  //Regard that for cout and to access void * have to cast the
  //pointer to the corresponding type(int, double, string, object...). See e.g.,

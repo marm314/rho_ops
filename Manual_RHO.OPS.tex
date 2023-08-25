@@ -197,7 +197,7 @@ All integrals are performed in spherical coordinates system and the information 
 \begin{verbatim}
    $INTEGRALS
    cuba
-   ncores               -> Number of cores to be used by cuba library (1 to idle cores) 
+   nprocs               -> Number of cores to be used by cuba library (1 to idle cores) 
    error_abs error_rel    
    min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
    operations           -> Total number of integrals to cumpute N (integer)
@@ -366,7 +366,7 @@ Note 3.2: The Quadrature procedure allows to calculate all n-regions at the same
    $INTRACULE
     name_file.dm2        -> Name of the DM2 file
     x12   y12  z12       -> Intracule point to evaluate 
-    ncores               -> Number of cores to be used by cuba library
+    nprocs               -> Number of cores to be used by cuba library
     error_abs error_rel    
     min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
     procedure            -> (i.e. Cuhre, Vegas, etc.)
@@ -376,7 +376,7 @@ This calcualation needs the DM2 in core so include the \$\textbf{DMNINCORE} keyw
 \noindent RHO.OPS has the option to calculate the Total Position Spread $[$TPS$]$ (see: $https://en.wikipedia.org/wiki/Total\_position\_spread$) for more details. The TPS calculated is first the approximated TPS (compute using only the density) but if the moments $<x1x2>$, $<x1y2>$, $<x1z2>$, $<y1y2>$, $<y1z2>$ and $<z1z2>$ are given, the exact TPS is also computed. Only CUBA procedure is available for this quantity. 
 \begin{verbatim}
    $TPS
-   ncores               -> Number of cores to be used by cuba library (1 to idle cores) 
+   nprocs               -> Number of cores to be used by cuba library (1 to idle cores) 
    error_abs error_rel    
    min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
    procedure            -> (i.e. Cuhre, Vegas, etc.)
@@ -390,7 +390,7 @@ Note3: If DM2 moments  are used, recall to use a FCHK, WFX or WFN file whose den
 \begin{verbatim}
    $DENS_SIM
    second_fchk          -> Name of the second FCHK or WFN file. 
-   ncores               -> Number of cores to be used by cuba library (1 to idle cores) 
+   nprocs               -> Number of cores to be used by cuba library (1 to idle cores) 
    error_abs error_rel    
    min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
    procedure            -> (i.e. Cuhre, Vegas, etc.)
@@ -406,7 +406,7 @@ Note: Notice that WFN and FCHK files can be used at the same time.\\
    third_fchk           -> Name of the second FCHK or WFN file (  F). 
    fourth_fchk          -> Name of the second FCHK or WFN file (-2F). 
    fifth_fchk           -> Name of the second FCHK or WFN file ( 2F). 
-   ncores               -> Number of cores to be used by cuba library (1 to idle cores) 
+   nprocs               -> Number of cores to be used by cuba library (1 to idle cores) 
    error_abs error_rel    
    min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
    procedure            -> (i.e. Cuhre, Vegas, etc.)
@@ -529,7 +529,7 @@ To use it include
 \begin{verbatim}
    $Vr
    x   y  z             -> Coordinates where to eval V(x,y,z)
-   ncores               -> Number of cores to be used by cuba library (1 to idle cores) 
+   nprocs               -> Number of cores to be used by cuba library (1 to idle cores) 
    error_abs error_rel    
    min_evals max_evals  -> Minimum and maximum number of evaluations (e.g. 0 1000000)
    procedure            -> (i.e. Cuhre, Vegas, etc.)
