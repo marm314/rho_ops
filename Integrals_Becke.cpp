@@ -169,7 +169,7 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
     res_integration[i*nprops+3]+=density*fact_jacob_weight*Point[2];            // rho \times z
     res_integration[i*nprops+4]+=density*fact_jacob_weight*normPoint;           // rho \times r
     res_integration[i*nprops+5]+=density*fact_jacob_weight*normPoint*normPoint; // rho \times r^2
-    if(abs(density)>pow(TEN,-FIFTEEN))
+    if(density>pow(TEN,-FIFTEEN)) // Negative densities from transtion densities are omitted
     {
      res_integration[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
     }
