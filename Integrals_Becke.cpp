@@ -352,7 +352,129 @@ double Xi_XY_val(int &Z1, int &Z2)
  return set_radii(Z1)/set_radii(Z2);
 } 
 
+// Radii taken from APOST-3D code
+double set_radii(int &Z)
+{
+ double val=ZERO;
+ if(Z==1){val=0.327;}
+ else if(Z==2){val= 1.000;}
+ else if(Z==3){val= 1.219;}
+ else if(Z==4){val= 0.911;}
+ else if(Z==5){val= 0.793;}
+ else if(Z==6){val= 0.766;}
+ else if(Z==7){val= 0.699;}
+ else if(Z==8){val= 0.658;}
+ else if(Z==9){val= 0.900;}
+ else if(Z==10){val=1.000;}
+ else if(Z==11){val=1.545;}
+ else if(Z==12){val=1.333;}
+ else if(Z==13){val=1.199;}
+ else if(Z==14){val=1.123;}
+ else if(Z==15){val=1.110;}
+ else if(Z==16){val=1.071;}
+ else if(Z==17){val=1.039;}
+ else if(Z==18){val=1.000;}
+ else if(Z==19){val=1.978;}
+ else if(Z==20){val=1.745;}
+ else if(Z==21){val=1.337;}
+ else if(Z==22){val=1.274;}
+ else if(Z==23){val=1.236;}
+ else if(Z==24){val=1.128;}
+ else if(Z==25){val=1.180;}
+ else if(Z==26){val=1.091;}
+ else if(Z==27){val=1.089;}
+ else if(Z==28){val=1.077;}
+ else if(Z==29){val=1.146;}
+ else if(Z==30){val=1.187;}
+ else if(Z==31){val=1.199;}
+ else if(Z==32){val=1.179;}
+ else if(Z==33){val=1.209;}
+ else if(Z==34){val=1.201;}
+ else if(Z==35){val=1.201;}
+ else if(Z==36){val=1.000;}
+ else if(Z==37){val=2.217;}
+ else if(Z==38){val=1.928;}
+ else if(Z==39){val=1.482;}
+ else if(Z==40){val=1.377;}
+ else if(Z==41){val=1.353;}
+ else if(Z==42){val=1.240;}
+ else if(Z==43){val=1.287;}
+ else if(Z==44){val=1.212;}
+ else if(Z==45){val=1.229;}
+ else if(Z==46){val=1.240;}
+ else if(Z==47){val=1.362;}
+ else if(Z==48){val=1.429;}
+ else if(Z==49){val=1.385;}
+ else if(Z==50){val=1.380;}
+ else if(Z==51){val=1.421;}
+ else if(Z==52){val=1.400;}
+ else if(Z==53){val=1.397;}
+ else if(Z==54){val=1.000;}
+ else if(Z==55){val=2.442;}
+ else if(Z==56){val=2.149;}
+ else if(Z==57){val=1.653;}
+ else if(Z==58){val=1.500;}
+ else if(Z==59){val=1.500;}
+ else if(Z==60){val=1.500;}
+ else if(Z==61){val=1.500;}
+ else if(Z==62){val=1.500;}
+ else if(Z==63){val=1.500;}
+ else if(Z==64){val=1.500;}
+ else if(Z==65){val=1.500;}
+ else if(Z==66){val=1.500;}
+ else if(Z==67){val=1.500;}
+ else if(Z==68){val=1.500;}
+ else if(Z==69){val=1.500;}
+ else if(Z==70){val=1.500;}
+ else if(Z==71){val=1.500;}
+ else if(Z==72){val=1.364;}
+ else if(Z==73){val=1.346;}
+ else if(Z==74){val=1.256;}
+ else if(Z==75){val=1.258;}
+ else if(Z==76){val=1.222;}
+ else if(Z==77){val=1.227;}
+ else if(Z==78){val=1.227;}
+ else if(Z==79){val=1.273;}
+ else if(Z==80){val=1.465;}
+ else if(Z==81){val=1.531;}
+ else if(Z==82){val=1.434;}      
+ else if(Z==83){val=1.496;}
+ else if(Z==84){val=1.500;}
+ else if(Z==85){val=1.500;}	
+ else if(Z==86){val=1.500;}      
+ else if(Z==87){val=1.500;}      		
+ else if(Z==88){val=1.500;}
+ else if(Z==89){val=1.500;}
+ else if(Z==90){val=1.500;}
+ else if(Z==91){val=1.500;}
+ else if(Z==92){val=1.500;}
+ else
+ {
+  cout<<"Warning! Atom with Z "<<Z<<" does not have a Bohr radius available."<<endl;
+  cout<<"Bohr radius set to 1.60."<<endl;
+  val=1.60;
+ }
+ return val;
+}
+
+double s_mu_stiff(double &mu,int stiff)
+{
+ int i;
+ double val=mu;
+ for(i=0;i<stiff;i++)
+ {
+  val=p_mu(val);
+ }
+ return HALF*(ONE-val);
+}
+
+double p_mu(double &mu)
+{
+ return HALF*(THREE*mu-pow(mu,THREE));
+}
+
 // See J. C. Slater, J. Chem. Phys., 41, 3199 (1964)
+/*
 double set_radii(int &Z)
 {
  double val=ZERO;
@@ -393,7 +515,7 @@ double set_radii(int &Z)
  else if(Z==35){val=1.15;} 	
  else if(Z==36){val=1.75;} // Avg
  else if(Z==37){val=2.35;}
- else if(Z==38){val=2.00;} 
+ else if(Z==38){val=2.00;}
  else if(Z==39){val=1.80;}
  else if(Z==40){val=1.55;}
  else if(Z==41){val=1.45;}
@@ -405,7 +527,7 @@ double set_radii(int &Z)
  else if(Z==47){val=1.60;}
  else if(Z==48){val=1.55;}
  else if(Z==49){val=1.55;}
- else if(Z==50){val=1.45;} 
+ else if(Z==50){val=1.45;}
  else if(Z==51){val=1.45;}
  else if(Z==52){val=1.40;}
  else if(Z==53){val=1.40;}
@@ -459,19 +581,5 @@ double set_radii(int &Z)
  }
  return val;
 }
+*/
 
-double s_mu_stiff(double &mu,int stiff)
-{
- int i;
- double val=mu;
- for(i=0;i<stiff;i++)
- {
-  val=p_mu(val);
- }
- return HALF*(ONE-val);
-}
-
-double p_mu(double &mu)
-{
- return HALF*(THREE*mu-pow(mu,THREE));
-}
