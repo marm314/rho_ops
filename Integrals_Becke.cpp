@@ -137,53 +137,67 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  delete[] S_X;S_X=NULL;
 }
 
-void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
+void Integrate_becke(vector<READ_FCHK_WFN> Rho,double *res_integration,int &nprocs)
 {
- int i,j,k,nprops=7;
+ int i,j,k,nprops=7,natoms=Rho[0].natoms;
  double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
  // Molecular init.
- for(i=0;i<nprops;i++)
+ for(i=0;i<nprops*natoms+nprops;i++)
  {
-  res_integration[nprops*Rho.natoms+i]=ZERO;
+  res_integration[i]=ZERO;
  }
  // Calc. integrals
- for(i=0;i<Rho.natoms;i++)
+ #pragma omp parallel num_threads(nprocs) \
+ private(i,j,k,Point,normPoint,density,fact_jacob_weight) \
+ shared(r_becke,r_real_becke,x_becke,y_becke,z_becke,natoms,nrad_becke,nang_becke,nprops,\
+ wA,w_theta_phi_becke,w_radial_becke)
  {
-  for(j=0;j<nprops;j++)
+  int nth=omp_get_num_threads();
+  int ith=omp_get_thread_num();
+  double *res_integration_th;
+  res_integration_th=new double[nprops*natoms+nprops];
+  for(i=0;i<nprops*natoms+nprops;i++){res_integration_th[i]=ZERO;}
+  for(i=ith;i<natoms;i=i+nth)
   {
-   res_integration[i*nprops+j]=ZERO;
-  }
-  for(j=0;j<nrad_becke;j++)
-  { 
-   for(k=0;k<nang_becke;k++)
-   {
-    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
-    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
-    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
-    normPoint=norm3D(Point);
-    Rho.rho_eval(Point,density);
-    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
-    res_integration[i*nprops]+=density*fact_jacob_weight;
-    res_integration[i*nprops+1]+=density*fact_jacob_weight*Point[0];            // rho \times x
-    res_integration[i*nprops+2]+=density*fact_jacob_weight*Point[1];            // rho \times y
-    res_integration[i*nprops+3]+=density*fact_jacob_weight*Point[2];            // rho \times z
-    res_integration[i*nprops+4]+=density*fact_jacob_weight*normPoint;           // rho \times r
-    res_integration[i*nprops+5]+=density*fact_jacob_weight*normPoint*normPoint; // rho \times r^2
-    if(density>pow(TEN,-FIFTEEN)) // Negative densities from transtion densities are omitted
+   for(j=0;j<nrad_becke;j++)
+   { 
+    for(k=0;k<nang_becke;k++)
     {
-     res_integration[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
+     Point[0]=r_real_becke[j]*x_becke[k]+Rho[ith].Cartesian_Coor[i][0];
+     Point[1]=r_real_becke[j]*y_becke[k]+Rho[ith].Cartesian_Coor[i][1];
+     Point[2]=r_real_becke[j]*z_becke[k]+Rho[ith].Cartesian_Coor[i][2];
+     normPoint=norm3D(Point);
+     Rho[ith].rho_eval(Point,density);
+     fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+     res_integration_th[i*nprops]+=density*fact_jacob_weight;
+     res_integration_th[i*nprops+1]+=density*fact_jacob_weight*Point[0];            // rho \times x
+     res_integration_th[i*nprops+2]+=density*fact_jacob_weight*Point[1];            // rho \times y
+     res_integration_th[i*nprops+3]+=density*fact_jacob_weight*Point[2];            // rho \times z
+     res_integration_th[i*nprops+4]+=density*fact_jacob_weight*normPoint;           // rho \times r
+     res_integration_th[i*nprops+5]+=density*fact_jacob_weight*normPoint*normPoint; // rho \times r^2
+     if(density>pow(TEN,-FIFTEEN)) // Negative densities from transtion densities are omitted
+     {
+      res_integration_th[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
+     }
     }
    }
   }
- } 
- for(i=0;i<Rho.natoms;i++)
+  #pragma omp barrier
+  #pragma omp critical
+  {
+   for(i=0;i<nprops*natoms+nprops;i++){res_integration[i]+=res_integration_th[i];}
+  } 
+  delete[] res_integration_th;res_integration_th=NULL;
+ }
+ // Multiply by 4 Pi and sum atomic contrib. to  
+ for(i=0;i<natoms;i++)
  {
   for(j=0;j<nprops;j++)
   {
    // Times 4 Pi
    res_integration[i*nprops+j]=FOUR*PI*res_integration[i*nprops+j];   // For each atom
    // Sum atoms
-   res_integration[nprops*Rho.natoms+j]+=res_integration[i*nprops+j]; // The whole molecule
+   res_integration[nprops*natoms+j]+=res_integration[i*nprops+j]; // The whole molecule
   }
  }
 }

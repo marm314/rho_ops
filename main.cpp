@@ -3125,13 +3125,18 @@ int main(int argc, char *argv[])
     double *res_integration,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
     res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
-//    vector<READ_FCHK_WFN>my_fchk_wfn;
-//    my_fchk_wfn.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+    if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}
+    if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}
+    vector<READ_FCHK_WFN>Read_fchk_wfn_th;
+    for(i=0;i<Input_commands.nprocs;i++)
+    {
+     Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+    }
     method="Becke/TFVC quadrature";
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
-    Integrate_becke(Read_fchk_wfn,res_integration);
+    Integrate_becke(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
     Results<<endl;
     for(i=0;i<Read_fchk_wfn.natoms;i++)
     {
@@ -3176,6 +3181,7 @@ int main(int argc, char *argv[])
     Results<<endl;
     Results<<" Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
     Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
+    Results<<" Using OMP running on    "<<setw(5)<<Input_commands.nprocs<<" threads"<<endl;
     Results<<endl;
     clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
     delete[] res_integration; res_integration=NULL;

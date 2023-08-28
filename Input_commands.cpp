@@ -514,10 +514,11 @@ Input::Input(string rho_in)
     else //Becke Quadrature
     {
      becke=true;
-     rho_input_file>>order_grid_r>>order_grid_ang>>stiff;
+     rho_input_file>>order_grid_r>>order_grid_ang>>stiff>>nprocs;
      if(order_grid_ang<=70){order_grid_ang=70;}
      if(order_grid_r<=30){order_grid_r=30;}
      if(stiff<4){stiff=4;}
+     if(nprocs<1){nprocs=1;}
     }
    }
    else if(rho_in=="$dmn_r")

@@ -7,6 +7,8 @@
 #include<iomanip>
 #include<stdio.h>
 #include<stdlib.h>
+#include<vector>
+#include<omp.h>
 #include"sphere_lebedev_rule.h"
 #include"legendre_quadrature.h"
 #include"Numbers.h"
@@ -17,7 +19,7 @@ using namespace std;
 //Functions declaration //
 //////////////////////////
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang,int &stiff);
-void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration);
+void Integrate_becke(vector<READ_FCHK_WFN>Rho,double *res_integration,int &nprocs);
 void clean_quadrature_becke(string name, int &natoms);
 void grid_avail_becke(int & Order);
 double Xi_XY_val(int &Z1, int &Z2);
