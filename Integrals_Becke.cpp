@@ -137,7 +137,55 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  delete[] S_X;S_X=NULL;
 }
 
-void Integrate_becke(vector<READ_FCHK_WFN> Rho,double *res_integration,int &nprocs)
+void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
+{
+ int i,j,k,nprops=7,natoms=Rho.natoms;
+ double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
+ // Molecular init.
+ for(i=0;i<nprops*natoms+nprops;i++)
+ {
+  res_integration[i]=ZERO;
+ }
+ // Calc. integrals
+ for(i=0;i<natoms;i++)
+ {
+  for(j=0;j<nrad_becke;j++)
+  { 
+   for(k=0;k<nang_becke;k++)
+   {
+    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
+    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
+    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
+    normPoint=norm3D(Point);
+    Rho.rho_eval(Point,density);
+    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    res_integration[i*nprops]+=density*fact_jacob_weight;
+    res_integration[i*nprops+1]+=density*fact_jacob_weight*Point[0];            // rho \times x
+    res_integration[i*nprops+2]+=density*fact_jacob_weight*Point[1];            // rho \times y
+    res_integration[i*nprops+3]+=density*fact_jacob_weight*Point[2];            // rho \times z
+    res_integration[i*nprops+4]+=density*fact_jacob_weight*normPoint;           // rho \times r
+    res_integration[i*nprops+5]+=density*fact_jacob_weight*normPoint*normPoint; // rho \times r^2
+    if(density>pow(TEN,-FIFTEEN)) // Negative densities from transtion densities are omitted
+    {
+     res_integration[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
+    }
+   }
+  }
+ }
+ // Multiply by 4 Pi and sum atomic contrib. to  
+ for(i=0;i<natoms;i++)
+ {
+  for(j=0;j<nprops;j++)
+  {
+   // Times 4 Pi
+   res_integration[i*nprops+j]=FOUR*PI*res_integration[i*nprops+j];   // For each atom
+   // Sum atoms
+   res_integration[nprops*natoms+j]+=res_integration[i*nprops+j]; // The whole molecule
+  }
+ }
+}
+
+void Integrate_becke_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,int &nprocs)
 {
  int i,j,k,nprops=7,natoms=Rho[0].natoms;
  double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;

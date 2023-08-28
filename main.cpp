@@ -3128,15 +3128,33 @@ int main(int argc, char *argv[])
     if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}
     if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}
     vector<READ_FCHK_WFN>Read_fchk_wfn_th;
-    for(i=0;i<Input_commands.nprocs;i++)
+    if(wfn_fchk) // WFN/WFX
     {
-     Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+     for(i=0;i<Input_commands.nprocs;i++)
+     {
+      Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+     }
+    }
+    else         // FCHK
+    {
+     if(Input_commands.nprocs>1)
+     {
+      cout<<"Parallelization for integrating with Becke/TFVC is currently available only for WFN/WFX files"<<endl;
+      Input_commands.nprocs=1;
+     }
     }
     method="Becke/TFVC quadrature";
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
-    Integrate_becke(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
+    if(wfn_fchk)  // WFN/WFX
+    {
+     Integrate_becke_paral(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
+    }
+    else          // FCHK
+    {
+     Integrate_becke(Read_fchk_wfn,res_integration);
+    }
     Results<<endl;
     for(i=0;i<Read_fchk_wfn.natoms;i++)
     {
