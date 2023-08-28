@@ -2,7 +2,7 @@
 Input::Input(){cout<<"Not allowed default constructor"<<endl;}
 Input::Input(string rho_in)
 {
- punctualr=false;punctualp=false;scanr=false;scanp=false;scanelf=false;cps=false;indicators=false;
+ punctualr=false;punctualp=false;scanr=false;scanp=false;scanelf=false;indicators=false;
  integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;cm=false;
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;becke=false;gnuplot=false;
@@ -128,7 +128,6 @@ Input::Input(string rho_in)
     else if(rho_in=="divonne"){method_cuba="Divonne";}
     else{method_cuba="Cuhre";}
    }
-   else if(rho_in=="$cps"){cps=true;}
    else if(rho_in=="$indicators"){indicators=true;}
    else if(rho_in=="$beta_mos"){Beta_MOs=true;}
    else if(rho_in=="$dmnincore"){store_dmn=true;rho_input_file>>mem;}

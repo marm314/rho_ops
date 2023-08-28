@@ -11,7 +11,7 @@
 /////////////////////////////////////////
 
 //Public functions.
-READ_FCHK_WFN::READ_FCHK_WFN(){cout<<"Not allowed default constructor"<<endl;}
+READ_FCHK_WFN::READ_FCHK_WFN(){cout<<"Not allowed default constructor in READ_FCHK_WFN"<<endl;}
 //Build Density object from fchk or wfn (read all required variables)
 READ_FCHK_WFN::READ_FCHK_WFN(string name,string name_log,bool WFN,bool log_file,bool cas,bool CM_in,int mult_in)
 {
@@ -1728,7 +1728,6 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
  }
  else
  {
-   if(RHO.im_wfn_wfx){cout<<"Warning! The Imag part of the NOs was not copied"<<endl;}
    wfn=RHO.wfn;
    nbasisf=RHO.nbasisf;
    MO_coef=nbasisf;
@@ -1762,6 +1761,18 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
     for(j=0;j<nprimitv;j++)
     {MOcoefA[i][j]=RHO.MOcoefA[i][j];}
     Ocupation[i]=RHO.Ocupation[i];
+   }
+   if(RHO.im_wfn_wfx)
+   {
+    im_wfn_wfx=RHO.im_wfn_wfx;
+    MOcoefA_im=new double*[MO_coef];
+    for(i=0;i<MO_coef;i++)
+    {MOcoefA_im[i]=new double[nprimitv];}
+    for(i=0;i<nbasisf;i++)
+    {
+     for(j=0;j<nprimitv;j++)
+     {MOcoefA_im[i][j]=RHO.MOcoefA_im[i][j];}
+    }
    }
    SPIN=new bool[1]; //Check for another use
  }

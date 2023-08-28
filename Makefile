@@ -8,8 +8,8 @@ Cln = /bin/rm -rf
 NAME=rho_ops
 ###########################################
 ###########################################
-SCR= main.cpp gauss_quad.cpp sphere_lebedev_rule.cpp legendre_quadrature.cpp hcubature.c Integrals_quadrature.cpp Integrals_Becke.cpp Critical_Points.cpp DMN_ops_p_class.cpp Input_commands.cpp Integrals_DMN.cpp Mathematical_Functions.cpp MOp_class.cpp String_ops.cpp gitver.cpp DMN_ops_class.cpp D_read_calc_rho.cpp Integrals.cpp MO_class.cpp NO_class.cpp NO_DMN_class.cpp gnuplot.cpp
-OBJECTS= main.o gauss_quad.o sphere_lebedev_rule.o legendre_quadrature.o hcubature.o Integrals_quadrature.o Integrals_Becke.o Critical_Points.o DMN_ops_p_class.o Input_commands.o Integrals_DMN.o Mathematical_Functions.o MOp_class.o String_ops.o gitver.o DMN_ops_class.o D_read_calc_rho.o Integrals.o MO_class.o NO_class.o NO_DMN_class.o gnuplot.o
+SCR= main.cpp gauss_quad.cpp sphere_lebedev_rule.cpp legendre_quadrature.cpp hcubature.c Integrals_quadrature.cpp Integrals_Becke.cpp DMN_ops_p_class.cpp Input_commands.cpp Integrals_DMN.cpp Mathematical_Functions.cpp MOp_class.cpp String_ops.cpp gitver.cpp DMN_ops_class.cpp D_read_calc_rho.cpp Integrals.cpp MO_class.cpp NO_class.cpp NO_DMN_class.cpp gnuplot.cpp
+OBJECTS= main.o gauss_quad.o sphere_lebedev_rule.o legendre_quadrature.o hcubature.o Integrals_quadrature.o Integrals_Becke.o DMN_ops_p_class.o Input_commands.o Integrals_DMN.o Mathematical_Functions.o MOp_class.o String_ops.o gitver.o DMN_ops_class.o D_read_calc_rho.o Integrals.o MO_class.o NO_class.o NO_DMN_class.o gnuplot.o
 LIB=libcuba.a
 
 all:

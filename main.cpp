@@ -18,7 +18,6 @@
 #include"MOp_class.h"
 #include"NO_DMN_class.h"
 #include"NOp_DMN_class.h"
-#include"Critical_Points.h"
 #include"Integrals.h"
 #include"Integrals_DMN.h"
 #include"Integrals_quadrature.h"
@@ -68,7 +67,6 @@ void mos_to_nos_dmn_sij(double **SIJ,READ_FCHK_WFN &Read_fchk_wfn,Input &Input_c
 void print_int(READ_FCHK_WFN &Read_fchk_wfn,string name_file,double **Sij, int nbasis,double &rho,double &rhoa,double &rhob,
 string region);
 void transform_int(string region,int &nbasis);
-void findcps(READ_FCHK_WFN &Read_fchk_wfn,double **aux,int pairs,int &points);
 void cube_file(READ_FCHK_WFN &Read_fchk_wfn,string name_file,string op_cube,double cubex,double cubey, double cubez,double stepx,
 double stepy,double stepz);
 double Deviation_idemp(READ_FCHK_WFN &Read_fchk_wfn);
@@ -97,7 +95,7 @@ int main(int argc, char *argv[])
  double laplacian_r,laplacian_alpha,laplacian_beta,laplacian_p,step,I_dyn,I_ndyn,ID_alpha,ID_beta;
  double IND_alpha,IND_beta,Intracule,Extracule,DORI;
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
- double **Inertia,**Quadrupole,**eigenV,**cps,**aux,**TPS,shannon=ZERO,shannonp=ZERO,fisher=ZERO,fisherp=ZERO,Tw,Ttf;
+ double **Inertia,**Quadrupole,**eigenV,**aux,**TPS,shannon=ZERO,shannonp=ZERO,fisher=ZERO,fisherp=ZERO,Tw,Ttf;
  double Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
  char direct;
  string method,operation,region_string,line,name_saved,sha;
@@ -1353,73 +1351,6 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<"#*************************************************************************#";
    Results<<endl;
-  }
-  ////////////////////////////////////
-  // Critical Points (not for DM1)  //
-  ////////////////////////////////////
-  if(Input_commands.cps)
-  {
-   Results<<"#*************************************************************************#";
-   Results<<endl;
-   Results<<"#                         Critical  Points                                #";
-   Results<<endl;
-   Results<<"#*************************************************************************#";
-   Results<<endl;
-   Results<<endl;
-   Results<<"#Pair (Za(n)-Zb(m))       Coord. X                Coord. Y              Coord. Z \t\t Error#"<<endl;
-   pairs=0;
-   for(i=1;i<Read_fchk_wfn.natoms;i++){pairs=pairs+i;}
-   points=0;
-   aux=new double*[pairs];
-   for(i=0;i<pairs;i++)
-   {aux[i]=new double[8];}
-   findcps(Read_fchk_wfn,aux,pairs,points);
-   cps=new double*[points];
-   for(i=0;i<points;i++)
-   {cps[i]=new double[8];}
-   #pragma omp for private(j)
-   for(i=0;i<points;i++)
-   {
-    for(j=0;j<8;j++)
-    {
-     cps[i][j]=aux[i][j];
-     if(abs(cps[i][j])<pow(TEN,-FIVE) && j!=7)
-     {cps[i][j]=ZERO;}
-    }
-   }
-   for(i=0;i<points;i++)
-   {
-    for(j=0;j<8;j++)
-    {
-     if(j<4)
-     {
-      Results<<setprecision(0)<<fixed;
-      if(j%2==0)
-      {
-       Results<<cps[i][j]<<"(";
-      }
-      else
-      {
-       Results<<cps[i][j]+1<<") \t";
-      }
-     }
-     else
-     {
-      Results<<setprecision(10)<<fixed<<scientific;
-      Results<<setw(17)<<cps[i][j]<<"\t";
-     }
-    }
-    Results<<endl;
-   }
-   Results<<endl;
-   Results<<"#*************************************************************************#";
-   Results<<endl;
-   for(i=0;i<pairs;i++)
-   {delete[] aux[i];}
-   for(i=0;i<points;i++)
-   {delete[] cps[i];}
-   delete[] aux;
-   delete[] cps;
   }
   /////////////////////////
   // Integration options //
@@ -3191,7 +3122,7 @@ int main(int argc, char *argv[])
    else
    {
     int grid_theta_phi,nprops=7; // Note: set nprops to numbers of properties !
-    double *res_integration,mu[3];
+    double *res_integration,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
     res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
     method="Becke/TFVC quadrature";
@@ -6470,47 +6401,6 @@ double stepy,double stepz)
  cube.close();
  read_cube.close();
  system(("rm "+name_file+".cub_tmp").c_str());
-}
-//Find critical points for each pair of atoms
-void findcps(READ_FCHK_WFN &Read_fchk_wfn,double **aux,int pairs,int &points)
-{
- int i,j,thd_id;
- READ_FCHK_WFN Read_fchk_wfn_copies[12]={Read_fchk_wfn}; //Maximun 12 threads(I think 12 is high enough =)!)
- #pragma omp for private(j)
- for(i=0;i<pairs;i++)
- {
-  for(j=0;j<8;j++)
-  {aux[i][j]=pow(TEN,TEN);}
- }
- points=0;
- for(i=0;i<Read_fchk_wfn.natoms;i++)
- {
-  // points variable is shared always!
-  #pragma omp parallel private(thd_id) shared(Read_fchk_wfn_copies)
-  {
-   thd_id=omp_get_thread_num();
-   #pragma omp for
-   for(j=i+1;j<Read_fchk_wfn.natoms;j++)
-   {
-    CP CPS(Read_fchk_wfn_copies[thd_id],i,j);
-    #pragma omp critical
-    {
-     if(CPS.grad_norm<pow(TEN,-TWO))
-     {
-      aux[points][0]=(double)CPS.atomic_num1;
-      aux[points][1]=(double)i;
-      aux[points][2]=(double)CPS.atomic_num2;
-      aux[points][3]=(double)j;
-      aux[points][4]=CPS.BCP[0];
-      aux[points][5]=CPS.BCP[1];
-      aux[points][6]=CPS.BCP[2];
-      aux[points][7]=CPS.grad_norm;
-      points++;
-     }
-    }
-   }
-  }
- }
 }
 //Calculate deviation from idempotency
 double Deviation_idemp(READ_FCHK_WFN &Read_fchk_wfn)
