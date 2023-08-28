@@ -278,14 +278,14 @@ All integrals are performed in spherical coordinates system and the information 
 \begin{verbatim}
    $INTEGRALS
    becke
-   rad ang  stiff       -> rad=total radial points, ang=total ang points, and stiffness.     
+   rad ang stiff nthreads  -> rad=radial points, ang=ang. points, stiffness, threads OMP.     
 \end{verbatim}
 
 \noindent Note 1: The estimated error of CUBA is equal to the max(Eabs,Erel$|$Integration$|$). The absolute error in the accuracy of the integration recommended for instance is $1e^{-4}$ with a relative error in the accuracy $1e^{-3}$. Be aware that increasing their values may require more evaluations. Also notice that CUBATURE only has the maximum error as input parameter and there is no maximum number of evaluations. This fact may cause that the integration procedure be kept running for very long periods of time if the requested accuracy is not reached!\newline
 
-\noindent Note 1: The estimated error of CUBA is equal to the max(Eabs,Erel$|$Integration$|$). The absolute error in the accuracy of the integration recommended for instance is $1e^{-4}$ with a relative error in the accuracy $1e^{-3}$. Be aware that increasing their values may require more evaluations. Also notice that CUBATURE only has the maximum error as input parameter and there is no maximum number of evaluations. This fact may cause that the integration procedure be kept running for very long periods of time if the requested accuracy is not reached!\newline
-\newline
 \noindent Note 2: Sij operation requires extra information (compulsory information).  \newline   
+
+\noindent Note 3: The Becke/TFVC integration scheme uses OMP only for WFN/WFX files (a serial version is used for FCHK files).  \newline
 
 \noindent CUBA (Sij is not compatible with other evaluations i.e. Shannon, Shannonp, etc.): \newline
 \begin{alltt}
