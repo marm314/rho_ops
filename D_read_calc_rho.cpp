@@ -1729,6 +1729,7 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
  else
  {
    wfn=RHO.wfn;
+   im_wfn_wfx=RHO.im_wfn_wfx;
    nbasisf=RHO.nbasisf;
    MO_coef=nbasisf;
    natoms=RHO.natoms;
@@ -1764,7 +1765,6 @@ READ_FCHK_WFN::READ_FCHK_WFN(const READ_FCHK_WFN&RHO)
    }
    if(RHO.im_wfn_wfx)
    {
-    im_wfn_wfx=RHO.im_wfn_wfx;
     MOcoefA_im=new double*[MO_coef];
     for(i=0;i<MO_coef;i++)
     {MOcoefA_im[i]=new double[nprimitv];}

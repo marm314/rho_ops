@@ -86,7 +86,7 @@ void calc_time(double DATE[2][4]);
 ///////////////////////////
 int main(int argc, char *argv[])
 {
- int i,j,points,num_integrals,pairs,nbasis,region_int=1;
+ int i,j,points,num_integrals,nbasis,region_int=1;
  bool fish=false,shan=false,fishp=false,shanp=false,inertiar=false,inertiap=false,pos=false,mom=false,rho=false;
  bool r1=false,r2=false,rm1=false,p1=false,p2=false,not_elf=false,sij=false,r1_moment=false,mos_to_nos_dmn=false,dipolar=false,not_indic=false;
  double counter,Density,Density_alpha,Density_beta,Nelec,tauW_alpha,ELF,ELFa,ELFb,coef_elf;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
  double laplacian_r,laplacian_alpha,laplacian_beta,laplacian_p,step,I_dyn,I_ndyn,ID_alpha,ID_beta;
  double IND_alpha,IND_beta,Intracule,Extracule,DORI;
  double Point[3]={ZERO,ZERO,ZERO},Grad[3],Grad_alpha[3],Grad_beta[3],RCC[3]={ZERO},mu[3]={ZERO},LOCAL_HYBRIDS_fr[5],DATE[2][4];
- double **Inertia,**Quadrupole,**eigenV,**aux,**TPS,shannon=ZERO,shannonp=ZERO,fisher=ZERO,fisherp=ZERO,Tw,Ttf;
+ double **Inertia,**Quadrupole,**eigenV,**TPS,shannon=ZERO,shannonp=ZERO,fisher=ZERO,fisherp=ZERO,Tw,Ttf;
  double Integrals_interval[6],Rot_grid_matrix[3][3]={ZERO};
  char direct;
  string method,operation,region_string,line,name_saved,sha;
@@ -3125,6 +3125,8 @@ int main(int argc, char *argv[])
     double *res_integration,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
     res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
+//    vector<READ_FCHK_WFN>my_fchk_wfn;
+//    my_fchk_wfn.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
     method="Becke/TFVC quadrature";
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
