@@ -13,6 +13,9 @@
 #include"legendre_quadrature.h"
 #include"Numbers.h"
 #include"D_read_calc_rho.h"
+#ifdef HAVE_LIBXC
+#include"xc.h"
+#endif
 
 using namespace std;
 //////////////////////////

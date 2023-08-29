@@ -141,6 +141,18 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
 {
  int i,j,k,nprops=7,natoms=Rho.natoms;
  double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
+#ifdef HAVE_LIBXC
+ nprops++;                           // Add LDAx integration as an extra property.
+ xc_func_type func;
+ int vmajor,vminor,vmicro,func_id=1; // LDAx
+ double rho[1],e_xc[1]; // No sigma vector needed because it is LDAx
+ xc_version(&vmajor, &vminor, &vmicro);
+ printf("Libxc version: %d.%d.%d\n",vmajor,vminor,vmicro);
+ if(xc_func_init(&func, func_id, XC_UNPOLARIZED) != 0)
+ {
+  fprintf(stderr, "Functional '%d' not found\n", func_id);
+ }
+#endif
  // Molecular init.
  for(i=0;i<nprops*natoms+nprops;i++)
  {
@@ -168,10 +180,18 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
     if(density>pow(TEN,-FIFTEEN)) // Negative densities from transtion densities are omitted
     {
      res_integration[i*nprops+6]+=pow(density,FIVE/THREE)*fact_jacob_weight;    // rho^5/3 
+#ifdef HAVE_LIBXC
+     rho[0]=density;
+     xc_lda_exc(&func,1,rho,e_xc);
+     res_integration[i*nprops+7]+=density*e_xc[0]*fact_jacob_weight;             // rho exc^LDAx (rho) 
+#endif
     }
    }
   }
  }
+#ifdef HAVE_LIBXC
+ xc_func_end(&func);
+#endif
  // Multiply by 4 Pi and sum atomic contrib. to  
  for(i=0;i<natoms;i++)
  {
