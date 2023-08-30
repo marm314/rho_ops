@@ -3185,6 +3185,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_LIBXC
      Results<<" E_xc          = "<<setw(17)<<res_integration[i*nprops+7]<<endl;
 #endif
+    Results<<endl;
     }
     Results<<endl;
     Density=res_integration[nprops*Read_fchk_wfn.natoms];
