@@ -3125,18 +3125,23 @@ int main(int argc, char *argv[])
     double *res_integration,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
 #ifdef HAVE_LIBXC
-    nprops++; // Add LDAx using LIBXC as an extra property
+    nprops++; // Add E_xc using LIBXC as an extra integrated property
 #endif
     res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
-    if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}
-    if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}
+    if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}  // nprocs < max OMP threads avail
+    if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}    // nprocs < natoms
     vector<READ_FCHK_WFN>Read_fchk_wfn_th;
     if(wfn_fchk) // WFN/WFX
     {
+#ifdef HAVE_LIBXC
+    cout<<"Warning! LibXC OMP integrations are only available in serial mode."<<endl; 
+    Input_commands.nprocs=1;
+#else 
      for(i=0;i<Input_commands.nprocs;i++)
      {
       Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
      }
+#endif
     }
     else         // FCHK
     {
@@ -3152,7 +3157,11 @@ int main(int argc, char *argv[])
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff);
     if(wfn_fchk)  // WFN/WFX
     {
+#ifdef HAVE_LIBXC
+     Integrate_becke(Read_fchk_wfn,res_integration);
+#else 
      Integrate_becke_paral(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
+#endif
     }
     else          // FCHK
     {
@@ -3174,7 +3183,7 @@ int main(int argc, char *argv[])
      Results<<" <r^2>         = "<<setw(17)<<res_integration[i*nprops+5]<<endl;
      Results<<" T_TF          = "<<setw(17)<<fact_TF*res_integration[i*nprops+6]<<endl;
 #ifdef HAVE_LIBXC
-     Results<<" E_xc^LDAx     = "<<setw(17)<<res_integration[i*nprops+7]<<endl;
+     Results<<" E_xc          = "<<setw(17)<<res_integration[i*nprops+7]<<endl;
 #endif
     }
     Results<<endl;
@@ -3201,7 +3210,7 @@ int main(int argc, char *argv[])
     T_TF=fact_TF*res_integration[nprops*Read_fchk_wfn.natoms+6];
     Results<<"The result of the integration T_TF= "<<setw(17)<<T_TF<<endl;
 #ifdef HAVE_LIBXC
-    Results<<"The result of the int E_xc^LDAx   = "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+7]<<endl; // MRM: add one to 7 if there is a new
+    Results<<"The result of the integration E_xc= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+7]<<endl; // MRM: add one to 7 if there is a new
 #endif                                                                                                               // prop. after T_TF
     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
     Results<<"\t obtained with "<<method<<endl;
