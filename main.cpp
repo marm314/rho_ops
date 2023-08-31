@@ -29,6 +29,7 @@
 #include"DMN_ops_p_class.h"
 #include"gnuplot.h"
 #include"N_fchks_wfns.h"
+#include"mescal.h"
 #include"gitver.h"
 #define Angs2au 1.8897259886
 #define au2eV 27.211399
@@ -5058,6 +5059,28 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<"#*************************************************************************#";
    Results<<endl;
+  }
+  /////////////////////////////////////
+  // Perform a MESCAL calculation    //
+  /////////////////////////////////////
+  if(Input_commands.mescal)
+  {
+   Results<<"#*************************************************************************#";
+   Results<<endl;
+   Results<<"#    MESCAL response to the QM electronic density (F_elec) + F_nuclei     #";
+   Results<<endl;
+   Results<<"#*************************************************************************#";
+   Results<<endl;
+   string mescal_file;
+   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+   {
+    mescal_file=name_file.substr(0,(name_file.length()-4))+"_MESCAL.out";
+   }
+   else
+   {
+    mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
+   }
+   MESCAL mescal(mescal_file,Input_commands.mescal_pdb);
   }
   /////////////////////////////////////
   // Transform int files for ESI-3c  //

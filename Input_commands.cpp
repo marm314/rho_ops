@@ -6,7 +6,7 @@ Input::Input(string rho_in)
  integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;cm=false;
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;
  dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;becke=false;gnuplot=false;
- cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
+ cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;mescal=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
  multiplicity=0;nprocs=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
@@ -703,6 +703,12 @@ Input::Input(string rho_in)
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
     Sij_region=rho_in;
+   }
+   else if(rho_in=="$mescal")
+   {
+    mescal=true;
+    getline(rho_input_file,rho_in);
+    mescal_pdb=rho_in;
    }
    else if(rho_in=="$debug"){debug=true;}
    else{}
