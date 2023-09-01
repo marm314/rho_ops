@@ -17,6 +17,7 @@ class MESCAL
   double charge,pos[3],dipole[3],alpha[3][3];
  };
  void Asymbol2Z(int &Z, string symbol);
+ double Z2mass(int &Z);
 
  public:
   MESCAL();

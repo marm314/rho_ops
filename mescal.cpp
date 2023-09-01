@@ -354,3 +354,119 @@ void MESCAL::Asymbol2Z(int &Z, string symbol)
   else{cout<<"Warning! Atomic number not found for Symbol "<<symbol<<endl;}
  }
 } 
+// Z -> mass  
+double MESCAL::Z2mass(int &Z)
+{
+ double mass=0.0e0;
+ if(Z==1){mass=1.00079;}
+ else if(Z==2 ){mass=4.0026;}
+ else if(Z==3 ){mass=6.941;}
+ else if(Z==4 ){mass=9.0122;}
+ else if(Z==5 ){mass=10.811;}
+ else if(Z==6 ){mass=12.011;}
+ else if(Z==7 ){mass=14.007;}
+ else if(Z==8 ){mass=15.999;}
+ else if(Z==9 ){mass=18.998;}
+ else if(Z==10){mass=20.180;}
+ else if(Z==11){mass=22.990;}
+ else if(Z==12){mass=24.305;}
+ else if(Z==13){mass=26.982;}
+ else if(Z==14){mass=28.086;}
+ else if(Z==15){mass=30.974;}
+ else if(Z==16){mass=32.065;}
+ else if(Z==17){mass=35.453;}
+ else if(Z==18){mass=39.948;}
+ else if(Z==19){mass=39.098;}
+ else if(Z==20){mass=40.078;}
+ else if(Z==21){mass=44.956;}
+ else if(Z==22){mass=47.867;}
+ else if(Z==23){mass=50.942;}
+ else if(Z==24){mass=51.996;}
+ else if(Z==25){mass=54.938;}
+ else if(Z==26){mass=55.845;}
+ else if(Z==27){mass=58.933;}
+ else if(Z==28){mass=58.693;}
+ else if(Z==29){mass=63.546;}
+ else if(Z==30){mass=65.39;}
+ else if(Z==31){mass=69.723;}
+ else if(Z==32){mass=72.61;}
+ else if(Z==33){mass=74.922;}
+ else if(Z==34){mass=78.96;}
+ else if(Z==35){mass=79.904;}
+ else if(Z==36){mass=83.80;}
+ else if(Z==37){mass=85.468;}
+ else if(Z==38){mass=87.62;}
+ else if(Z==39){mass=89.906;}
+ else if(Z==40){mass=91.224;}
+ else if(Z==41){mass=92.906;}
+ else if(Z==42){mass=95.94;}
+ else if(Z==43){mass=98;}
+ else if(Z==44){mass=101.07;}
+ else if(Z==45){mass=102.91;}
+ else if(Z==46){mass=106.42;}
+ else if(Z==47){mass=107.87;}
+ else if(Z==48){mass=112.41;}
+ else if(Z==49){mass=114.82;}
+ else if(Z==50){mass=118.71;}
+ else if(Z==51){mass=121.76;}
+ else if(Z==52){mass=127.60;}
+ else if(Z==53){mass=126.90;}
+ else if(Z==54){mass=131.29;}
+ else if(Z==55){mass=132.91;}
+ else if(Z==56){mass=137.33;}
+ else if(Z==57){mass=138.91;}
+ else if(Z==58){mass=140.12;}
+ else if(Z==59){mass=140.91;}
+ else if(Z==60){mass=144.24;}
+ else if(Z==61){mass=145;}
+ else if(Z==62){mass=150.36;}
+ else if(Z==63){mass=151.96;}
+ else if(Z==64){mass=157.25;}
+ else if(Z==65){mass=158.93;}
+ else if(Z==66){mass=162.50;}
+ else if(Z==67){mass=164.93;}
+ else if(Z==68){mass=167.26;}
+ else if(Z==69){mass=168.93;}
+ else if(Z==70){mass=173.04;}
+ else if(Z==71){mass=174.97;}
+ else if(Z==72){mass=178.49;}
+ else if(Z==73){mass=180.95;}
+ else if(Z==74){mass=183.84;}
+ else if(Z==75){mass=186.21;}
+ else if(Z==76){mass=190.23;}
+ else if(Z==77){mass=192.22;}
+ else if(Z==78){mass=195.08;}
+ else if(Z==79){mass=196.97;}
+ else if(Z==80){mass=200.59;}
+ else if(Z==81){mass=204.38;}
+ else if(Z==82){mass=207.2;}
+ else if(Z==83){mass=208.98;}
+ else if(Z==84){mass=209;}
+ else if(Z==85){mass=210;}
+ else if(Z==86){mass=222;}
+ else if(Z==87){mass=223;}
+ else if(Z==88){mass=226;}
+ else if(Z==89){mass=227;}
+ else if(Z==90){mass=232.04;}
+ else if(Z==91){mass=231.04;}
+ else if(Z==92){mass=238.03;}
+ else if(Z==93){mass=237;}
+ else if(Z==94){mass=244;}
+ else if(Z==95){mass=243;}
+ else if(Z==96){mass=247;}
+ else if(Z==97){mass=247;}
+ else if(Z==98){mass=251;}
+ else if(Z==99){mass=252;}
+ else if(Z==100){mass=257;}
+ else if(Z==101){mass=258;}
+ else if(Z==102){mass=259;}
+ else if(Z==103){mass=262;}
+ else if(Z==104){mass=261;}
+ else if(Z==105){mass=262;}
+ else if(Z==106){mass=266;}
+ else if(Z==107){mass=264;}
+ else if(Z==108){mass=269;}
+ else if(Z==109){mass=268;}
+ else{cout<<"Warning! Mass not found for Atomic Number "<<Z<<endl;}
+ return mass;
+} 
