@@ -85,8 +85,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
     {
      line_aux=line_aux.substr(0,1);
     }
-cout<<line_aux<<endl; 
-
+    Asymbol2Z(Z,line_aux);
     // Det Atomic positions
     line_aux=line.substr(blank_spaces[8],blank_spaces[11]-blank_spaces[8]+1);
     stringstream ss1(line_aux);
@@ -141,8 +140,7 @@ cout<<line_aux<<endl;
     {
      line_aux=line_aux.substr(0,1);
     }
-cout<<line_aux<<endl; 
-
+    Asymbol2Z(Z,line_aux);
     // Det Atomic positions
     line_aux=line.substr(blank_spaces[8],blank_spaces[11]-blank_spaces[8]+1);
     stringstream ss1(line_aux);
@@ -217,3 +215,136 @@ MESCAL::~MESCAL()
 {
  // Nth to be deleted manually
 }
+
+
+// Bellow wes point we have functions that only work as libraries to asing values. 
+// Atomic symbol -> Z 
+void MESCAL::Asymbol2Z(int &Z, string symbol)
+{
+ if(symbol.length()==2)
+ {
+  if(symbol=="He"){Z=2;}
+  else if(symbol=="Li"){Z=3;}
+  else if(symbol=="Be"){Z=4;}
+  else if(symbol=="Ne"){Z=10;}
+  else if(symbol=="Na"){Z=11;}
+  else if(symbol=="Mg"){Z=12;}
+  else if(symbol=="Al"){Z=13;}
+  else if(symbol=="Si"){Z=14;}
+  else if(symbol=="Cl"){Z=17;}
+  else if(symbol=="Ar"){Z=18;}
+  else if(symbol=="Ca"){Z=20;}
+  else if(symbol=="Sc"){Z=21;}
+  else if(symbol=="Ti"){Z=22;}
+  else if(symbol=="Cr"){Z=24;}
+  else if(symbol=="Mn"){Z=25;}
+  else if(symbol=="Fe"){Z=26;}
+  else if(symbol=="Co"){Z=27;}
+  else if(symbol=="Ni"){Z=28;}
+  else if(symbol=="Cu"){Z=29;}
+  else if(symbol=="Zn"){Z=30;}
+  else if(symbol=="Ga"){Z=31;}
+  else if(symbol=="Ge"){Z=32;}
+  else if(symbol=="As"){Z=33;}
+  else if(symbol=="Se"){Z=34;}
+  else if(symbol=="Br"){Z=35;}
+  else if(symbol=="Kr"){Z=36;}
+  else if(symbol=="Rb"){Z=37;}
+  else if(symbol=="Sr"){Z=38;}
+  else if(symbol=="Zr"){Z=40;}
+  else if(symbol=="Nb"){Z=41;}
+  else if(symbol=="Mo"){Z=42;}
+  else if(symbol=="Tc"){Z=43;}
+  else if(symbol=="Ru"){Z=44;}
+  else if(symbol=="Rh"){Z=45;}
+  else if(symbol=="Pd"){Z=46;}
+  else if(symbol=="Ag"){Z=47;}
+  else if(symbol=="Cd"){Z=48;}
+  else if(symbol=="In"){Z=49;}
+  else if(symbol=="Sn"){Z=50;}
+  else if(symbol=="Sb"){Z=51;}
+  else if(symbol=="Te"){Z=52;}
+  else if(symbol=="Xe"){Z=54;}
+  else if(symbol=="Cs"){Z=55;}
+  else if(symbol=="Ba"){Z=56;}
+  else if(symbol=="La"){Z=57;}
+  else if(symbol=="Ce"){Z=58;}
+  else if(symbol=="Pr"){Z=59;}
+  else if(symbol=="Nd"){Z=60;}
+  else if(symbol=="Pm"){Z=61;}
+  else if(symbol=="Sm"){Z=62;}
+  else if(symbol=="Eu"){Z=63;}
+  else if(symbol=="Gd"){Z=64;}
+  else if(symbol=="Tb"){Z=65;}
+  else if(symbol=="Dy"){Z=66;}
+  else if(symbol=="Ho"){Z=67;}
+  else if(symbol=="Er"){Z=68;}
+  else if(symbol=="Tm"){Z=69;}
+  else if(symbol=="Yb"){Z=70;}
+  else if(symbol=="Lu"){Z=71;}
+  else if(symbol=="Hf"){Z=72;}
+  else if(symbol=="Ta"){Z=73;}
+  else if(symbol=="Re"){Z=75;}
+  else if(symbol=="Os"){Z=76;}
+  else if(symbol=="Ir"){Z=77;}
+  else if(symbol=="Pt"){Z=78;}
+  else if(symbol=="Au"){Z=79;}
+  else if(symbol=="Hg"){Z=80;}
+  else if(symbol=="Tl"){Z=81;}
+  else if(symbol=="Pb"){Z=82;}
+  else if(symbol=="Bi"){Z=83;}
+  else if(symbol=="Po"){Z=84;}
+  else if(symbol=="At"){Z=85;}
+  else if(symbol=="Rn"){Z=86;}
+  else if(symbol=="Fr"){Z=87;}
+  else if(symbol=="Ra"){Z=88;}
+  else if(symbol=="Ac"){Z=89;}
+  else if(symbol=="Th"){Z=90;}
+  else if(symbol=="Pa"){Z=91;}
+  else if(symbol=="Np"){Z=93;}
+  else if(symbol=="Pu"){Z=94;}
+  else if(symbol=="Am"){Z=95;}
+  else if(symbol=="Cm"){Z=96;}
+  else if(symbol=="Bk"){Z=97;}
+  else if(symbol=="Cf"){Z=98;}
+  else if(symbol=="Es"){Z=99;}
+  else if(symbol=="Fm"){Z=100;}
+  else if(symbol=="Md"){Z=101;}
+  else if(symbol=="No"){Z=102;}
+  else if(symbol=="Lr"){Z=103;}
+  else if(symbol=="Rf"){Z=104;}
+  else if(symbol=="Db"){Z=105;}
+  else if(symbol=="Sg"){Z=106;}
+  else if(symbol=="Bh"){Z=107;}
+  else if(symbol=="Hs"){Z=108;}
+  else if(symbol=="Mt"){Z=109;}
+  else if(symbol=="Ds"){Z=110;}
+  else if(symbol=="Rg"){Z=111;}
+  else if(symbol=="Cn"){Z=112;}
+  else if(symbol=="Nh"){Z=113;}
+  else if(symbol=="Fl"){Z=114;}
+  else if(symbol=="Mc"){Z=115;}
+  else if(symbol=="Lv"){Z=116;}
+  else if(symbol=="Ts"){Z=117;}
+  else if(symbol=="Og"){Z=118;}
+  else{cout<<"Warning! Atomic number not found for Symbol "<<symbol<<endl;}
+ }
+ else
+ {
+  if(symbol=="H"){Z=1;}
+  else if(symbol=="B"){Z=5;}
+  else if(symbol=="C"){Z=6;}
+  else if(symbol=="N"){Z=7;}
+  else if(symbol=="O"){Z=8;}
+  else if(symbol=="F"){Z=9;}
+  else if(symbol=="P"){Z=15;}
+  else if(symbol=="S"){Z=16;}
+  else if(symbol=="K"){Z=19;}
+  else if(symbol=="V"){Z=23;}
+  else if(symbol=="Y"){Z=39;}
+  else if(symbol=="I"){Z=53;}
+  else if(symbol=="W"){Z=74;}
+  else if(symbol=="U"){Z=92;}
+  else{cout<<"Warning! Atomic number not found for Symbol "<<symbol<<endl;}
+ }
+} 

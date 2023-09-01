@@ -13,8 +13,9 @@ class MESCAL
  struct ATOM
  {
   int Z;
-  double charge,pos[3],dipole[3];
+  double charge,pos[3],dipole[3],alpha[3][3];
  };
+ void Asymbol2Z(int &Z, string symbol);
 
  public:
   MESCAL();
