@@ -57,7 +57,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
    if(ichar1==14){break;}
   }
   // Store information
-  if(line.length()>27)
+  if(line.length()>27 && line.substr(0,4)=="ATOM")
   {
    stringstream ss(line.substr(blank_spaces[6],blank_spaces[9]-blank_spaces[6]+1));
    ss>>new_fragment;
@@ -90,9 +90,11 @@ MESCAL::MESCAL(string name_output,string name_pdb)
     line_aux=line.substr(blank_spaces[8],blank_spaces[11]-blank_spaces[8]+1);
     stringstream ss1(line_aux);
     ss1>>pos[0];
+    pos[0]=pos[0]*Angs2au;
     line_aux=line.substr(blank_spaces[10],blank_spaces[13]-blank_spaces[10]+1);
     stringstream ss2(line_aux);
     ss2>>pos[1];
+    pos[1]=pos[1]*Angs2au;
     line_aux=line.substr(blank_spaces[12],line.length()-blank_spaces[12]+1);
     space=false;space2=false;ichar1=0;
     for(ichar=0;ichar<(int)line_aux.length();ichar++)
@@ -115,6 +117,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
     if(ichar1!=0){line_aux=line_aux.substr(0,ichar1);}
     stringstream ss3(line_aux);
     ss3>>pos[2];
+    pos[2]=pos[2]*Angs2au;
     fragments[old_fragment-1].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
     nfragments++;
    }
@@ -145,9 +148,11 @@ MESCAL::MESCAL(string name_output,string name_pdb)
     line_aux=line.substr(blank_spaces[8],blank_spaces[11]-blank_spaces[8]+1);
     stringstream ss1(line_aux);
     ss1>>pos[0];
+    pos[0]=pos[0]*Angs2au;
     line_aux=line.substr(blank_spaces[10],blank_spaces[13]-blank_spaces[10]+1);
     stringstream ss2(line_aux);
     ss2>>pos[1];
+    pos[1]=pos[1]*Angs2au;
     line_aux=line.substr(blank_spaces[12],line.length()-blank_spaces[12]+1);
     space=false;space2=false;ichar1=0;
     for(ichar=0;ichar<(int)line_aux.length();ichar++)
@@ -170,13 +175,14 @@ MESCAL::MESCAL(string name_output,string name_pdb)
     if(ichar1!=0){line_aux=line_aux.substr(0,ichar1);}
     stringstream ss3(line_aux);
     ss3>>pos[2];
+    pos[2]=pos[2]*Angs2au;
     fragments[old_fragment-1].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
    }
   }
  } 
  read_pdb.close();
  write_out<<endl;
- write_out<<" Fragments read from the PDB file"<<endl;
+ write_out<<" Fragments read from the PDB file (distances in Bohr) "<<endl;
  write_out<<endl;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {

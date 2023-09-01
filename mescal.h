@@ -5,6 +5,7 @@
 #include<vector>
 #include<fstream>
 #include<algorithm>
+#define Angs2au 1.8897259886  
 
 using namespace std;
 class MESCAL
