@@ -5,7 +5,9 @@
 #include<vector>
 #include<fstream>
 #include<algorithm>
+#include<cmath>
 #define Angs2au 1.8897259886  
+#define tol8 1e-8
 
 using namespace std;
 class MESCAL
@@ -14,10 +16,11 @@ class MESCAL
  struct ATOM
  {
   int Z;
-  double charge,pos[3],dipole[3],alpha[3][3];
+  double charge,pos[3],dipole[3],pos_wrt_cm[3],alpha[3][3];
  };
  void Asymbol2Z(int &Z, string symbol);
  double Z2mass(int &Z);
+ void jacobi(int n, double **m, double **v);
 
  public:
   MESCAL();
