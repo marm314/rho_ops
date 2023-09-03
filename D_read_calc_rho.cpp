@@ -6000,32 +6000,6 @@ void READ_FCHK_WFN::Center_of_mass()
   results_inert<<endl;
  }
  results_inert<<endl;
- for(i=0;i<3;i++)
- {
-  Rcm[i]=ZERO;
- }
- /*
-
- This rotation does not guarantee a correct orientation of the NOs....
- We are forced to avoid it!
-
- for(i=0;i<natoms;i++)
- {
-  for(j=0;j<3;j++)
-  {
-   for(k=0;k<3;k++)
-   {
-    Rcm[k]=Rcm[k]+EigenV[j][k]*Cartesian_Coor[i][j];
-   }
-  }
-  for(j=0;j<3;j++)
-  {
-   Cartesian_Coor[i][j]=Rcm[j];
-   Rcm[j]=ZERO;
-  }
- }
-
- */
  // Recover real distances
  for(i=0;i<natoms;i++)
  {
@@ -6034,7 +6008,7 @@ void READ_FCHK_WFN::Center_of_mass()
    Cartesian_Coor[i][j]=Norm*Cartesian_Coor[i][j];
   }
  }
- results_inert<<"Final coordinates (the order is the same as in the FCHK/WFN/WFX file):"<<endl;
+ results_inert<<"Final coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
  results_inert<<"       Charge                     Coordinates"<<endl;
  for(i=0;i<natoms;i++)
  {
@@ -6042,6 +6016,26 @@ void READ_FCHK_WFN::Center_of_mass()
   for(j=0;j<3;j++)
   {
    results_inert<<setw(15)<<Cartesian_Coor[i][j];
+  }
+  results_inert<<endl;
+ }
+ results_inert<<endl;
+ results_inert<<"Final rotated coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
+ results_inert<<"       Charge                     Coordinates"<<endl;
+ for(i=0;i<natoms;i++)
+ {
+  results_inert<<setw(15)<<Nu_charge[i];
+  for(j=0;j<3;j++){Rcm[j]=ZERO;}
+  for(k=0;k<3;k++)
+  {
+   for(j=0;j<3;j++)
+   {
+    Rcm[k]=Rcm[k]+EigenV[j][order[k]]*Cartesian_Coor[i][j];
+   }
+  }
+  for(j=0;j<3;j++)
+  {
+   results_inert<<setw(15)<<Rcm[j];
   }
   results_inert<<endl;
  }
@@ -6643,32 +6637,6 @@ void READ_FCHK_WFN::Center_of_mass()
   results_inert<<endl;
  }
  results_inert<<endl;
- for(i=0;i<3;i++)
- {
-  Rcm[i]=ZERO;
- }
- /*
-
- This rotation does not guarantee a correct orientation of the NOs....
- We are forced to avoid it!
-
- for(i=0;i<natoms;i++)
- {
-  for(j=0;j<3;j++)
-  {
-   for(k=0;k<3;k++)
-   {
-    Rcm[k]=Rcm[k]+EigenV[j][k]*Cartesian_Coor[i][j];
-   }
-  }
-  for(j=0;j<3;j++)
-  {
-   Cartesian_Coor[i][j]=Rcm[j];
-   Rcm[j]=ZERO;
-  }
- }
-
- */
  // Recover real distances
  for(i=0;i<natoms;i++)
  {
@@ -6677,7 +6645,7 @@ void READ_FCHK_WFN::Center_of_mass()
    Cartesian_Coor[i][j]=Norm*Cartesian_Coor[i][j];
   }
  }
- results_inert<<"Final coordinates (the order is the same as in the FCHK/WFN/WFX file):"<<endl;
+ results_inert<<"Final coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
  results_inert<<"       Charge                     Coordinates"<<endl;
  for(i=0;i<natoms;i++)
  {
@@ -6685,6 +6653,26 @@ void READ_FCHK_WFN::Center_of_mass()
   for(j=0;j<3;j++)
   {
    results_inert<<setw(15)<<Cartesian_Coor[i][j];
+  }
+  results_inert<<endl;
+ }
+ results_inert<<endl;
+ results_inert<<"Final rotated coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
+ results_inert<<"       Charge                     Coordinates"<<endl;
+ for(i=0;i<natoms;i++)
+ {
+  results_inert<<setw(15)<<Nu_charge[i];
+  for(j=0;j<3;j++){Rcm[j]=ZERO;}
+  for(k=0;k<3;k++)
+  {
+   for(j=0;j<3;j++)
+   {
+    Rcm[k]=Rcm[k]+EigenV[j][order[k]]*Cartesian_Coor[i][j];
+   }
+  }
+  for(j=0;j<3;j++)
+  {
+   results_inert<<setw(15)<<Rcm[j];
   }
   results_inert<<endl;
  }
