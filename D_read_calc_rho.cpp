@@ -5402,7 +5402,7 @@ void READ_FCHK_WFN::Init_MOim(double **MOcoef_in)
 //Move the origin to the center of mass
 void READ_FCHK_WFN::Center_of_mass()
 {
- int i,j,k;
+ int i,j,k,pivot,order[3];
  double **Im,**EigenV,*mass,Rcm[3]={ZERO},Mtot=ZERO,Norm,Auxiliar,Auxiliar2;
  ofstream results_inert;
  if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
@@ -5957,27 +5957,28 @@ void READ_FCHK_WFN::Center_of_mass()
   results_inert<<endl;
   jacobi(3,Im,EigenV);
  }
-// results_i<<"Normalized inertia tensor for the atomic masses (post-diagonalization):"<<endl;
  results_inert<<"Normalized inertia tensor for the atomic masses (post-diagonalization and ordering):"<<endl;
- Auxiliar=Im[0][0];
- counter=0;
  for(i=0;i<3;i++)
  {
-  if(abs(Auxiliar)<abs(Im[i][i]))
+  order[i]=i;
+ }
+ for(i=0;i<3;i++)
+ {
+  Norm=abs(Im[i][i]);
+  for(j=i+1;j<3;j++)
   {
-   Auxiliar2=Im[i][i];
-   Im[i][i]=Im[counter][counter];
-   Im[counter][counter]=Auxiliar2;
-   for(j=0;j<3;j++)
+   if(abs(Im[j][j])>Norm)
    {
-    Auxiliar2=EigenV[j][i];
-    EigenV[j][i]=EigenV[j][counter];
-    EigenV[j][counter]=Auxiliar2;
+    Norm=abs(Im[j][j]);
+    Auxiliar2=Im[j][j];
+    Im[j][j]=Im[i][i];
+    Im[i][i]=Auxiliar2;
+    pivot=order[i];
+    order[i]=order[j];
+    order[j]=pivot;
    }
-   counter=i;
   }
  }
- Auxiliar=ZERO;
  for(i=0;i<3;i++)
  {
   for(j=0;j<3;j++)
@@ -5992,9 +5993,9 @@ void READ_FCHK_WFN::Center_of_mass()
  {
   for(j=0;j<3;j++)
   {
-   results_inert<<setw(15)<<EigenV[i][j]<<" ";
+   results_inert<<setw(15)<<EigenV[i][order[j]]<<" ";
    //Also store the rotation matrix but in rows!
-   Rot_ICM[j][i]=EigenV[i][j];
+   Rot_ICM[j][i]=EigenV[i][order[j]];
   }
   results_inert<<endl;
  }
@@ -6599,27 +6600,28 @@ void READ_FCHK_WFN::Center_of_mass()
   results_inert<<endl;
   jacobi(3,Im,EigenV);
  }
-// results_i<<"Normalized inertia tensor for the atomic masses (post-diagonalization):"<<endl;
  results_inert<<"Normalized inertia tensor for the atomic masses (post-diagonalization and ordering):"<<endl;
- Auxiliar=Im[0][0];
- counter=0;
  for(i=0;i<3;i++)
  {
-  if(abs(Auxiliar)<abs(Im[i][i]))
+  order[i]=i;
+ }
+ for(i=0;i<3;i++)
+ {
+  Norm=abs(Im[i][i]);
+  for(j=i+1;j<3;j++)
   {
-   Auxiliar2=Im[i][i];
-   Im[i][i]=Im[counter][counter];
-   Im[counter][counter]=Auxiliar2;
-   for(j=0;j<3;j++)
+   if(abs(Im[j][j])>Norm)
    {
-    Auxiliar2=EigenV[j][i];
-    EigenV[j][i]=EigenV[j][counter];
-    EigenV[j][counter]=Auxiliar2;
+    Norm=abs(Im[j][j]);
+    Auxiliar2=Im[j][j];
+    Im[j][j]=Im[i][i];
+    Im[i][i]=Auxiliar2;
+    pivot=order[i];
+    order[i]=order[j];
+    order[j]=pivot;
    }
-   counter=i;
   }
  }
- Auxiliar=ZERO;
  for(i=0;i<3;i++)
  {
   for(j=0;j<3;j++)
@@ -6634,9 +6636,9 @@ void READ_FCHK_WFN::Center_of_mass()
  {
   for(j=0;j<3;j++)
   {
-   results_inert<<setw(15)<<EigenV[i][j]<<" ";
+   results_inert<<setw(15)<<EigenV[i][order[j]]<<" ";
    //Also store the rotation matrix but in rows!
-   Rot_ICM[j][i]=EigenV[i][j];
+   Rot_ICM[j][i]=EigenV[i][order[j]];
   }
   results_inert<<endl;
  }
