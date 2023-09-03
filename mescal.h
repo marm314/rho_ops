@@ -13,6 +13,7 @@ using namespace std;
 class MESCAL
 {
  private:
+ int order[3];
  struct ATOM
  {
   int Z;
@@ -21,6 +22,8 @@ class MESCAL
  void Asymbol2Z(int &Z, string symbol);
  double Z2mass(int &Z);
  void jacobi(int n, double **m, double **v);
+ void read_pdb_file(string name_pbd);
+ void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
 
  public:
   MESCAL();
