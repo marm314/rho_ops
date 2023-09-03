@@ -32,3 +32,4 @@ Manual_RHO.OPS.log
 mescal.o
 mescal_utils.o
 mescal_IO.o
+*.swp
