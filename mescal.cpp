@@ -12,32 +12,13 @@ MESCAL::MESCAL(string name_output,string name_pdb)
   Urot[icoord]=new double[3];
   Im[icoord]=new double[3];
  }
- ofstream write_out(name_output);
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"------                 MESCAL ( in C++ )                   -----"<<endl; 
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"--          Developed by: Dr. M. Rodriguez-Mayorga            --"<<endl; 
- write_out<<"----               email: marm3.14@gmail.com               -----"<<endl;
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<endl;  
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<"--  MicroElectroStatic Calculations (MESCAL)               -----"<<endl;
- write_out<<"--  Based on MESCAL (in Fortran) code by                   -----"<<endl;
- write_out<<"--  Dr. Gabriele D'Avino (2013-2015)                       -----"<<endl;
- write_out<<"--  email: gabriele.davino@gmail.com                       -----"<<endl;
- write_out<<"--  download: https://gitlab.com/taphino/mescal            -----"<<endl;
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<endl;  
+ // Init output file
+ init_output(name_output);
+ ofstream write_out(name_output,std::ios_base::app);
  write_out<<setprecision(8)<<fixed<<scientific;
  // Read PDB file to store Fragment and atomic information
  nfragments=0;
  read_pdb_file(name_pdb);
-
- // Read fragment.dat files to store alpha_ij and rot matrices 
-
  write_out<<endl;
  write_out<<" Fragments read from the PDB file (distances in Bohr) "<<endl;
  write_out<<endl;
@@ -71,6 +52,10 @@ MESCAL::MESCAL(string name_output,string name_pdb)
    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
   }
   write_out<<endl;
+
+  // Read fragment.dat files to store alpha_ij and rot matrices 
+  read_fragment_file((fragments[ifrag].name+".dat").c_str());
+
   // Compute alpha' = U alpha U^T for each fragment 
   
   // Set alpha atomic contributions 
@@ -78,27 +63,11 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  // Delete Urot and Im because they are no longer needed
  for(icoord=0;icoord<3;icoord++){delete[] Urot[icoord];Urot[icoord]=NULL; delete[] Im[icoord];Im[icoord]=NULL;}
  delete[] Urot; Urot=NULL; delete[] Im; Im=NULL;
-
- // Do self-consistent sol. to get induced dipoles
-
- write_out<<endl;  
- write_out<<endl;
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<" /  \\     /  |/        | /      \\  /      \\           /  |"<<endl;
- write_out<<" $$  \\   /$$ |$$$$$$$$/ /$$$$$$  |/$$$$$$  |  ______  $$ |  "<<endl;
- write_out<<" $$$  \\ /$$$ |$$ |__    $$ \\__$$/ $$ |  $$/  /      \\ $$ | "<<endl;
- write_out<<" $$$$  /$$$$ |$$    |   $$      \\ $$ |       $$$$$$  |$$ |  "<<endl;
- write_out<<" $$ $$ $$/$$ |$$$$$/     $$$$$$  |$$ |   __  /    $$ |$$ |   "<<endl;
- write_out<<" $$ |$$$/ $$ |$$ |_____ /  \\__$$ |$$ \\__/  |/$$$$$$$ |$$ | "<<endl;
- write_out<<" $$ | $/  $$ |$$       |$$    $$/ $$    $$/ $$    $$ |$$ |   "<<endl;
- write_out<<" $$/      $$/ $$$$$$$$/  $$$$$$/   $$$$$$/   $$$$$$$/ $$/    "<<endl;
- write_out<<"----------------------------------------------------------------"<<endl;  
- write_out<<endl;
- write_out<<"  Normal termination of MESCAL code          "<<endl;
- write_out<<endl;  
- write_out<<"----------------------------------------------------------------"<<endl;  
  write_out.close();
 }
+ 
+// Do self-consistent sol. to get induced dipoles
+
 MESCAL::~MESCAL()
 {
  // Nth to be deleted manually

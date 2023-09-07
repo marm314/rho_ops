@@ -5081,6 +5081,10 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb);
+
+  // call mescal scf providing QM electric fields to the MM part.
+
+   mescal.close_output(mescal_file);
   }
   /////////////////////////////////////
   // Transform int files for ESI-3c  //

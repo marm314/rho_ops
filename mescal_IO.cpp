@@ -160,3 +160,63 @@ void MESCAL::read_pdb_file(string name_pdb)
  } 
  read_pdb.close();
 }
+
+// Read fragment file
+void MESCAL::read_fragment_file(string name_frag)
+{
+ string line;
+ ifstream read_frag(name_frag);
+ while(getline(read_frag,line))
+ {
+  cout<<line<<endl;
+ }
+ read_frag.close();
+}
+
+// Print header ouput file
+void MESCAL::init_output(string name_output)
+{
+ ofstream write_out(name_output);
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"------                 MESCAL ( in C++ )                   -----"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"--          Developed by: Dr. M. Rodriguez-Mayorga            --"<<endl;
+ write_out<<"----               email: marm3.14@gmail.com               -----"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"--  MicroElectroStatic Calculations (MESCAL)               -----"<<endl;
+ write_out<<"--  Based on MESCAL (in Fortran) code by                   -----"<<endl;
+ write_out<<"--  Dr. Gabriele D'Avino (2013-2015)                       -----"<<endl;
+ write_out<<"--  email: gabriele.davino@gmail.com                       -----"<<endl;
+ write_out<<"--  download: https://gitlab.com/taphino/mescal            -----"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<endl;
+ write_out.close();
+}
+
+// Print footer ouput file
+void MESCAL::close_output(string name_output)
+{
+ ofstream write_out(name_output,std::ios_base::app);
+ write_out<<endl;
+ write_out<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<" /  \\     /  |/        | /      \\  /      \\           /  |"<<endl;
+ write_out<<" $$  \\   /$$ |$$$$$$$$/ /$$$$$$  |/$$$$$$  |  ______  $$ |  "<<endl;
+ write_out<<" $$$  \\ /$$$ |$$ |__    $$ \\__$$/ $$ |  $$/  /      \\ $$ | "<<endl;
+ write_out<<" $$$$  /$$$$ |$$    |   $$      \\ $$ |       $$$$$$  |$$ |  "<<endl;
+ write_out<<" $$ $$ $$/$$ |$$$$$/     $$$$$$  |$$ |   __  /    $$ |$$ |   "<<endl;
+ write_out<<" $$ |$$$/ $$ |$$ |_____ /  \\__$$ |$$ \\__/  |/$$$$$$$ |$$ | "<<endl;
+ write_out<<" $$ | $/  $$ |$$       |$$    $$/ $$    $$/ $$    $$ |$$ |   "<<endl;
+ write_out<<" $$/      $$/ $$$$$$$$/  $$$$$$/   $$$$$$/   $$$$$$$/ $$/    "<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<endl;
+ write_out<<"  Normal termination of MESCAL code          "<<endl;
+ write_out<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out.close();
+}

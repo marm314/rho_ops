@@ -23,6 +23,7 @@ class MESCAL
  double Z2mass(int &Z);
  void jacobi(int n, double **m, double **v);
  void read_pdb_file(string name_pbd);
+ void read_fragment_file(string name_frag);
  void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
 
  public:
@@ -37,6 +38,8 @@ class MESCAL
   vector<ATOM>atoms;
  };
  vector<FRAGMENT>fragments;
+ void init_output(string name_output);
+ void close_output(string name_output);
 
 }; 
 #endif // _MESCAL_H_
