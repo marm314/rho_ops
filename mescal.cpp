@@ -54,7 +54,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
   write_out<<endl;
 
   // Read fragment.dat files to store alpha_ij and rot matrices 
-  read_fragment_file((fragments[ifrag].name+".dat").c_str());
+  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag);
 
   // Compute alpha' = U alpha U^T for each fragment 
   

@@ -162,15 +162,41 @@ void MESCAL::read_pdb_file(string name_pdb)
 }
 
 // Read fragment file
-void MESCAL::read_fragment_file(string name_frag)
+void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag)
 {
+ int iread,jread;
+ double Im_ref[3][3],alpha[3][3],*charges_read;
  string line;
+ charges_read=new double [fragments[ifrag].natoms];
  ifstream read_frag(name_frag);
  while(getline(read_frag,line))
  {
-  cout<<line<<endl;
+  if(line=="Polarizability")
+  {
+   for(iread=0;iread<3;iread++)
+   {
+    for(jread=0;jread<=iread;jread++){read_frag>>alpha[iread][jread];if(iread!=jread){alpha[jread][iread]=alpha[iread][jread];}}
+   }
+  }
+  if(line=="Normalized inertia tensor")
+  {
+   for(iread=0;iread<3;iread++)
+   {
+    for(jread=0;jread<3;jread++){read_frag>>Im_ref[iread][jread];}
+   }
+  }
+  if(line=="Mulliken Charges")
+  {
+   for(iread=0;iread<fragments[ifrag].natoms;iread++){read_frag>>charges_read[iread];}
+  }
  }
  read_frag.close();
+
+ // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
+
+ // Transform alpha_rot  -> alpha_atomic (valence electrons) 
+
+ delete[] charges_read; charges_read=NULL;
 }
 
 // Print header ouput file
