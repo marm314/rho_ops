@@ -4,7 +4,7 @@
 MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
 MESCAL::MESCAL(string name_output,string name_pdb)
 {
- int ifrag,iatom,icoord,jcoord;
+ int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
  double pos[3],**Im,**Urot;
  Urot=new double*[3];Im=new double*[3];
  for(icoord=0;icoord<3;icoord++)
@@ -24,6 +24,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  write_out<<endl;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
+  Sum_Val_elect=0;
   write_out<<" Fragment "<<ifrag+1<<endl;
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
@@ -32,6 +33,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[0];
    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[1];
    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[2]<<endl;
+   Sum_Val_elect+=Z2val_electrons(fragments[ifrag].atoms[iatom].Z);
   }
   Frag_T_inertia(ifrag,pos,Im,Urot);
   write_out<<"  Center of Mass "<<setw(20)<<pos[0]<<setw(20)<<pos[1]<<setw(20)<<pos[2]<<endl;
@@ -51,10 +53,10 @@ MESCAL::MESCAL(string name_output,string name_pdb)
   {
    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
   }
-  write_out<<endl;
-
   // Read fragment.dat files to store alpha_ij and rot matrices 
-  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag);
+  write_out<<"  Total number of valence electrons of this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect);
+  write_out<<endl;
 
   // Compute alpha' = U alpha U^T for each fragment 
   

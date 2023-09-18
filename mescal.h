@@ -6,7 +6,7 @@
 #include<fstream>
 #include<algorithm>
 #include<cmath>
-#define Angs2au 1.8897259886  
+#define Angs2au 1.8897259886
 #define tol8 1e-8
 
 using namespace std;
@@ -21,9 +21,10 @@ class MESCAL
  };
  void Asymbol2Z(int &Z, string symbol);
  double Z2mass(int &Z);
+ int Z2val_electrons(int &Z);
  void jacobi(int n, double **m, double **v);
  void read_pdb_file(string name_pbd);
- void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag);
+ void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect);
  void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
 
  public:

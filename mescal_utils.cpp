@@ -344,3 +344,119 @@ double MESCAL::Z2mass(int &Z)
  else{cout<<"Warning! Mass not found for Atomic Number "<<Z<<endl;}
  return mass;
 } 
+// Z -> valence electrons
+int MESCAL::Z2val_electrons(int &Z)
+{
+ int val_elect=0;
+ if(Z==1){val_elect=1;}
+ else if(Z==2 ){val_elect=2;}
+ else if(Z==3 ){val_elect=1;}
+ else if(Z==4 ){val_elect=2;}
+ else if(Z==5 ){val_elect=3;}
+ else if(Z==6 ){val_elect=4;}
+ else if(Z==7 ){val_elect=5;}
+ else if(Z==8 ){val_elect=6;}
+ else if(Z==9 ){val_elect=7;}
+ else if(Z==10){val_elect=8;}
+ else if(Z==11){val_elect=1;}
+ else if(Z==12){val_elect=2;}
+ else if(Z==13){val_elect=3;}
+ else if(Z==14){val_elect=4;}
+ else if(Z==15){val_elect=5;}
+ else if(Z==16){val_elect=6;}
+ else if(Z==17){val_elect=7;}
+ else if(Z==18){val_elect=8;}
+ else if(Z==19){val_elect=1;}
+ else if(Z==20){val_elect=2;}
+ else if(Z==21){val_elect=3;}
+ else if(Z==22){val_elect=4;}
+ else if(Z==23){val_elect=5;}
+ else if(Z==24){val_elect=6;}
+ else if(Z==25){val_elect=7;}
+ else if(Z==26){val_elect=8;}
+ else if(Z==27){val_elect=9;}
+ else if(Z==28){val_elect=10;}
+ else if(Z==29){val_elect=11;}
+ else if(Z==30){val_elect=12;}
+ else if(Z==31){val_elect=13;}
+ else if(Z==32){val_elect=14;}
+ else if(Z==33){val_elect=15;}
+ else if(Z==34){val_elect=16;}
+ else if(Z==35){val_elect=17;}
+ else if(Z==36){val_elect=18;}
+ else if(Z==37){val_elect=1;}
+ else if(Z==38){val_elect=2;}
+ else if(Z==39){val_elect=3;}
+ else if(Z==40){val_elect=4;}
+ else if(Z==41){val_elect=5;}
+ else if(Z==42){val_elect=6;}
+ else if(Z==43){val_elect=7;}
+ else if(Z==44){val_elect=8;}
+ else if(Z==45){val_elect=9;}
+ else if(Z==46){val_elect=10;}
+ else if(Z==47){val_elect=11;}
+ else if(Z==48){val_elect=12;}
+ else if(Z==49){val_elect=13;}
+ else if(Z==50){val_elect=14;}
+ else if(Z==51){val_elect=15;}
+ else if(Z==52){val_elect=16;}
+ else if(Z==53){val_elect=17;}
+ else if(Z==54){val_elect=18;}
+ else if(Z==55){val_elect=1;}
+ else if(Z==56){val_elect=2;}
+ else if(Z==57){val_elect=3;}
+ else if(Z==58){val_elect=4;}
+ else if(Z==59){val_elect=5;}
+ else if(Z==60){val_elect=6;}
+ else if(Z==61){val_elect=7;}
+ else if(Z==62){val_elect=8;}
+ else if(Z==63){val_elect=9;}
+ else if(Z==64){val_elect=10;}
+ else if(Z==65){val_elect=11;}
+ else if(Z==66){val_elect=12;}
+ else if(Z==67){val_elect=13;}
+ else if(Z==68){val_elect=14;}
+ else if(Z==69){val_elect=15;}
+ else if(Z==70){val_elect=16;}
+ else if(Z==71){val_elect=17;}
+ else if(Z==72){val_elect=18;}
+ else if(Z==73){val_elect=19;}
+ else if(Z==74){val_elect=20;}
+ else if(Z==75){val_elect=21;}
+ else if(Z==76){val_elect=22;}
+ else if(Z==77){val_elect=23;}
+ else if(Z==78){val_elect=24;}
+ else if(Z==79){val_elect=25;}
+ else if(Z==80){val_elect=26;}
+ else if(Z==81){val_elect=27;}
+ else if(Z==82){val_elect=28;}
+ else if(Z==83){val_elect=29;}
+ else if(Z==84){val_elect=30;}
+ else if(Z==85){val_elect=31;}
+ else if(Z==86){val_elect=32;}
+ else if(Z==87){val_elect=1;}
+ else if(Z==88){val_elect=2;}
+ else if(Z==89){val_elect=3;}
+ else if(Z==90){val_elect=4;}
+ else if(Z==91){val_elect=5;}
+ else if(Z==92){val_elect=6;}
+ else if(Z==93){val_elect=7;}
+ else if(Z==94){val_elect=8;}
+ else if(Z==95){val_elect=9;}
+ else if(Z==96){val_elect=10;}
+ else if(Z==97){val_elect=11;}
+ else if(Z==98){val_elect=12;}
+ else if(Z==99){val_elect=13;}
+ else if(Z==100){val_elect=14;}
+ else if(Z==101){val_elect=15;}
+ else if(Z==102){val_elect=16;}
+ else if(Z==103){val_elect=17;}
+ else if(Z==104){val_elect=18;}
+ else if(Z==105){val_elect=19;}
+ else if(Z==106){val_elect=20;}
+ else if(Z==107){val_elect=21;}
+ else if(Z==108){val_elect=22;}
+ else if(Z==109){val_elect=23;}
+ else{cout<<"Warning! Valence electrons number not found for Atomic Number "<<Z<<endl;}
+ return val_elect;
+} 

@@ -162,10 +162,10 @@ void MESCAL::read_pdb_file(string name_pdb)
 }
 
 // Read fragment file
-void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag)
+void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect)
 {
- int iread,jread;
- double Im_ref[3][3],alpha[3][3],*charges_read;
+ int iread,jread,iatom,ialpha,jalpha;
+ double fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
  string line;
  charges_read=new double [fragments[ifrag].natoms];
  ifstream read_frag(name_frag);
@@ -194,8 +194,20 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 
  // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
 
- // Transform alpha_rot  -> alpha_atomic (valence electrons) 
-
+ // Transform alpha_rot  -> alpha_atomic (number of valence electrons used as weighting method)
+ // Note: We are currently assuming that atoms are ordered in the same way in the PDB and in the fragment.dat file
+ //       It is possible to improve this by using the rot matrix and the distances. 
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  fact_weight=((double)Z2val_electrons(fragments[ifrag].atoms[iatom].Z)/(double)Sum_Val_elect);
+  for(ialpha=0;ialpha<3;ialpha++)
+  {
+   for(jalpha=0;jalpha<3;jalpha++)
+   {
+    fragments[ifrag].atoms[iatom].alpha[ialpha][jalpha]=fact_weight*alpha[ialpha][jalpha];
+   }
+  }
+ }
  delete[] charges_read; charges_read=NULL;
 }
 
