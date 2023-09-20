@@ -165,8 +165,9 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect)
 {
+ bool devItens=false;
  int iread,jread,iatom,ialpha,jalpha;
- double tol4=pow(10.0e0,-4.0e0),fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
  string line;
  charges_read=new double [fragments[ifrag].natoms];
  ifstream read_frag(name_frag);
@@ -186,11 +187,13 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     for(jread=0;jread<3;jread++){read_frag>>Im_ref[iread][jread];}
    }
+   devItens=false; 
    for(iread=0;iread<3;iread++)
    {
     for(jread=0;jread<3;jread++)
-    {if(abs(Im_ref[iread][jread]-Im_frag[iread][jread])>tol4){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-4 w.r.t. reference."<<endl;};}
+    {if(abs(Im_ref[iread][jread]-Im_frag[iread][jread])>tol2){devItens=true;}}
    }
+   if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-3 w.r.t. reference."<<endl;}
   }
   if(line=="Mulliken Charges")
   {
