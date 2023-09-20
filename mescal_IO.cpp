@@ -3,7 +3,7 @@
 // Read PDB file
 void MESCAL::read_pdb_file(string name_pdb)
 {
- int ichar,ichar1,Z=1,old_fragment=-1,new_fragment,blank_spaces[14];
+ int ichar,ichar1,Z=1,count_fragments=-1,old_fragment=-1,new_fragment,blank_spaces[14];
  double pos[3];
  string line,line_aux;
  bool space,space2;
@@ -41,6 +41,7 @@ void MESCAL::read_pdb_file(string name_pdb)
    ss>>new_fragment;
    if(new_fragment!=old_fragment)
    {
+    count_fragments++;
     line_aux=line.substr(blank_spaces[4],blank_spaces[7]-blank_spaces[4]+1);
     line_aux.erase(std::remove_if(line_aux.begin(),line_aux.end(),::isspace),line_aux.end());
     old_fragment=new_fragment;
@@ -96,12 +97,12 @@ void MESCAL::read_pdb_file(string name_pdb)
     stringstream ss3(line_aux);
     ss3>>pos[2];
     pos[2]=pos[2]*Angs2au;
-    fragments[old_fragment-1].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
+    fragments[count_fragments].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
     nfragments++;
    }
    else
    {
-    fragments[old_fragment-1].natoms++;                                        // Add an atom to the fragment
+    fragments[count_fragments].natoms++;                                        // Add an atom to the fragment
     // Here add atomic info to push_back
     // Det Z
     line_aux=line.substr(blank_spaces[2],blank_spaces[5]-blank_spaces[2]+1);
@@ -154,7 +155,7 @@ void MESCAL::read_pdb_file(string name_pdb)
     stringstream ss3(line_aux);
     ss3>>pos[2];
     pos[2]=pos[2]*Angs2au;
-    fragments[old_fragment-1].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
+    fragments[count_fragments].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
    }
   }
  } 
@@ -165,10 +166,11 @@ void MESCAL::read_pdb_file(string name_pdb)
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect)
 {
  int iread,jread,iatom,ialpha,jalpha;
- double fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
+ double tol4=pow(10.0e0,-4.0e0),fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
  string line;
  charges_read=new double [fragments[ifrag].natoms];
  ifstream read_frag(name_frag);
+ if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;}
  while(getline(read_frag,line))
  {
   if(line=="Polarizability")
@@ -183,6 +185,11 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    for(iread=0;iread<3;iread++)
    {
     for(jread=0;jread<3;jread++){read_frag>>Im_ref[iread][jread];}
+   }
+   for(iread=0;iread<3;iread++)
+   {
+    for(jread=0;jread<3;jread++)
+    {if(abs(Im_ref[iread][jread]-Im_frag[iread][jread])>tol4){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-4 w.r.t. reference."<<endl;};}
    }
   }
   if(line=="Mulliken Charges")
