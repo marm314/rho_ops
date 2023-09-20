@@ -244,6 +244,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     fragments[ifrag].atoms[iatom].alpha[ialpha][jalpha]=fact_weight*alpha[ialpha][jalpha];
    }
   }
+  fragments[ifrag].atoms[iatom].charge=charges_read[iatom]; // Asign Mulliken charges to atoms
  }
  delete[] charges_read; charges_read=NULL;
 }
