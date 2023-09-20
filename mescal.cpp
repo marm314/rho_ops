@@ -53,14 +53,12 @@ MESCAL::MESCAL(string name_output,string name_pdb)
   {
    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
   }
-  // Read fragment.dat files to store alpha_ij and rot matrices 
   write_out<<"  Total number of valence electrons of this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+  // Read fragment.dat files to store charges and asign alpha atomic contributions. 
+  // Note: We compute alpha' = U alpha U^T for each fragment 
   read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect);
   write_out<<endl;
 
-  // Compute alpha' = U alpha U^T for each fragment 
-  
-  // Set alpha atomic contributions 
  }
  // Delete Urot and Im because they are no longer needed
  for(icoord=0;icoord<3;icoord++){delete[] Urot[icoord];Urot[icoord]=NULL; delete[] Im[icoord];Im[icoord]=NULL;}

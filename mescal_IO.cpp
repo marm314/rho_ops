@@ -165,45 +165,72 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect)
 {
- bool devItens=false;
- int iread,jread,iatom,ialpha,jalpha;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3],*charges_read;
+ bool devItens=false,frag_file_good=true;
+ int iindex,jindex,kindex,iatom,ialpha,jalpha;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*charges_read;
  string line;
  charges_read=new double [fragments[ifrag].natoms];
  ifstream read_frag(name_frag);
- if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;}
+ if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
  {
-  if(line=="Polarizability")
+  if(line.length()<14){line+="         ";}
+  if(line.substr(0,14)=="Polarizability")
   {
-   for(iread=0;iread<3;iread++)
+   for(iindex=0;iindex<3;iindex++)
    {
-    for(jread=0;jread<=iread;jread++){read_frag>>alpha[iread][jread];if(iread!=jread){alpha[jread][iread]=alpha[iread][jread];}}
+    for(jindex=0;jindex<=iindex;jindex++){read_frag>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
    }
   }
   if(line=="Normalized inertia tensor")
   {
-   for(iread=0;iread<3;iread++)
+   for(iindex=0;iindex<3;iindex++)
    {
-    for(jread=0;jread<3;jread++){read_frag>>Im_ref[iread][jread];}
+    for(jindex=0;jindex<3;jindex++){read_frag>>Im_ref[iindex][jindex];}
    }
    devItens=false; 
-   for(iread=0;iread<3;iread++)
+   for(iindex=0;iindex<3;iindex++)
    {
-    for(jread=0;jread<3;jread++)
-    {if(abs(Im_ref[iread][jread]-Im_frag[iread][jread])>tol2){devItens=true;}}
+    for(jindex=0;jindex<3;jindex++)
+    {
+     Temp_mat[iindex][jindex]=0.0e0;
+     if(abs(Im_ref[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
+    }
    }
    if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-3 w.r.t. reference."<<endl;}
   }
   if(line=="Mulliken Charges")
   {
-   for(iread=0;iread<fragments[ifrag].natoms;iread++){read_frag>>charges_read[iread];}
+   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>charges_read[iindex];}
   }
  }
  read_frag.close();
-
- // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
-
+ if(frag_file_good)
+ {
+  // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
+  for(iindex=0;iindex<3;iindex++)
+  {
+   for(jindex=0;jindex<3;jindex++)
+   {
+    for(kindex=0;kindex<3;kindex++)
+    {
+     //Temp_mat[iindex][jindex]+=Urot[kindex][iindex]*alpha[kindex][jindex];
+     Temp_mat[iindex][jindex]+=Urot[iindex][kindex]*alpha[kindex][jindex];
+    }
+   }
+  }
+  for(iindex=0;iindex<3;iindex++)
+  {
+   for(jindex=0;jindex<3;jindex++)
+   {
+    alpha[iindex][jindex]=0.0e0;
+    for(kindex=0;kindex<3;kindex++)
+    {
+     alpha[iindex][jindex]+=Temp_mat[iindex][kindex]*Urot[jindex][kindex];
+    }
+   }
+  }
+ }
  // Transform alpha_rot  -> alpha_atomic (number of valence electrons used as weighting method)
  // Note: We are currently assuming that atoms are ordered in the same way in the PDB and in the fragment.dat file
  //       It is possible to improve this by using the rot matrix and the distances. 
