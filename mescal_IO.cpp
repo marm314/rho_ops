@@ -174,7 +174,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
  {
-  if(line.length()<14){line+="         ";}
+  if(line.length()<16){line+="                   ";}
   if(line.substr(0,14)=="Polarizability")
   {
    for(iindex=0;iindex<3;iindex++)
@@ -199,7 +199,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    }
    if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-3 w.r.t. reference."<<endl;}
   }
-  if(line=="Mulliken Charges")
+  if(line.substr(0,16)=="Mulliken Charges")
   {
    for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>charges_read[iindex];}
   }

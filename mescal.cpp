@@ -90,7 +90,46 @@ void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
  }
 }
 
-// Do self-consistent sol. to get induced dipoles
+// Set F_inter_fragment (due point charge(s) of the other fragments)
+void MESCAL::set_F_inter_frag()
+{
+ int ifrag,jfrag,iatom,jatom,icoord;
+ double r,r3,diff_xyz[3],F_inter[3];
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++){F_inter[icoord]=0.0e0;}
+   for(jfrag=0;jfrag<nfragments;jfrag++)
+   {
+    if(ifrag!=jfrag) // Only inter-fragment contributions
+    {
+     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
+     {
+      r=0.0e0;
+      for(icoord=0;icoord<3;icoord++)
+      {
+       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
+       r+=diff_xyz[icoord]*diff_xyz[icoord];
+      }
+      r=pow(r,0.5e0);
+      r3=pow(r,3.0e0);
+      for(icoord=0;icoord<3;icoord++)
+      {
+       F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
+      }
+     }
+    }
+   }
+   for(icoord=0;icoord<3;icoord++)
+   {
+    fragments[ifrag].atoms[iatom].F_perm[icoord]+=F_inter[icoord];
+   }
+  }
+ }
+}
+
+// Do self-consistent sol. to find induced dipoles (mu) and fields (F_mu)
 
 MESCAL::~MESCAL()
 {

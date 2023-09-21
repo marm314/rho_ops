@@ -41,6 +41,7 @@ class MESCAL
  vector<FRAGMENT>fragments;
  void init_output(string name_output);
  void set_F_ext_punct(double &q_mescal,double Point_mescal[3]);
+ void set_F_inter_frag();
  void close_output(string name_output);
 
 }; 
