@@ -214,7 +214,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     for(kindex=0;kindex<3;kindex++)
     {
-     //Temp_mat[iindex][jindex]+=Urot[kindex][iindex]*alpha[kindex][jindex];
      Temp_mat[iindex][jindex]+=Urot[iindex][kindex]*alpha[kindex][jindex];
     }
    }

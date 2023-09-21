@@ -65,6 +65,31 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  write_out.close();
 }
  
+// Set F_ext (due to a/many point charge(s))
+void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
+{
+ int ifrag,iatom,icoord;
+ double r,r3,diff_xyz[3];
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   r=0.0e0;
+   for(icoord=0;icoord<3;icoord++)
+   {
+    diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-Point_mescal[icoord];
+    r+=diff_xyz[icoord]*diff_xyz[icoord];
+   }
+   r=pow(r,0.5e0);
+   r3=pow(r,3.0e0);
+   for(icoord=0;icoord<3;icoord++)
+   {
+    fragments[ifrag].atoms[iatom].F_perm[icoord]+=q_mescal*diff_xyz[icoord]/r3;
+   }
+  }
+ }
+}
+
 // Do self-consistent sol. to get induced dipoles
 
 MESCAL::~MESCAL()

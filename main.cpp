@@ -5081,10 +5081,25 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb);
+   // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
+   if(Input_commands.mescal_punctual)
+   {
+    double Point_mescal[3];
+    for(i=0;i<Input_commands.npoints_mescal;i++)
+    {
+     for(j=0;j<3;j++){Point_mescal[j]=Input_commands.Point_mescal[i][j];}
+     mescal.set_F_ext_punct(Input_commands.q_mescal,Point_mescal);
+    }
+   }
+   else
+   {
+    Results<<"Comment: No external punctual charge read. Thus, no F_ext employed in MESCAL"<<endl;
+   }
 
-  // call mescal scf providing QM electric fields to the MM part.
+   // call mescal SCF for mu.
 
    mescal.close_output(mescal_file);
+   Results<<endl;
   }
   /////////////////////////////////////
   // Transform int files for ESI-3c  //
