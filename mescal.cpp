@@ -90,7 +90,7 @@ void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
  }
 }
 
-// Set F_inter_fragment (due point charge(s) of the other fragments)
+// Set F_inter_fragment (due to INDUCED point charge(s) of the other fragments)
 void MESCAL::set_F_inter_frag()
 {
  int ifrag,jfrag,iatom,jatom,icoord;
@@ -116,7 +116,7 @@ void MESCAL::set_F_inter_frag()
       r3=pow(r,3.0e0);
       for(icoord=0;icoord<3;icoord++)
       {
-       F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
+       F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
       }
      }
     }

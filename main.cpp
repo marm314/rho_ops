@@ -5095,8 +5095,6 @@ int main(int argc, char *argv[])
    {
     Results<<"Comment: No external punctual charge read. Thus, no F_ext employed in MESCAL"<<endl;
    }
-   // Init F_inter fragmenst due to charges 
-   mescal.set_F_inter_frag();
 
    // call mescal SCF for mu and F_mu.
 

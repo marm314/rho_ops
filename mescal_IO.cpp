@@ -97,7 +97,7 @@ void MESCAL::read_pdb_file(string name_pdb)
     stringstream ss3(line_aux);
     ss3>>pos[2];
     pos[2]=pos[2]*Angs2au;
-    fragments[count_fragments].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
+    fragments[count_fragments].atoms.push_back({Z,pos[0],pos[1],pos[2]});// Z, position
     nfragments++;
    }
    else
@@ -155,7 +155,7 @@ void MESCAL::read_pdb_file(string name_pdb)
     stringstream ss3(line_aux);
     ss3>>pos[2];
     pos[2]=pos[2]*Angs2au;
-    fragments[count_fragments].atoms.push_back({Z,0.0,pos[0],pos[1],pos[2],0.0,0.0,0.0});// Z, charge, pos, dipole  
+    fragments[count_fragments].atoms.push_back({Z,pos[0],pos[1],pos[2]});// Z, position  
    }
   }
  } 
@@ -170,6 +170,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*charges_read;
  string line;
  charges_read=new double [fragments[ifrag].natoms];
+ for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){charges_read[iindex]=0.0e0;}
  ifstream read_frag(name_frag);
  if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
@@ -243,7 +244,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     fragments[ifrag].atoms[iatom].alpha[ialpha][jalpha]=fact_weight*alpha[ialpha][jalpha];
    }
   }
-  fragments[ifrag].atoms[iatom].charge=charges_read[iatom]; // Asign Mulliken charges to atoms
+  fragments[ifrag].atoms[iatom].charge=charges_read[iatom]; // Asign permanent charges to atoms (not used in SCF calc. and currently are the Mulliken ones) 
  }
  delete[] charges_read; charges_read=NULL;
 }
