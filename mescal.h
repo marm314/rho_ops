@@ -17,8 +17,8 @@ class MESCAL
  struct ATOM
  {
   int Z;
-  double pos[3],charge=0.0e0,charge_ind=0.0e0,dipole[3]={0.0e0},pos_wrt_cm[3]={0.0e0};
-  double F_perm[3]={0.0e0},F_mu[3]={0.0e0},alpha[3][3]={0.0e0};
+  double pos[3],charge=0.0e0,charge_ind=0.0e0,V_pot_0=0.0e0,dipole_ind[3]={0.0e0},pos_wrt_cm[3]={0.0e0};
+  double F_0[3]={0.0e0},F_ind[3]={0.0e0},alpha[3][3]={0.0e0};
  };
  void Asymbol2Z(int &Z, string symbol);
  double Z2mass(int &Z);

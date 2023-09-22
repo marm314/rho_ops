@@ -84,8 +84,9 @@ void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
    r3=pow(r,3.0e0);
    for(icoord=0;icoord<3;icoord++)
    {
-    fragments[ifrag].atoms[iatom].F_perm[icoord]+=q_mescal*diff_xyz[icoord]/r3;
+    fragments[ifrag].atoms[iatom].F_0[icoord]+=q_mescal*diff_xyz[icoord]/r3;
    }
+   fragments[ifrag].atoms[iatom].V_pot_0+=q_mescal/r;
   }
  }
 }
@@ -123,7 +124,7 @@ void MESCAL::set_F_inter_frag()
    }
    for(icoord=0;icoord<3;icoord++)
    {
-    fragments[ifrag].atoms[iatom].F_perm[icoord]+=F_inter[icoord];
+    fragments[ifrag].atoms[iatom].F_ind[icoord]+=F_inter[icoord];
    }
   }
  }
