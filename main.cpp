@@ -5088,7 +5088,7 @@ int main(int argc, char *argv[])
     for(i=0;i<Input_commands.npoints_mescal;i++)
     {
      for(j=0;j<3;j++){Point_mescal[j]=Input_commands.Point_mescal[i][j];}
-     mescal.set_F_ext_punct(Input_commands.q_mescal,Point_mescal);
+     mescal.set_FV_ext_punct(Input_commands.q_mescal,Point_mescal);
     }
    }
    else

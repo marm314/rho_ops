@@ -2,6 +2,23 @@
 
 MESCAL=./mescal/
 # Check if this mescal file different
+if [ -f "mescal.h" ]
+then
+    echo "mescal.h exists"
+    DIFF=$(diff mescal.h $MESCAL/mescal.h)
+    if [ "$DIFF" != "" ]
+    then
+     echo "mescal.h is modified"
+     cp $MESCAL/mescal.h mescal.h
+    fi
+    if [ "$DIFF" == "" ]
+    then
+     echo "mescal.h is unmodified"
+    fi
+else
+    cp $MESCAL/mescal.h mescal.h
+fi
+# Check if this mescal file different
 if [ -f "mescal.cpp" ]
 then
     echo "mescal.cpp exists"

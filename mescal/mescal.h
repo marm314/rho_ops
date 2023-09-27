@@ -17,8 +17,8 @@ class MESCAL
  struct ATOM
  {
   int Z;
-  double pos[3],charge=0.0e0,charge_ind=0.0e0,V_pot_0=0.0e0,dipole_ind[3]={0.0e0},pos_wrt_cm[3]={0.0e0};
-  double F_0[3]={0.0e0},F_ind[3]={0.0e0},alpha[3][3]={0.0e0};
+  double pos[3],charge=0.0e0,charge_ind=0.0e0,V_ext=0.0e0,V_q_ind=0.0e0,V_q_perm=0.0e0,dipole_ind[3]={0.0e0},pos_wrt_cm[3]={0.0e0};
+  double F_ext[3]={0.0e0},F_q_ind[3]={0.0e0},F_q_perm[3]={0.0e0},alpha[3][3]={0.0e0};
  };
  void Asymbol2Z(int &Z, string symbol);
  double Z2mass(int &Z);
@@ -41,8 +41,8 @@ class MESCAL
  };
  vector<FRAGMENT>fragments;
  void init_output(string name_output);
- void set_F_ext_punct(double &q_mescal,double Point_mescal[3]);
- void set_F_inter_frag();
+ void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
+ void set_FV_q_inter_frag(bool &induced);
  void close_output(string name_output);
 
 }; 

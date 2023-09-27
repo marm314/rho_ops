@@ -65,8 +65,8 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  write_out.close();
 }
  
-// Set F_ext (due to a/many point charge(s))
-void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
+// Set F_ext and V_ext (due to a/many point charge(s))
+void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
 {
  int ifrag,iatom,icoord;
  double r,r3,diff_xyz[3];
@@ -84,23 +84,42 @@ void MESCAL::set_F_ext_punct(double &q_mescal,double Point_mescal[3])
    r3=pow(r,3.0e0);
    for(icoord=0;icoord<3;icoord++)
    {
-    fragments[ifrag].atoms[iatom].F_0[icoord]+=q_mescal*diff_xyz[icoord]/r3;
+    fragments[ifrag].atoms[iatom].F_ext[icoord]+=q_ext*diff_xyz[icoord]/r3;
    }
-   fragments[ifrag].atoms[iatom].V_pot_0+=q_mescal/r;
+   fragments[ifrag].atoms[iatom].V_ext+=q_ext/r;
   }
  }
 }
 
-// Set F_inter_fragment (due to INDUCED point charge(s) of the other fragments)
-void MESCAL::set_F_inter_frag()
+// Set F_q_inter_fragment and V_q_inter_fragment (due to INDUCED/PERMANENT point charge(s) of the other fragments)
+void MESCAL::set_FV_q_inter_frag(bool &induced)
 {
  int ifrag,jfrag,iatom,jatom,icoord;
- double r,r3,diff_xyz[3],F_inter[3];
+ double r,r3,V_q_ind,V_q_perm,diff_xyz[3],F_inter[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
-   for(icoord=0;icoord<3;icoord++){F_inter[icoord]=0.0e0;}
+   if(induced)
+   {
+    V_q_ind=0.0e0;
+    fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     F_inter[icoord]=0.0e0;
+     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
+    }
+   }
+   else
+   {
+    V_q_perm=0.0e0;
+    fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     F_inter[icoord]=0.0e0;
+     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
+    }
+   }
    for(jfrag=0;jfrag<nfragments;jfrag++)
    {
     if(ifrag!=jfrag) // Only inter-fragment contributions
@@ -115,16 +134,40 @@ void MESCAL::set_F_inter_frag()
       }
       r=pow(r,0.5e0);
       r3=pow(r,3.0e0);
-      for(icoord=0;icoord<3;icoord++)
+      if(induced)
       {
-       F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
+       V_q_ind+=fragments[ifrag].atoms[iatom].charge_ind/r;
+       for(icoord=0;icoord<3;icoord++)
+       {
+        F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
+       }
+      }
+      else
+      {
+       V_q_perm+=fragments[ifrag].atoms[iatom].charge/r;
+       for(icoord=0;icoord<3;icoord++)
+       {
+        F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
+       }
       }
      }
     }
    }
-   for(icoord=0;icoord<3;icoord++)
+   if(induced)
    {
-    fragments[ifrag].atoms[iatom].F_ind[icoord]+=F_inter[icoord];
+    fragments[ifrag].atoms[iatom].V_q_ind=V_q_ind;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=F_inter[icoord];
+    }
+   }
+   else
+   {
+    fragments[ifrag].atoms[iatom].V_q_perm=V_q_perm;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=F_inter[icoord];
+    }
    }
   }
  }
