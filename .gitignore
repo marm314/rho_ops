@@ -33,3 +33,8 @@ mescal.o
 mescal_utils.o
 mescal_IO.o
 *.swp
+mescal.cpp
+mescal.h
+mescal_IO.cpp
+mescal_utils.
+mescal_utils.cpp
