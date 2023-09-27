@@ -130,7 +130,7 @@ void MESCAL::set_F_inter_frag()
  }
 }
 
-// Do self-consistent sol. to find induced dipoles (mu) and fields (F_mu)
+// Do self-consistent sol. to find induced dipoles (mu) and fields (F_mu) HERE
 
 MESCAL::~MESCAL()
 {
