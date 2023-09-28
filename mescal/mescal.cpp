@@ -287,7 +287,7 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
 void MESCAL::set_F_mu_ind()
 {
  int ifrag,jfrag,iatom,jatom,icoord;
- double r,r5,diff_xyz[3];
+ double r,r2,r5,diff_xyz[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
@@ -309,19 +309,20 @@ void MESCAL::set_F_mu_ind()
        r+=diff_xyz[icoord]*diff_xyz[icoord];
       }
       r=pow(r,0.5e0);
+      r2=pow(r,2.0e0);
       r5=pow(r,5.0e0);
       fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0])/r5;
+                                                -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)/r5;
       fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1])/r5;
+                                                -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)/r5;
       fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])/r5;
+                                                -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)/r5;
      }
     }
    }
