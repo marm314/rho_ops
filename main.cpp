@@ -5097,9 +5097,12 @@ int main(int argc, char *argv[])
    }
 
    // call mescal SCS for mu and F_mu.
-   mescal.maxiter=1;
-   mescal.induced_q=false;
+   mescal.maxiter=Input_commands.maxiter_mescal;
+   mescal.ind_q=false;
    mescal.perm_q=false;
+   Results<<endl;
+   Results<<" Running mescal with maxiter"<<setw(5)<<mescal.maxiter<<endl;
+   Results<<endl;
    mescal.mescal_scs(mescal_file);
 
    mescal.close_output(mescal_file);

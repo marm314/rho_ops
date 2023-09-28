@@ -35,7 +35,7 @@ class MESCAL
   MESCAL();
   MESCAL(string,string);
   ~MESCAL();
-  bool perm_q=false,induced_q=false;
+  bool perm_q=false,ind_q=false;
   int nfragments,maxiter=1000;
   struct FRAGMENT
   {

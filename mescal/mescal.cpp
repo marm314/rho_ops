@@ -69,7 +69,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
 void MESCAL::mescal_scs(string name)
 {
  int iter=0;
- bool tmp_false=false,conver;
+ bool tmp_false=false,conver=false;
  double E_old,E_new;
  // For permanent charges this is done only once because it does not change
  if(perm_q)
@@ -77,12 +77,11 @@ void MESCAL::mescal_scs(string name)
   set_FV_q_inter_frag(tmp_false);
  }
  // Enter SC procedure 
- conver=false;
  do
  {
-  if(induced_q)
+  if(ind_q)
   {
-   set_FV_q_inter_frag(induced_q);
+   set_FV_q_inter_frag(ind_q);
   }
   // mu = alpha F
   update_mu_ind();
