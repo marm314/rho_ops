@@ -69,13 +69,15 @@ MESCAL::MESCAL(string name_output,string name_pdb)
 void MESCAL::mescal_scs(string name)
 {
  int iter=0;
- bool E_old,E_new,tmp_false=false; 
+ bool tmp_false=false,conver;
+ double E_old,E_new;
  // For permanent charges this is done only once because it does not change
  if(perm_q)
  {
   set_FV_q_inter_frag(tmp_false);
  }
  // Enter SC procedure 
+ conver=false;
  do
  {
   if(induced_q)
@@ -89,7 +91,7 @@ void MESCAL::mescal_scs(string name)
   // Check conver and compute energy
   // Print iter info 
   iter++;
- }while(iter<maxiter);
+ }while(iter<maxiter && !conver);
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
