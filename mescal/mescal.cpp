@@ -64,7 +64,34 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  delete[] Urot; Urot=NULL; delete[] Im; Im=NULL;
  write_out.close();
 }
- 
+
+// Do self-consistent solution to find induced dipoles (mu) and fields (F_mu)
+void MESCAL::mescal_scs(string name)
+{
+ int iter=0;
+ bool E_old,E_new,tmp_false=false; 
+ // For permanent charges this is done only once because it does not change
+ if(perm_q)
+ {
+  set_FV_q_inter_frag(tmp_false);
+ }
+ // Enter SC procedure 
+ do
+ {
+  if(induced_q)
+  {
+   set_FV_q_inter_frag(induced_q);
+  }
+  // mu = alpha F
+  update_mu_ind();
+  // F_mu_ind = D mu_ind
+  set_F_mu_ind();
+  // Check conver and compute energy
+  // Print iter info 
+  iter++;
+ }while(iter<maxiter);
+}
+
 // Set F_ext and V_ext (due to a/many point charge(s))
 void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
 {
@@ -90,90 +117,6 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
   }
  }
 }
-
-// Set F_q_inter_fragment and V_q_inter_fragment (due to INDUCED/PERMANENT point charge(s) of the other fragments)
-void MESCAL::set_FV_q_inter_frag(bool &induced)
-{
- int ifrag,jfrag,iatom,jatom,icoord;
- double r,r3,V_q_ind,V_q_perm,diff_xyz[3],F_inter[3];
- for(ifrag=0;ifrag<nfragments;ifrag++)
- {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   if(induced)
-   {
-    V_q_ind=0.0e0;
-    fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     F_inter[icoord]=0.0e0;
-     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
-    }
-   }
-   else
-   {
-    V_q_perm=0.0e0;
-    fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     F_inter[icoord]=0.0e0;
-     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
-    }
-   }
-   for(jfrag=0;jfrag<nfragments;jfrag++)
-   {
-    if(ifrag!=jfrag) // Only inter-fragment contributions
-    {
-     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
-     {
-      r=0.0e0;
-      for(icoord=0;icoord<3;icoord++)
-      {
-       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
-       r+=diff_xyz[icoord]*diff_xyz[icoord];
-      }
-      r=pow(r,0.5e0);
-      r3=pow(r,3.0e0);
-      if(induced)
-      {
-       V_q_ind+=fragments[ifrag].atoms[iatom].charge_ind/r;
-       for(icoord=0;icoord<3;icoord++)
-       {
-        F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
-       }
-      }
-      else
-      {
-       V_q_perm+=fragments[ifrag].atoms[iatom].charge/r;
-       for(icoord=0;icoord<3;icoord++)
-       {
-        F_inter[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
-       }
-      }
-     }
-    }
-   }
-   if(induced)
-   {
-    fragments[ifrag].atoms[iatom].V_q_ind=V_q_ind;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=F_inter[icoord];
-    }
-   }
-   else
-   {
-    fragments[ifrag].atoms[iatom].V_q_perm=V_q_perm;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=F_inter[icoord];
-    }
-   }
-  }
- }
-}
-
-// Do self-consistent sol. to find induced dipoles (mu) and fields (F_mu) HERE
 
 MESCAL::~MESCAL()
 {
@@ -251,6 +194,149 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
     order[icoord]=order[jcoord];
     order[jcoord]=pivot;
    } 
+  }
+ }
+}
+
+// Update mu_ind
+void MESCAL::update_mu_ind()
+{
+ int ifrag,iatom,icoord;
+ double Field[3];
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
+                 +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
+                 +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
+                 +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+   }
+   alphaF2mu(ifrag,iatom,Field);
+  }
+ }
+}
+
+// Set F_q_inter_fragment and V_q_inter_fragment (due to INDUCED/PERMANENT point charge(s) of the other fragments)
+void MESCAL::set_FV_q_inter_frag(bool &induced)
+{
+ int ifrag,jfrag,iatom,jatom,icoord;
+ double r,r3,diff_xyz[3];
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   if(induced)
+   {
+    fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
+    }
+   }
+   else
+   {
+    fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
+    }
+   }
+   for(jfrag=0;jfrag<nfragments;jfrag++)
+   {
+    if(ifrag!=jfrag) // Only inter-fragment contributions
+    {
+     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
+     {
+      r=0.0e0;
+      for(icoord=0;icoord<3;icoord++)
+      {
+       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
+       r+=diff_xyz[icoord]*diff_xyz[icoord];
+      }
+      r=pow(r,0.5e0);
+      r3=pow(r,3.0e0);
+      if(induced)
+      {
+       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[ifrag].atoms[iatom].charge_ind/r;
+       for(icoord=0;icoord<3;icoord++)
+       {
+        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
+       }
+      }
+      else
+      {
+       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[ifrag].atoms[iatom].charge/r;
+       for(icoord=0;icoord<3;icoord++)
+       {
+        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+// Set F_mu_ind (due to induced dipoles)
+void MESCAL::set_F_mu_ind()
+{
+ int ifrag,jfrag,iatom,jatom,icoord;
+ double r,r5,diff_xyz[3];
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
+   }
+   for(jfrag=0;jfrag<nfragments;jfrag++)
+   {
+    if(ifrag!=jfrag)
+    {
+     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
+     {
+      r=0.0e0;
+      for(icoord=0;icoord<3;icoord++)
+      {
+       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
+       r+=diff_xyz[icoord]*diff_xyz[icoord];
+      }
+      r=pow(r,0.5e0);
+      r5=pow(r,5.0e0);
+      fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
+                                                -fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0])/r5;
+      fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
+                                                -fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1])/r5;
+      fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
+                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
+                                                -fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])/r5;
+     }
+    }
+   }
+  } 
+ }
+}
+
+// Do mu = alpha F
+void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
+{
+ int icoord,jcoord;
+ for(icoord=0;icoord<3;icoord++)
+ {
+  fragments[ifrag].atoms[iatom].mu_ind[icoord]=0.0e0;
+  for(jcoord=0;jcoord<3;jcoord++)
+  {
+   fragments[ifrag].atoms[iatom].mu_ind[icoord]+=fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]*Field[jcoord];
   }
  }
 }

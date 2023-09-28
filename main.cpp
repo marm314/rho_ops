@@ -5096,7 +5096,11 @@ int main(int argc, char *argv[])
     Results<<"Comment: No external punctual charge read. Thus, no F_ext employed in MESCAL"<<endl;
    }
 
-   // call mescal SCF for mu and F_mu.
+   // call mescal SCS for mu and F_mu.
+   mescal.maxiter=1;
+   mescal.induced_q=false;
+   mescal.perm_q=false;
+   mescal.mescal_scs(mescal_file);
 
    mescal.close_output(mescal_file);
    Results<<endl;
