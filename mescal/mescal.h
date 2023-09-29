@@ -43,7 +43,7 @@ class MESCAL
   ~MESCAL();
   bool perm_q=false,ind_q=false;
   int nfragments,maxiter=1000,iter=0;
-  double mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
+  double r0,mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
   struct FRAGMENT
   {
    string name;

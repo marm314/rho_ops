@@ -25,7 +25,7 @@ class Input
  bool cuba,cubature,quadrature,becke,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrot_no,symrotdens,symgrad;
  bool dmn_indicators,gnuplot,dmn_plots,nopath,dim3,dim2,Beta_MOs,wfx_print,wfx_print_dmn,store_dmn,print_dm1_fchk;
  bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,v_hartree,extracule,int_pol_hyperpol,intra_1rdm_sij,mulliken,im_wfn_wfx;
- bool mescal,mescal_punctual; 
+ bool mescal,mescal_punctual,mescal_qperm,mescal_qind; 
  double **interval_integrals,**coordinates_r,**coordinates_p;
  double init_coord_r[3],init_coord_p[3],init_coord_elf[3],init_coord_lh[3],init_coord_indic[3],interval_integralsCUB[6];
  double step_r,step_p,step_elf,step_lh,step_indic,points_scan_r,points_scan_p,points_scan_elf,points_scan_lh;
@@ -34,7 +34,7 @@ class Input
  double pointDM1[3],pointprimeDM1[3],points_scan_2[2],not_used_3d_doub,rotate_angle,mem;
  double cubex,cubey,cubez,step_cube_x,step_cube_y,step_cube_z,Point_intra[3],Point_extra[3],Point_Vr[3],field_F;
  double **Point_mescal,q_mescal;
- double thresh_mescal_mu,thresh_mescal_E;
+ double thresh_mescal_mu,thresh_mescal_E,r0_mescal;
  char dir_r,dir_p,dir_elf,dir_lh,dir_indic,scan_1,scan_2,not_used_3d,dir_pol_hyper;
  string name_fchk_wfn,name_log,*name_dmn,*name_dmnp,cuba_cubature,method_cuba,*integral_ops,Sij_region,MOorNO;
  string *dmns_read,name_dm1,name_dm2,path,*extra_lines_plot,*plot_ops,opcube,second_fchk_wfn,third_fchk_wfn;
