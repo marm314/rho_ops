@@ -5096,7 +5096,6 @@ int main(int argc, char *argv[])
    {
     Results<<"Comment: No external punctual charge read. Thus, no F_ext employed in MESCAL"<<endl;
    }
-
    // call mescal SCS for mu and F_mu.
    mescal.maxiter=Input_commands.maxiter_mescal;
    mescal.ind_q=false;
@@ -5109,7 +5108,9 @@ int main(int argc, char *argv[])
    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
    Results<<endl;
    mescal.mescal_scs(mescal_file);
-
+   Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
+   Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
+   Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
    mescal.close_output(mescal_file);
    Results<<endl;
   }

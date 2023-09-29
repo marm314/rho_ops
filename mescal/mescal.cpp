@@ -157,14 +157,13 @@ void MESCAL::calc_E(string name)
  if(iter>0)
  {
   E_diff=Energy-Energy_old;
-  Energy_old=Energy;
   if(abs(E_diff)<threshold_E){conver=true;}
  }
  else
  {
-  Energy_old=Energy;
   E_diff=0.0e0;
  }
+ Energy_old=Energy;
  print_iter_info(name);
 }
 

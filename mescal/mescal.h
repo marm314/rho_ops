@@ -15,7 +15,7 @@ class MESCAL
  private:
   bool conver=false;
   int order[3];
-  double Energy_old,E_diff;
+  double Energy_old;
   struct ATOM
   {
    int Z;
@@ -43,7 +43,7 @@ class MESCAL
   ~MESCAL();
   bool perm_q=false,ind_q=false;
   int nfragments,maxiter=1000,iter=0;
-  double mu_diff_max,threshold_mu,threshold_E,Energy;
+  double mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
   struct FRAGMENT
   {
    string name;

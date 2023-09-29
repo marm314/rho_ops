@@ -283,12 +283,12 @@ void MESCAL::print_init_sc(string name_output)
  write_out<<"---------- Performing self-consistent procedure ----------------"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<endl;
- write_out<<setprecision(4)<<fixed;
- write_out<<" Maxiter     "<<setw(10)<<maxiter<<endl;
- write_out<<" Threshold mu"<<setw(10)<<threshold_mu<<endl;;
- write_out<<" Threshold  E"<<setw(10)<<threshold_E<<endl;;
+ write_out<<setprecision(4)<<fixed<<scientific;
+ write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
+ write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;;
+ write_out<<" Threshold  E"<<setw(20)<<threshold_E<<endl;;
  write_out<<endl;
- write_out<<"# iter              Energy          max(mu_diff)            E_diff"<<endl;
+ write_out<<"#   iter        Energy(au)          max(mu_diff)         E_diff(au)"<<endl;
  write_out.close();
 }
 
@@ -323,8 +323,27 @@ void MESCAL::print_iter_info(string name_output)
 // Print footer ouput file
 void MESCAL::close_output(string name_output)
 {
+ int ifrag,iatom;
  ofstream write_out(name_output,std::ios_base::app);
+ write_out<<setprecision(8)<<fixed;
  write_out<<endl;
+ write_out<<"Final induced charges and dipoled"<<endl;
+ write_out<<endl;
+ write_out<<"#     Z                                 R                                       q_ind                                 mu_ind"<<endl;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   write_out<<setw(7)<<fragments[ifrag].atoms[iatom].Z;
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[0];
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[1];
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[2];
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].charge_ind;
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[0];
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[1];
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[2]<<endl;
+  }
+ }
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<" /  \\     /  |/        | /      \\  /      \\           /  |"<<endl;
