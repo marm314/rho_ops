@@ -5071,6 +5071,7 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<"#*************************************************************************#";
    Results<<endl;
+   Results<<setprecision(10)<<fixed<<scientific;
    string mescal_file;
    if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
@@ -5100,8 +5101,12 @@ int main(int argc, char *argv[])
    mescal.maxiter=Input_commands.maxiter_mescal;
    mescal.ind_q=false;
    mescal.perm_q=false;
+   mescal.threshold_mu=Input_commands.thresh_mescal_mu;
+   mescal.threshold_E=Input_commands.thresh_mescal_E;
    Results<<endl;
-   Results<<" Running mescal with maxiter"<<setw(5)<<mescal.maxiter<<endl;
+   Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
+   Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
+   Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
    Results<<endl;
    mescal.mescal_scs(mescal_file);
 

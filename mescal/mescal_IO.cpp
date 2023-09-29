@@ -274,6 +274,52 @@ void MESCAL::init_output(string name_output)
  write_out.close();
 }
 
+// Print init SC procedure
+void MESCAL::print_init_sc(string name_output)
+{
+ ofstream write_out(name_output,std::ios_base::app);
+ write_out<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"---------- Performing self-consistent procedure ----------------"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<endl;
+ write_out<<setprecision(4)<<fixed;
+ write_out<<" Maxiter     "<<setw(10)<<maxiter<<endl;
+ write_out<<" Threshold mu"<<setw(10)<<threshold_mu<<endl;;
+ write_out<<" Threshold  E"<<setw(10)<<threshold_E<<endl;;
+ write_out<<endl;
+ write_out<<"# iter              Energy          max(mu_diff)            E_diff"<<endl;
+ write_out.close();
+}
+
+// Print end SC procedure
+void MESCAL::print_end_sc(string name_output)
+{
+ ofstream write_out(name_output,std::ios_base::app);
+ write_out<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<"---------- Self-consistent procedure completed  ----------------"<<endl;
+ write_out<<"----------------------------------------------------------------"<<endl;
+ write_out<<endl;
+ write_out.close();
+}
+
+// Print iter information
+void MESCAL::print_iter_info(string name_output)
+{
+ ofstream write_out(name_output,std::ios_base::app);
+ write_out<<setprecision(8)<<fixed;
+ if(iter!=0)
+ {
+  write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<mu_diff_max<<setw(20)<<E_diff<<endl;
+ }
+ else
+ {
+  write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<0.0e0<<setw(20)<<E_diff<<endl;
+ }
+ write_out.close();
+}
+
 // Print footer ouput file
 void MESCAL::close_output(string name_output)
 {

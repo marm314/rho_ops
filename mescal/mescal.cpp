@@ -1,6 +1,6 @@
 #include"mescal.h"
 
-//Public functions.
+// Public functions.
 MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
 MESCAL::MESCAL(string name_output,string name_pdb)
 {
@@ -68,29 +68,45 @@ MESCAL::MESCAL(string name_output,string name_pdb)
 // Do self-consistent solution to find induced dipoles (mu) and fields (F_mu)
 void MESCAL::mescal_scs(string name)
 {
- int iter=0;
- bool tmp_false=false,conver=false;
- double E_old,E_new;
+ bool tmp_false=false;
  // For permanent charges this is done only once because it does not change
  if(perm_q)
  {
   set_FV_q_inter_frag(tmp_false);
  }
- // Enter SC procedure 
+ // Enter SC procedure
+ iter=0;
+ print_init_sc(name); 
  do
  {
-  if(ind_q)
+  if(ind_q && !conver)
   {
    set_FV_q_inter_frag(ind_q);
   }
-  // mu = alpha F
+  // Set mu = alpha F  and check convergence on mu
+  mu_diff_max=-1.0e0;
   update_mu_ind();
-  // F_mu_ind = D mu_ind
-  set_F_mu_ind();
-  // Check conver and compute energy
-  // Print iter info 
+  // F_mu_ind = D mu_ind if mu is not converged or iter=0
+  if(iter==0)
+  {
+   set_F_mu_ind();
+  }
+  else
+  {
+   if(mu_diff_max>threshold_mu)
+   {
+    set_F_mu_ind();
+   }
+   else
+   {
+    conver=true;
+   }
+  }
+  // Check conver Energy (computig energy) and print iter info
+  calc_E(name); 
   iter++;
- }while(iter<maxiter && !conver);
+ }while(iter<=maxiter && !conver);
+ print_end_sc(name); 
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
@@ -119,10 +135,45 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
  }
 }
 
+// Calc E and print iter info
+void MESCAL::calc_E(string name)
+{
+ int ifrag,iatom,icoord;
+ double E_mu=0.0e0,E_q=0.0e0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    E_mu+=(fragments[ifrag].atoms[iatom].F_ext[icoord]
+          +fragments[ifrag].atoms[iatom].F_q_perm[icoord])*fragments[ifrag].atoms[iatom].mu_ind[icoord];
+   }
+   E_q+=(fragments[ifrag].atoms[iatom].V_ext
+        +fragments[ifrag].atoms[iatom].V_q_perm)*fragments[ifrag].atoms[iatom].charge_ind;
+  }
+ }
+ Energy=0.5e0*(E_q-E_mu);
+ if(iter>0)
+ {
+  E_diff=Energy-Energy_old;
+  Energy_old=Energy;
+  if(abs(E_diff)<threshold_E){conver=true;}
+ }
+ else
+ {
+  Energy_old=Energy;
+  E_diff=0.0e0;
+ }
+ print_iter_info(name);
+}
+
 MESCAL::~MESCAL()
 {
  // Nth to be deleted manually
 }
+
+// Private functions.
 
 // Compute Inertia tensor for Fragments
 void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
@@ -333,12 +384,20 @@ void MESCAL::set_F_mu_ind()
 void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
 {
  int icoord,jcoord;
+ double old_mu,mu_diff=0.0e0;
  for(icoord=0;icoord<3;icoord++)
  {
+  if(iter>0){old_mu=fragments[ifrag].atoms[iatom].mu_ind[icoord];}
   fragments[ifrag].atoms[iatom].mu_ind[icoord]=0.0e0;
   for(jcoord=0;jcoord<3;jcoord++)
   {
    fragments[ifrag].atoms[iatom].mu_ind[icoord]+=fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]*Field[jcoord];
   }
+  if(iter>0){mu_diff+=pow(old_mu-fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);}
+ }
+ if(iter>0)
+ {
+  mu_diff=pow(mu_diff,0.5e0);
+  if(mu_diff>mu_diff_max){mu_diff_max=mu_diff;}
  }
 }

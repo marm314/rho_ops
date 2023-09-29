@@ -13,7 +13,9 @@ using namespace std;
 class MESCAL
 {
  private:
+  bool conver=false;
   int order[3];
+  double Energy_old,E_diff;
   struct ATOM
   {
    int Z;
@@ -27,16 +29,21 @@ class MESCAL
   void read_pdb_file(string name_pbd);
   void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
+  void set_FV_q_inter_frag(bool &induced);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
   void update_mu_ind();
   void set_F_mu_ind();
+  void print_init_sc(string name);
+  void print_end_sc(string name);
+  void print_iter_info(string name);
 
  public:
   MESCAL();
   MESCAL(string,string);
   ~MESCAL();
   bool perm_q=false,ind_q=false;
-  int nfragments,maxiter=1000;
+  int nfragments,maxiter=1000,iter=0;
+  double mu_diff_max,threshold_mu,threshold_E,Energy;
   struct FRAGMENT
   {
    string name;
@@ -46,8 +53,8 @@ class MESCAL
   vector<FRAGMENT>fragments;
   void init_output(string name_output);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
-  void set_FV_q_inter_frag(bool &induced);
   void mescal_scs(string name_output);
+  void calc_E(string name_output);
   void close_output(string name_output);
 
 }; 
