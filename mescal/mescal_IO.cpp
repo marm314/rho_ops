@@ -329,7 +329,7 @@ void MESCAL::close_output(string name_output)
  write_out<<endl;
  write_out<<"Final induced charges and dipoled"<<endl;
  write_out<<endl;
- write_out<<"#     Z                                 R                                       q_ind                                 mu_ind"<<endl;
+ write_out<<"#     Z                               R(au)                                     q_ind                                 mu_ind"<<endl;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
