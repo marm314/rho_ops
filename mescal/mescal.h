@@ -13,7 +13,7 @@ using namespace std;
 class MESCAL
 {
  private:
-  bool conver=false;
+  bool conver_E=false,conver_mu=false;
   int order[3];
   double Energy_old;
   struct ATOM

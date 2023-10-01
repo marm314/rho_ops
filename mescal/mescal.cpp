@@ -80,7 +80,7 @@ void MESCAL::mescal_scs(string name)
  print_init_sc(name); 
  do
  {
-  if(ind_q && !conver)
+  if(ind_q && !(conver_E && conver_mu))
   {
    set_FV_q_inter_frag(ind_q);
   }
@@ -100,13 +100,13 @@ void MESCAL::mescal_scs(string name)
    }
    else
    {
-    conver=true;
+    conver_mu=true;
    }
   }
   // Check conver Energy (computig energy) and print iter info
   calc_E(name); 
   iter++;
- }while(iter<=maxiter && !conver);
+ }while(iter<=maxiter && !(conver_E && conver_mu));
  print_end_sc(name); 
 }
 
@@ -158,7 +158,7 @@ void MESCAL::calc_E(string name)
  if(iter>0)
  {
   E_diff=Energy-Energy_old;
-  if(abs(E_diff)<threshold_E){conver=true;}
+  if(abs(E_diff)<threshold_E){conver_E=true;}
  }
  else
  {
