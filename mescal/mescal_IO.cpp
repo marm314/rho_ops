@@ -175,7 +175,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
  {
-  if(line.length()<16){line+="                   ";}
+  if(line.length()<25){line+="                         ";}
   if(line.substr(0,14)=="Polarizability")
   {
    for(iindex=0;iindex<3;iindex++)
@@ -183,7 +183,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     for(jindex=0;jindex<=iindex;jindex++){read_frag>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
    }
   }
-  if(line=="Normalized inertia tensor")
+  if(line.substr(0,25)=="Normalized inertia tensor")
   {
    for(iindex=0;iindex<3;iindex++)
    {
