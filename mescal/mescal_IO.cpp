@@ -228,6 +228,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     {
      alpha[iindex][jindex]+=Temp_mat[iindex][kindex]*Urot[jindex][kindex];
     }
+    if(abs(alpha[iindex][jindex])<tol8){alpha[iindex][jindex]=0.0e0;}
    }
   }
  }

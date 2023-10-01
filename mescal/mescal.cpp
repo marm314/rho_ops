@@ -370,7 +370,7 @@ void MESCAL::set_F_mu_ind()
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
                                                 -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
-      fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+      fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
                                                 -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
