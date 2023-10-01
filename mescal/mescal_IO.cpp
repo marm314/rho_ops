@@ -198,7 +198,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      if(abs(Im_ref[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
     }
    }
-   if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-3 w.r.t. reference."<<endl;}
+   if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
   }
   if(line.substr(0,16)=="Mulliken Charges")
   {
