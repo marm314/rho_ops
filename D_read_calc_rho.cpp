@@ -5403,7 +5403,7 @@ void READ_FCHK_WFN::Init_MOim(double **MOcoef_in)
 void READ_FCHK_WFN::Center_of_mass()
 {
  int i,j,k,pivot,order[3];
- double **Im,**EigenV,*mass,Rcm[3]={ZERO},Mtot=ZERO,Norm,Auxiliar,Auxiliar2;
+ double **Im,**EigenV,*mass,Rcm[3]={ZERO},Mtot=ZERO,Norm,Norm_cm,Auxiliar,Auxiliar2;
  ofstream results_inert;
  if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
  {
@@ -5901,20 +5901,20 @@ void READ_FCHK_WFN::Center_of_mass()
    Cartesian_Coor[i][j]=Cartesian_Coor[i][j]-Rcm[j];
   }
  }
- Norm=norm3D(Cartesian_Coor[0]);
+ Norm_cm=norm3D(Cartesian_Coor[0]);
  for(i=0;i<natoms;i++)
  {
   Auxiliar=norm3D(Cartesian_Coor[i]);
-  if(Auxiliar>Norm)
+  if(Auxiliar>Norm_cm)
   {
-   Norm=Auxiliar;
+   Norm_cm=Auxiliar;
   }
  }
  for(i=0;i<natoms;i++)
  {
   for(j=0;j<3;j++)
   {
-   Cartesian_Coor[i][j]=Cartesian_Coor[i][j]/(Norm+pow(TEN,-TEN));
+   Cartesian_Coor[i][j]=Cartesian_Coor[i][j]/(Norm_cm+pow(TEN,-TEN));
   }
  }
  for(i=0;i<natoms;i++)
@@ -6005,7 +6005,7 @@ void READ_FCHK_WFN::Center_of_mass()
  {
   for(j=0;j<3;j++)
   {
-   Cartesian_Coor[i][j]=Norm*Cartesian_Coor[i][j];
+   Cartesian_Coor[i][j]=Norm_cm*Cartesian_Coor[i][j];
   }
  }
  results_inert<<"Final coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
@@ -6538,20 +6538,20 @@ void READ_FCHK_WFN::Center_of_mass()
    Cartesian_Coor[i][j]=Cartesian_Coor[i][j]-Rcm[j];
   }
  }
- Norm=norm3D(Cartesian_Coor[0]);
+ Norm_cm=norm3D(Cartesian_Coor[0]);
  for(i=0;i<natoms;i++)
  {
   Auxiliar=norm3D(Cartesian_Coor[i]);
-  if(Auxiliar>Norm)
+  if(Auxiliar>Norm_cm)
   {
-   Norm=Auxiliar;
+   Norm_cm=Auxiliar;
   }
  }
  for(i=0;i<natoms;i++)
  {
   for(j=0;j<3;j++)
   {
-   Cartesian_Coor[i][j]=Cartesian_Coor[i][j]/(Norm+pow(TEN,-TEN));
+   Cartesian_Coor[i][j]=Cartesian_Coor[i][j]/(Norm_cm+pow(TEN,-TEN));
   }
  }
  for(i=0;i<natoms;i++)
@@ -6642,7 +6642,7 @@ void READ_FCHK_WFN::Center_of_mass()
  {
   for(j=0;j<3;j++)
   {
-   Cartesian_Coor[i][j]=Norm*Cartesian_Coor[i][j];
+   Cartesian_Coor[i][j]=Norm_cm*Cartesian_Coor[i][j];
   }
  }
  results_inert<<"Final coordinates (the order of atoms is the same as in the FCHK/WFN/WFX file):"<<endl;
