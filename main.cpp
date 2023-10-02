@@ -229,7 +229,9 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"# Ph.D. student at University of the Girona (2018)                             #";
   Results<<endl;
-  Results<<"# Postdoctoral reseracher at Vrije Universiteit Amsterdam (2021)               #";
+  Results<<"# Postdoctoral researcher at Vrije Universiteit Amsterdam (2021)               #";
+  Results<<endl;
+  Results<<"# Postdoctoral researcher at Inst. Neel CNRS Grenoble (2023)                   #";
   Results<<endl;
   Results<<"# for support and comments send an email to: marm3.14@gmail.com                #";
   Results<<endl;
