@@ -196,6 +196,7 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
   for(icoord=0;icoord<3;icoord++)
   {
    fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-Rcm[icoord];
+   if(abs(fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord])<tol4){fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]=0.0e0;}
    Norm+=fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]*fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord];
   }
   Norm=pow(Norm,0.5e0);

@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<cmath>
 #define Angs2au 1.8897259886
+#define tol4 1e-4
 #define tol8 1e-8
 
 using namespace std;
