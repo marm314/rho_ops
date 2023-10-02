@@ -26,9 +26,10 @@ class MESCAL
   void Asymbol2Z(int &Z, string symbol);
   double Z2mass(int &Z);
   int Z2val_electrons(int &Z);
+  double Z2atomic_pol(int &Z);
   void jacobi(int n, double **m, double **v);
   void read_pdb_file(string name_pbd);
-  void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect);
+  void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
   void set_FV_q_inter_frag(bool &induced);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
@@ -42,7 +43,7 @@ class MESCAL
   MESCAL();
   MESCAL(string,string);
   ~MESCAL();
-  bool perm_q=false,ind_q=false;
+  bool perm_q=false,ind_q=false,part_val_e=false;
   int nfragments,maxiter=1000,iter=0;
   double r0,mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
   struct FRAGMENT

@@ -460,3 +460,114 @@ int MESCAL::Z2val_electrons(int &Z)
  else{cout<<"Warning! Valence electrons number not found for Atomic Number "<<Z<<endl;}
  return val_elect;
 } 
+// Z -> atomic polarizability
+// atomic anD moLecuLar poLarizabiLitieS Thomas M. Miller
+double MESCAL::Z2atomic_pol(int &Z)
+{
+ double atomic_pol=0.0e0;
+ if(Z==1){atomic_pol=0.666793;}
+ else if(Z==2 ){atomic_pol=0.2050522;}
+ else if(Z==3 ){atomic_pol=24.33;}
+ else if(Z==4 ){atomic_pol=5.60;}
+ else if(Z==5 ){atomic_pol=3.03;}
+ else if(Z==6 ){atomic_pol=1.76;}
+ else if(Z==7 ){atomic_pol=1.10;}
+ else if(Z==8 ){atomic_pol=0.802;}
+ else if(Z==9 ){atomic_pol=0.557;}
+ else if(Z==10){atomic_pol=0.3956;}
+ else if(Z==11){atomic_pol=24.11;}
+ else if(Z==12){atomic_pol=10.6;}
+ else if(Z==13){atomic_pol=6.8;}
+ else if(Z==14){atomic_pol=5.38;}
+ else if(Z==15){atomic_pol=3.63;}
+ else if(Z==16){atomic_pol=2.9;}
+ else if(Z==17){atomic_pol=2.18;}
+ else if(Z==18){atomic_pol=1.6411;}
+ else if(Z==19){atomic_pol=43.4;}
+ else if(Z==20){atomic_pol=22.8;}
+ else if(Z==21){atomic_pol=17.8;}
+ else if(Z==22){atomic_pol=14.6;}
+ else if(Z==23){atomic_pol=12.4;}
+ else if(Z==24){atomic_pol=11.6;}
+ else if(Z==25){atomic_pol=9.4;}
+ else if(Z==26){atomic_pol=8.4;}
+ else if(Z==27){atomic_pol=7.5;}
+ else if(Z==28){atomic_pol=6.8;}
+ else if(Z==29){atomic_pol=6.2;}
+ else if(Z==30){atomic_pol=5.75;}
+ else if(Z==31){atomic_pol=8.12;}
+ else if(Z==32){atomic_pol=6.07;}
+ else if(Z==33){atomic_pol=4.31;}
+ else if(Z==34){atomic_pol=3.77;}
+ else if(Z==35){atomic_pol=3.05;}
+ else if(Z==36){atomic_pol=2.4844;}
+ else if(Z==37){atomic_pol=47.3;}
+ else if(Z==38){atomic_pol=27.6;}
+ else if(Z==39){atomic_pol=22.7;}
+ else if(Z==40){atomic_pol=17.9;}
+ else if(Z==41){atomic_pol=15.7;}
+ else if(Z==42){atomic_pol=12.8;}
+ else if(Z==43){atomic_pol=11.4;}
+ else if(Z==44){atomic_pol=9.6;}
+ else if(Z==45){atomic_pol=8.6;}
+ else if(Z==46){atomic_pol=4.8;}
+ else if(Z==47){atomic_pol=7.2;}
+ else if(Z==48){atomic_pol=7.36;}
+ else if(Z==49){atomic_pol=10.2;}
+ else if(Z==50){atomic_pol=7.7;}
+ else if(Z==51){atomic_pol=6.6;}
+ else if(Z==52){atomic_pol=5.5;}
+ else if(Z==53){atomic_pol=5.35;}
+ else if(Z==54){atomic_pol=4.044;}
+ else if(Z==55){atomic_pol=59.42;}
+ else if(Z==56){atomic_pol=39.7;}
+ else if(Z==57){atomic_pol=31.1;}
+ else if(Z==58){atomic_pol=29.6;}
+ else if(Z==59){atomic_pol=28.2;}
+ else if(Z==60){atomic_pol=31.4;}
+ else if(Z==61){atomic_pol=30.1;}
+ else if(Z==62){atomic_pol=28.8;}
+ else if(Z==63){atomic_pol=27.7;}
+ else if(Z==64){atomic_pol=23.5;}
+ else if(Z==65){atomic_pol=25.5;}
+ else if(Z==66){atomic_pol=24.5;}
+ else if(Z==67){atomic_pol=23.6;}
+ else if(Z==68){atomic_pol=22.7;}
+ else if(Z==69){atomic_pol=21.8;}
+ else if(Z==70){atomic_pol=21.0;}
+ else if(Z==71){atomic_pol=21.9;}
+ else if(Z==72){atomic_pol=16.2;}
+ else if(Z==73){atomic_pol=13.1;}
+ else if(Z==74){atomic_pol=11.1;}
+ else if(Z==75){atomic_pol=9.7;}
+ else if(Z==76){atomic_pol=8.5;}
+ else if(Z==77){atomic_pol=7.6;}
+ else if(Z==78){atomic_pol=6.5;}
+ else if(Z==79){atomic_pol=5.8;}
+ else if(Z==80){atomic_pol=5.02;}
+ else if(Z==81){atomic_pol=7.6;}
+ else if(Z==82){atomic_pol=6.8;}
+ else if(Z==83){atomic_pol=7.4;}
+ else if(Z==84){atomic_pol=6.8;}
+ else if(Z==85){atomic_pol=6.0;}
+ else if(Z==86){atomic_pol=5.3;}
+ else if(Z==87){atomic_pol=48.6;}
+ else if(Z==88){atomic_pol=38.3;}
+ else if(Z==89){atomic_pol=32.1;}
+ else if(Z==90){atomic_pol=32.1;}
+ else if(Z==91){atomic_pol=25.4;}
+ else if(Z==92){atomic_pol=24.9;}
+ else if(Z==93){atomic_pol=24.8;}
+ else if(Z==94){atomic_pol=24.5;}
+ else if(Z==95){atomic_pol=23.3;}
+ else if(Z==96){atomic_pol=23.0;}
+ else if(Z==97){atomic_pol=22.7;}
+ else if(Z==98){atomic_pol=20.5;}
+ else if(Z==99){atomic_pol=19.7;}
+ else if(Z==100){atomic_pol=23.8;}
+ else if(Z==101){atomic_pol=18.2;}
+ else if(Z==102){atomic_pol=17.5;}
+ else if(Z==119){atomic_pol=24.26;}
+ else{cout<<"Warning! Atomic polarizability not found for Atomic Number "<<Z<<endl;}
+ return atomic_pol;
+} 

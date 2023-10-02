@@ -5,7 +5,7 @@ MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
 MESCAL::MESCAL(string name_output,string name_pdb)
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
- double pos[3],**Im,**Urot;
+ double pos[3],**Im,**Urot,Sum_atomic_pol;
  Urot=new double*[3];Im=new double*[3];
  for(icoord=0;icoord<3;icoord++)
  {
@@ -25,6 +25,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   Sum_Val_elect=0;
+  Sum_atomic_pol=0.0e0;
   write_out<<" Fragment "<<ifrag+1<<endl;
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
@@ -34,6 +35,7 @@ MESCAL::MESCAL(string name_output,string name_pdb)
    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[1];
    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[2]<<endl;
    Sum_Val_elect+=Z2val_electrons(fragments[ifrag].atoms[iatom].Z);
+   Sum_atomic_pol+=Z2atomic_pol(fragments[ifrag].atoms[iatom].Z);
   }
   Frag_T_inertia(ifrag,pos,Im,Urot);
   write_out<<"  Center of Mass "<<setw(20)<<pos[0]<<setw(20)<<pos[1]<<setw(20)<<pos[2]<<endl;
@@ -53,10 +55,11 @@ MESCAL::MESCAL(string name_output,string name_pdb)
   {
    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
   }
-  write_out<<"  Total number of valence electrons of this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+  write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+  write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;
   // Read fragment.dat files to store charges and asign alpha' atomic contributions using the number of val. electrons  
   // Note: We compute alpha' = U alpha U^T for each fragment 
-  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect);
+  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect,Sum_atomic_pol);
   write_out<<endl;
  }
  // Delete Urot and Im because they are no longer needed

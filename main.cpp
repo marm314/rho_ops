@@ -5100,6 +5100,7 @@ int main(int argc, char *argv[])
    mescal.maxiter=Input_commands.maxiter_mescal;
    mescal.ind_q=Input_commands.mescal_qind;
    mescal.perm_q=Input_commands.mescal_qperm;
+   mescal.part_val_e=Input_commands.mescal_part_val_e;
    mescal.threshold_mu=Input_commands.thresh_mescal_mu;
    mescal.threshold_E=Input_commands.thresh_mescal_E;
    mescal.r0=Input_commands.r0_mescal;
@@ -5107,9 +5108,11 @@ int main(int argc, char *argv[])
    Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
    Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
-   Results<<"          Screening r0 value"<<setw(25)<<mescal.r0<<endl;
+   Results<<"          Screening r0(Angs)"<<setw(25)<<mescal.r0<<endl;
    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
+   if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
+   else{Results<<" Partition of alpha using atomic polarizabilities is ON"<<endl;}
    Results<<endl;
    mescal.mescal_scs(mescal_file);
    Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;

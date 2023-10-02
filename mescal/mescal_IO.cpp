@@ -163,7 +163,7 @@ void MESCAL::read_pdb_file(string name_pdb)
 }
 
 // Read fragment file
-void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect)
+void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
  bool devItens=false,frag_file_good=true;
  int iindex,jindex,kindex,iatom,ialpha,jalpha;
@@ -232,12 +232,19 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    }
   }
  }
- // Transform alpha_rot  -> alpha_atomic (number of valence electrons used as weighting method)
+ // Transform alpha_rot  -> alpha_atomic (number of valence electrons or atomic polarizabilities used as weighting method)
  // Note: We are currently assuming that atoms are ordered in the same way in the PDB and in the fragment.dat file
  //       It is possible to improve this by using the rot matrix and the distances. 
  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
  {
-  fact_weight=((double)Z2val_electrons(fragments[ifrag].atoms[iatom].Z)/(double)Sum_Val_elect);
+  if(part_val_e) // Use partition based on number of valence electrons
+  {
+   fact_weight=((double)Z2val_electrons(fragments[ifrag].atoms[iatom].Z)/(double)Sum_Val_elect);
+  }
+  else           // Use partition based on atomic polarizabilities
+  {
+   fact_weight=Z2atomic_pol(fragments[ifrag].atoms[iatom].Z)/Sum_atomic_pol;
+  }
   for(ialpha=0;ialpha<3;ialpha++)
   {
    for(jalpha=0;jalpha<3;jalpha++)
@@ -288,6 +295,11 @@ void MESCAL::print_init_sc(string name_output)
  write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
  write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;;
  write_out<<" Threshold  E"<<setw(20)<<threshold_E<<endl;;
+ write_out<<" Screening r0 (au) "<<setw(14)<<r0<<endl;
+ if(perm_q){write_out<<" Q_permanent option is ON"<<endl;}
+ if(ind_q ){write_out<<" Q_induced option is ON"<<endl;}
+ if(part_val_e){write_out<<" Partition of alpha using num. valence electrons is ON"<<endl;}
+ else{write_out<<" Partition of alpha using atomic polarizabilities is ON"<<endl;}
  write_out<<endl;
  write_out<<"#   iter        Energy(au)          max(mu_diff)         E_diff(au)"<<endl;
  write_out.close();
