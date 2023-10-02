@@ -239,6 +239,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  {
   if(part_val_e) // Use partition based on number of valence electrons
   {
+cout<<"HERE"<<endl;
    fact_weight=((double)Z2val_electrons(fragments[ifrag].atoms[iatom].Z)/(double)Sum_Val_elect);
   }
   else           // Use partition based on atomic polarizabilities

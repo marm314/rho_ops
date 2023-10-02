@@ -2,10 +2,11 @@
 
 // Public functions.
 MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
-MESCAL::MESCAL(string name_output,string name_pdb)
+MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in)
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
  double pos[3],**Im,**Urot,Sum_atomic_pol;
+ part_val_e=part_val_e_in; 
  Urot=new double*[3];Im=new double*[3];
  for(icoord=0;icoord<3;icoord++)
  {

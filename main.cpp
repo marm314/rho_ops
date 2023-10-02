@@ -5081,7 +5081,7 @@ int main(int argc, char *argv[])
    {
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
-   MESCAL mescal(mescal_file,Input_commands.mescal_pdb);
+   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e);
    // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
    if(Input_commands.mescal_punctual)
    {
@@ -5100,7 +5100,6 @@ int main(int argc, char *argv[])
    mescal.maxiter=Input_commands.maxiter_mescal;
    mescal.ind_q=Input_commands.mescal_qind;
    mescal.perm_q=Input_commands.mescal_qperm;
-   mescal.part_val_e=Input_commands.mescal_part_val_e;
    mescal.threshold_mu=Input_commands.thresh_mescal_mu;
    mescal.threshold_E=Input_commands.thresh_mescal_E;
    mescal.r0=Input_commands.r0_mescal;

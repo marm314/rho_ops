@@ -41,7 +41,7 @@ class MESCAL
 
  public:
   MESCAL();
-  MESCAL(string,string);
+  MESCAL(string,string,bool&);
   ~MESCAL();
   bool perm_q=false,ind_q=false,part_val_e=false;
   int nfragments,maxiter=1000,iter=0;
