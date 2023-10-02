@@ -334,7 +334,7 @@ void MESCAL::print_iter_info(string name_output)
 }
 
 // Print footer ouput file
-void MESCAL::close_output(string name_output)
+void MESCAL::close_output(string name_output,string sha)
 {
  int ifrag,iatom;
  ofstream write_out(name_output,std::ios_base::app);
@@ -357,6 +357,9 @@ void MESCAL::close_output(string name_output)
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[2]<<endl;
   }
  }
+ write_out<<endl;
+ write_out<<endl;
+ write_out<<"Git sha: "<<sha<<endl;
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<" /  \\     /  |/        | /      \\  /      \\           /  |"<<endl;

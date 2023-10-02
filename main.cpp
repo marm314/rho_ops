@@ -5117,7 +5117,7 @@ int main(int argc, char *argv[])
    Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
    Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
-   mescal.close_output(mescal_file);
+   mescal.close_output(mescal_file,sha);
    Results<<endl;
   }
   /////////////////////////////////////

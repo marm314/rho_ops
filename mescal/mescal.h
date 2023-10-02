@@ -57,7 +57,7 @@ class MESCAL
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void mescal_scs(string name_output);
   void calc_E(string name_output);
-  void close_output(string name_output);
+  void close_output(string name_output,string sha);
 
 }; 
 #endif // _MESCAL_H_
