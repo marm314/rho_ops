@@ -6,10 +6,10 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 //Functions description //
 //////////////////////////
-void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff)
+void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,bool &Becke)
 {
  int i,j,k,l,m,ZB,ZC;
- double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC,xi_BC,RBC,**S_X,*P_X,Sum_PB;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**S_X,*P_X,Sum_PB;
  //
  // Prepare the quadrature grid for each atom
  //
@@ -104,10 +104,24 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        Diff_Point[1]=Rho.Cartesian_Coor[m][1]-Rho.Cartesian_Coor[l][1];
        Diff_Point[2]=Rho.Cartesian_Coor[m][2]-Rho.Cartesian_Coor[l][2];
        RBC=norm3D(Diff_Point);
-       // Compute nu_BC and S_X(nu_BC)
+       // Compute nu_BC
        mu_BC=(rB-rC)/RBC;
        xi_BC=Xi_XY_val(ZB,ZC);
-       nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
+       // Becke
+       if(Becke)
+       {
+        u_BC=(xi_BC-ONE)/(xi_BC+ONE); 
+        a_BC=u_BC/(u_BC*u_BC-ONE);
+        if(a_BC<-HALF){a_BC=-HALF;}
+        if(a_BC>HALF){a_BC=HALF;}
+        nu_BC=mu_BC+a_BC*(ONE-mu_BC*mu_BC);
+       }
+       // TFVC
+       else
+       {  
+        nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
+       }
+       // Set S_X(nu_BC)
        S_X[l][m]=s_mu_stiff(nu_BC,stiff);
       }
      }
