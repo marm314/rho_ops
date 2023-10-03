@@ -79,6 +79,8 @@ void MESCAL::mescal_scs(string name)
   set_FV_q_inter_frag(tmp_false);
  }
  // Enter SC procedure
+ if(!(w_mu>=0.0e0 && w_mu<1.0e0)){w_mu=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
+ if(r0<tol4){r0=0.0e0;cout<<" Warning! Screening r0 < 10^-4 found, setting r0 = 0.0e0."<<endl;}
  r0=r0*Angs2au;
  iter=0;
  print_init_sc(name); 
@@ -366,7 +368,14 @@ void MESCAL::set_F_mu_ind()
       r=pow(r,0.5e0);
       r2=pow(r,2.0e0);
       r5=pow(r,5.0e0);
-      fr=1.0e0-exp(-pow(r/r0,3.0e0));
+      if(r0>=tol4) // Screen only for r0>=0.0001
+      {
+       fr=1.0e0-exp(-pow(r/r0,3.0e0));
+      }
+      else
+      { 
+       fr=1.0e0;
+      }
       fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
@@ -390,7 +399,7 @@ void MESCAL::set_F_mu_ind()
 void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
 {
  int icoord,jcoord;
- double old_mu,mu_diff=0.0e0;
+ double old_mu=0.0e0,mu_diff=0.0e0;
  for(icoord=0;icoord<3;icoord++)
  {
   if(iter>0){old_mu=fragments[ifrag].atoms[iatom].mu_ind[icoord];}
@@ -399,6 +408,7 @@ void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
   {
    fragments[ifrag].atoms[iatom].mu_ind[icoord]+=fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]*Field[jcoord];
   }
+  fragments[ifrag].atoms[iatom].mu_ind[icoord]=(1.0e0-w_mu)*fragments[ifrag].atoms[iatom].mu_ind[icoord]+w_mu*old_mu;
   if(iter>0){mu_diff+=pow(old_mu-fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);}
  }
  if(iter>0)

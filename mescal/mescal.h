@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<cmath>
 #define Angs2au 1.8897259886
+#define au2Debye 2.541746276
 #define tol4 1e-4
 #define tol8 1e-8
 
@@ -45,7 +46,7 @@ class MESCAL
   ~MESCAL();
   bool perm_q=false,ind_q=false,part_val_e=false;
   int nfragments,maxiter=1000,iter=0;
-  double r0,mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
+  double r0=0.0e0,w_mu=0.4,mu_diff_max,E_diff,threshold_mu,threshold_E,Energy;
   struct FRAGMENT
   {
    string name;

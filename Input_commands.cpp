@@ -714,7 +714,7 @@ Input::Input(string rho_in)
      rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
     }while(rho_in=="");
     mescal_pdb=rho_in;
-    rho_input_file>>maxiter_mescal>>thresh_mescal_mu>>thresh_mescal_E>>r0_mescal;
+    rho_input_file>>maxiter_mescal>>thresh_mescal_mu>>thresh_mescal_E>>r0_mescal>>w_mu_mescal;
    }
    else if(rho_in=="$mescal_punctual")
    {

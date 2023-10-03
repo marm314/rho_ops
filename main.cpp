@@ -5105,11 +5105,13 @@ int main(int argc, char *argv[])
    mescal.threshold_mu=Input_commands.thresh_mescal_mu;
    mescal.threshold_E=Input_commands.thresh_mescal_E;
    mescal.r0=Input_commands.r0_mescal;
+   mescal.w_mu=Input_commands.w_mu_mescal;
    Results<<endl;
    Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
    Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
    Results<<"          Screening r0(Angs)"<<setw(25)<<mescal.r0<<endl;
+   Results<<"              Damping weight"<<setw(25)<<mescal.w_mu<<endl;
    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
    if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
