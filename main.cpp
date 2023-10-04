@@ -217,11 +217,11 @@ int main(int argc, char *argv[])
   Results<<endl;
   Results<<"# then perform several operations with it (e.g., Complexity analysis[Shannon   #";
   Results<<endl;
-  Results<<"# entropy, Fisher Integral, etc.]; find bond, ring and cage critical points;   #";
+  Results<<"# entropy, Fisher Integral, etc.]; calculate several quantities for            #";
   Results<<endl;
-  Results<<"# calculate several quantities for local-hybrid functionals[tw(r),tau(r),etc]; #";
+  Results<<"# local-hybrid functionals[tw(r),tau(r),etc]; build and evaluate MOs and NOs   #";
   Results<<endl;
-  Results<<"# build and evaluate MOs and NOs as well as calculate overlaps; etc.)          #";
+  Results<<"# as well as calculate overlaps; etc.)                                         #";
   Results<<endl;
   Results<<"#******************************************************************************#";
   Results<<endl;

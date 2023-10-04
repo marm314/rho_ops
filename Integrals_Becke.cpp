@@ -9,7 +9,7 @@ double *x_becke,*y_becke,*z_becke;
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,bool &Becke)
 {
  int i,j,k,l,m,ZB,ZC;
- double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**S_X,*P_X,Sum_PB;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_BC_mat,**S_X,*P_X,Sum_PB;
  //
  // Prepare the quadrature grid for each atom
  //
@@ -33,7 +33,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  r_read.close();
  for(i=0;i<nrad_becke;i++)
  {
-  //r_real_beke is for entire space (0 to inf)
+  //r_real_becke is for entire space (0 to inf)
   r_real_becke[i]=r_becke[i]/(ONE-r_becke[i]);
  }
  //Grid for theta, phi
@@ -64,10 +64,34 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  //
  P_X=new double[natom];
  S_X=new double*[natom];
+ Xi_BC_mat=new double*[natom];
  wA=new double**[natom];
  for(i=0;i<natom;i++)
  {
   S_X[i]=new double[natom];
+  Xi_BC_mat[i]=new double[natom];
+  for(j=0;j<natom;j++){Xi_BC_mat[i][j]=ONE;}
+  if(!Becke)
+  {
+   for(j=i;j<natom;j++)
+   {
+    if(i!=j)
+    {
+     // Use BCP
+     Xi_BC_mat[i][j]=Xi_XY_bcp(Rho,i,j);
+    }
+   }
+  }
+ }
+ if(!Becke)
+ {
+  for(i=0;i<natom;i++)
+  {
+   for(j=0;j<=i;j++)
+   {
+    Xi_BC_mat[i][j]=ONE/Xi_BC_mat[j][i];
+   }
+  }
  }
  for(i=0;i<natom;i++)
  {
@@ -106,10 +130,10 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        RBC=norm3D(Diff_Point);
        // Compute nu_BC
        mu_BC=(rB-rC)/RBC;
-       xi_BC=Xi_XY_val(ZB,ZC);
        // Becke
        if(Becke)
        {
+        xi_BC=Xi_XY_table(ZB,ZC);
         u_BC=(xi_BC-ONE)/(xi_BC+ONE); 
         a_BC=u_BC/(u_BC*u_BC-ONE);
         if(a_BC<-HALF){a_BC=-HALF;}
@@ -118,7 +142,8 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        }
        // TFVC
        else
-       {  
+       {
+        xi_BC=Xi_BC_mat[l][m];  
         nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
        }
        // Set S_X(nu_BC)
@@ -146,9 +171,11 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  for(i=0;i<natom;i++)
  {
   delete[] S_X[i];S_X[i]=NULL;
+  delete[] Xi_BC_mat[i];Xi_BC_mat[i]=NULL;
  }
  delete[] P_X;P_X=NULL;
  delete[] S_X;S_X=NULL;
+ delete[] Xi_BC_mat;Xi_BC_mat=NULL;
 }
 
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
@@ -443,7 +470,78 @@ void grid_avail_becke(int & Order)
  }
 }
 
-double Xi_XY_val(int &Z1, int &Z2)
+double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
+{
+ int icoord,iter=0;
+ double R_dist,rX=ONE,rY=ONE,Diff_Point[3],a,b,x1[3],x2[3],x3[3],x4[3],f1,f2,f3,f4;
+ double tol8=pow(TEN,-EIGHT),tol6=pow(TEN,-SIX);
+ Diff_Point[0]=Rho.Cartesian_Coor[iatom][0]-Rho.Cartesian_Coor[jatom][0];
+ Diff_Point[1]=Rho.Cartesian_Coor[iatom][1]-Rho.Cartesian_Coor[jatom][1];
+ Diff_Point[2]=Rho.Cartesian_Coor[iatom][2]-Rho.Cartesian_Coor[jatom][2];
+ R_dist=norm3D(Diff_Point);
+ if(R_dist<TWO && iatom!=jatom) // 10 au ( >5 Angstrom ) to search for BCPs
+ {
+  // Find CP, set radious rX and rY
+  for(icoord=0;icoord<3;icoord++)
+  {
+   x1[icoord]=Rho.Cartesian_Coor[iatom][icoord];
+   x3[icoord]=Rho.Cartesian_Coor[jatom][icoord];
+  }
+  Rho.rho_eval(x1,f1);
+  Rho.rho_eval(x3,f3);
+  do
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    Diff_Point[icoord]=x3[icoord]-x1[icoord];
+   }
+   R_dist=norm3D(Diff_Point);
+   // a + b = R_dist
+   // b/a = phi = 1.618033899
+   // then
+   // a + a phi = a ( 1 + phi ) = R_dist -> a = R_dist / ( phi + 1 )
+   if(R_dist>tol6)
+   { 
+    a=R_dist/(golden_ratio+ONE);
+    b=R_dist-a;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     x2[icoord]=x1[icoord]+a*Diff_Point[icoord]/R_dist;
+     x4[icoord]=x1[icoord]+b*Diff_Point[icoord]/R_dist;
+    }
+    Rho.rho_eval(x2,f2);
+    Rho.rho_eval(x4,f4);
+    if(f4<f2)
+    {
+     for(icoord=0;icoord<3;icoord++)
+     {
+      x1[icoord]=x2[icoord];
+     }
+     f1=f2;
+    }
+    else
+    {
+     for(icoord=0;icoord<3;icoord++)
+     {
+      x3[icoord]=x4[icoord];
+     }
+     f3=f4;
+    }
+   }
+   iter++;   
+  }while((abs(f1-f3)>tol8 || R_dist>tol6) && iter<1000);
+  for(icoord=0;icoord<3;icoord++)
+  {
+   x2[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[iatom][icoord];
+   x4[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[jatom][icoord];
+  }
+  rX=norm3D(x2);
+  rY=norm3D(x4);
+ }
+ return rX/rY;
+} 
+
+double Xi_XY_table(int &Z1, int &Z2)
 {
  return set_radii(Z1)/set_radii(Z2);
 } 

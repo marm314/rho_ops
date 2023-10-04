@@ -24,4 +24,5 @@
 #define SIXTY 60.0e0
 #define BILLION 1.0e9
 #define AUtoDAng 1.345044
+#define golden_ratio 1.618033988
 #endif // _NUMBERS_H_
