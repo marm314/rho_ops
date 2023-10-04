@@ -9,7 +9,7 @@ double *x_becke,*y_becke,*z_becke;
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,bool &Becke)
 {
  int i,j,k,l,m,ZB,ZC;
- double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_BC_mat,**S_X,*P_X,Sum_PB;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_XY_mat,**S_X,*P_X,Sum_PB;
  //
  // Prepare the quadrature grid for each atom
  //
@@ -64,13 +64,13 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  //
  P_X=new double[natom];
  S_X=new double*[natom];
- Xi_BC_mat=new double*[natom];
+ Xi_XY_mat=new double*[natom];
  wA=new double**[natom];
  for(i=0;i<natom;i++)
  {
   S_X[i]=new double[natom];
-  Xi_BC_mat[i]=new double[natom];
-  for(j=0;j<natom;j++){Xi_BC_mat[i][j]=ONE;}
+  Xi_XY_mat[i]=new double[natom];
+  for(j=0;j<natom;j++){Xi_XY_mat[i][j]=ONE;}
   if(!Becke)
   {
    for(j=i;j<natom;j++)
@@ -78,7 +78,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
     if(i!=j)
     {
      // Use BCP
-     Xi_BC_mat[i][j]=Xi_XY_bcp(Rho,i,j);
+     Xi_XY_mat[i][j]=Xi_XY_bcp(Rho,i,j);
     }
    }
   }
@@ -89,7 +89,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   {
    for(j=0;j<=i;j++)
    {
-    Xi_BC_mat[i][j]=ONE/Xi_BC_mat[j][i];
+    Xi_XY_mat[i][j]=ONE/Xi_XY_mat[j][i];
    }
   }
  }
@@ -143,7 +143,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        // TFVC
        else
        {
-        xi_BC=Xi_BC_mat[l][m];  
+        xi_BC=Xi_XY_mat[l][m];  
         nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
        }
        // Set S_X(nu_BC)
@@ -171,11 +171,11 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  for(i=0;i<natom;i++)
  {
   delete[] S_X[i];S_X[i]=NULL;
-  delete[] Xi_BC_mat[i];Xi_BC_mat[i]=NULL;
+  delete[] Xi_XY_mat[i];Xi_XY_mat[i]=NULL;
  }
  delete[] P_X;P_X=NULL;
  delete[] S_X;S_X=NULL;
- delete[] Xi_BC_mat;Xi_BC_mat=NULL;
+ delete[] Xi_XY_mat;Xi_XY_mat=NULL;
 }
 
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
@@ -479,7 +479,7 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
  Diff_Point[1]=Rho.Cartesian_Coor[iatom][1]-Rho.Cartesian_Coor[jatom][1];
  Diff_Point[2]=Rho.Cartesian_Coor[iatom][2]-Rho.Cartesian_Coor[jatom][2];
  R_dist=norm3D(Diff_Point);
- if(R_dist<TWO && iatom!=jatom) // 10 au ( >5 Angstrom ) to search for BCPs
+ if(R_dist<SIX && iatom!=jatom) // 10 au ( >5 Angstrom ) to search for BCPs
  {
   // Find CP, set radious rX and rY
   for(icoord=0;icoord<3;icoord++)
@@ -499,7 +499,7 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
    // a + b = R_dist
    // b/a = phi = 1.618033899
    // then
-   // a + a phi = a ( 1 + phi ) = R_dist -> a = R_dist / ( phi + 1 )
+   // a + a phi = a ( 1 + phi ) = R_dist -> a = R_dist / ( 1 + phi )
    if(R_dist>tol6)
    { 
     a=R_dist/(golden_ratio+ONE);
@@ -530,6 +530,7 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
    }
    iter++;   
   }while((abs(f1-f3)>tol8 || R_dist>tol6) && iter<1000);
+  if(iter==1000){cout<<" Warning! The search for the BCP for atoms "<<iatom+1<<","<<jatom<<" failed."<<endl;}
   for(icoord=0;icoord<3;icoord++)
   {
    x2[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[iatom][icoord];
