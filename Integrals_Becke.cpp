@@ -1,7 +1,7 @@
 #include"Integrals_Becke.h"
 
 int nrad_becke,nang_becke;
-double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,***wA;//,*theta_becke,*phi_becke;
+double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,***wA;
 double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 //Functions description //
@@ -43,22 +43,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  y_becke=new double[nang_becke];
  z_becke=new double[nang_becke];
  w_theta_phi_becke=new double[nang_becke];
-// theta_becke=new double[nang_becke];
-// phi_becke=new double[nang_becke];
  ld_by_order(nang_becke,x_becke,y_becke,z_becke,w_theta_phi_becke);
-/*
- double *temp,*temp1;
- temp=new double[1];
- temp1=new double[1];
- for(i=0;i<nang_becke;i++)
- {
-  xyz_to_tp(x_becke[i],y_becke[i],z_becke[i],temp,temp1);
-  phi_becke[i]=temp[0];
-  theta_becke[i]=temp1[0];
- }
- delete[] temp; temp=NULL;
- delete[] temp1; temp1=NULL;
-*/
  //
  // Prepare the quadrature weights for each atom
  //
@@ -73,7 +58,8 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   for(j=0;j<natom;j++){Xi_XY_mat[i][j]=ONE;}
   if(!Becke)
   {
-   for(j=i;j<natom;j++)
+   //for(j=i;j<natom;j++)
+   for(j=0;j<natom;j++)
    {
     if(i!=j)
     {
@@ -83,6 +69,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
    }
   }
  }
+/*
  if(!Becke)
  {
   for(i=0;i<natom;i++)
@@ -93,6 +80,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
    }
   }
  }
+*/
  for(i=0;i<natom;i++)
  {
   wA[i]=new double*[nrad_becke];
@@ -479,7 +467,7 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
  Diff_Point[1]=Rho.Cartesian_Coor[iatom][1]-Rho.Cartesian_Coor[jatom][1];
  Diff_Point[2]=Rho.Cartesian_Coor[iatom][2]-Rho.Cartesian_Coor[jatom][2];
  R_dist=norm3D(Diff_Point);
- if(R_dist<SIX && iatom!=jatom) // 10 au ( >5 Angstrom ) to search for BCPs
+ if(R_dist<SIX && iatom!=jatom) // 6 au ( >3 Angstrom ) to search for BCPs
  {
   // Find CP, set radious rX and rY
   for(icoord=0;icoord<3;icoord++)
@@ -530,7 +518,7 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
    }
    iter++;   
   }while((abs(f1-f3)>tol8 || R_dist>tol6) && iter<1000);
-  if(iter==1000){cout<<" Warning! The search for the BCP for atoms "<<iatom+1<<","<<jatom<<" failed."<<endl;}
+  if(iter==1000){cout<<" Warning! Failed to find the BCP for atoms "<<iatom+1<<","<<jatom<<"."<<endl;}
   for(icoord=0;icoord<3;icoord++)
   {
    x2[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[iatom][icoord];
