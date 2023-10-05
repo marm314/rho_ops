@@ -166,11 +166,21 @@ void MESCAL::read_pdb_file(string name_pdb)
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
  bool devItens=false,frag_file_good=true;
- int iindex,jindex,kindex,iatom,ialpha,jalpha;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*charges_read;
+ int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read;
  string line;
- charges_read=new double [fragments[ifrag].natoms];
- for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){charges_read[iindex]=0.0e0;}
+ if(ind_q)
+ {
+  fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
+   for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+   {fragments[ifrag].Pi[iatom][jatom]=0.0e0;}
+  }
+ }
+ q_read=new double [fragments[ifrag].natoms];
+ for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){q_read[iindex]=0.0e0;}
  ifstream read_frag(name_frag);
  if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
@@ -202,7 +212,17 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   }
   if(line.substr(0,16)=="Mulliken Charges")
   {
-   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>charges_read[iindex];}
+   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>q_read[iindex];}
+  }
+  if(line.substr(0,14)=="Susceptibility")
+  {
+   if(ind_q)
+   {
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){read_frag>>fragments[ifrag].Pi[iatom][jatom];}
+    }
+   }
   }
  }
  read_frag.close();
@@ -252,9 +272,9 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     fragments[ifrag].atoms[iatom].alpha[ialpha][jalpha]=fact_weight*alpha[ialpha][jalpha];
    }
   }
-  fragments[ifrag].atoms[iatom].charge=charges_read[iatom]; // Asign permanent charges to atoms (not used in SCF calc. and currently are the Mulliken ones) 
+  fragments[ifrag].atoms[iatom].q_perm=q_read[iatom]; // Asign permanent charges to atoms (not used in SCF calc. and currently are the Mulliken ones) 
  }
- delete[] charges_read; charges_read=NULL;
+ delete[] q_read; q_read=NULL;
 }
 
 // Print header ouput file
@@ -293,16 +313,28 @@ void MESCAL::print_init_sc(string name_output)
  write_out<<endl;
  write_out<<setprecision(4)<<fixed<<scientific;
  write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
- write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;;
- write_out<<" Threshold  E"<<setw(20)<<threshold_E<<endl;;
+ write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;
+ write_out<<" Threshold  E"<<setw(20)<<threshold_E<<endl;
+ if(ind_q)
+ {
+  write_out<<" Threshold  q"<<setw(20)<<threshold_q<<endl;
+ }
  write_out<<" Screening r0 (au) "<<setw(14)<<r0<<endl;
- write_out<<" Damping weight    "<<setw(14)<<w_mu<<endl;
+ write_out<<" Damping weight mu "<<setw(14)<<w_mu<<endl;
+ if(ind_q ){write_out<<" Damping weight  q "<<setw(14)<<w_q<<endl;}
  if(perm_q){write_out<<" Q_permanent option is ON"<<endl;}
  if(ind_q ){write_out<<" Q_induced option is ON"<<endl;}
  if(part_val_e){write_out<<" Partition of alpha using num. valence electrons is ON"<<endl;}
  else{write_out<<" Partition of alpha using atomic polarizabilities is ON"<<endl;}
  write_out<<endl;
- write_out<<"#   iter        Energy(au)          max(mu_diff)         E_diff(au)"<<endl;
+ if(ind_q)
+ {
+  write_out<<"#   iter        Energy(au)          max(mu_diff)         max(q_diff)         E_diff(au)"<<endl;
+ }
+ else
+ {
+  write_out<<"#   iter        Energy(au)          max(mu_diff)         E_diff(au)"<<endl;
+ }
  write_out.close();
 }
 
@@ -323,13 +355,27 @@ void MESCAL::print_iter_info(string name_output)
 {
  ofstream write_out(name_output,std::ios_base::app);
  write_out<<setprecision(8)<<fixed;
- if(iter!=0)
+ if(ind_q)
  {
-  write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<mu_diff_max<<setw(20)<<E_diff<<endl;
+  if(iter!=0)
+  {
+   write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<mu_diff_max<<setw(20)<<q_diff_max<<setw(20)<<E_diff<<endl;
+  }
+  else
+  {
+   write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<0.0e0<<setw(20)<<0.0e0<<setw(20)<<E_diff<<endl;
+  }
  }
  else
  {
-  write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<0.0e0<<setw(20)<<E_diff<<endl;
+  if(iter!=0)
+  {
+   write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<mu_diff_max<<setw(20)<<E_diff<<endl;
+  }
+  else
+  {
+   write_out<<setw(7)<<iter<<setw(20)<<Energy<<setw(20)<<0.0e0<<setw(20)<<E_diff<<endl;
+  }
  }
  write_out.close();
 }
@@ -352,7 +398,7 @@ void MESCAL::close_output(string name_output,string sha)
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[0];
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[1];
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].pos[2];
-   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].charge_ind;
+   write_out<<setw(20)<<fragments[ifrag].atoms[iatom].q_ind;
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[0];
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[1];
    write_out<<setw(20)<<fragments[ifrag].atoms[iatom].mu_ind[2]<<endl;

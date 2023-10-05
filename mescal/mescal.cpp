@@ -2,11 +2,12 @@
 
 // Public functions.
 MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
-MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in)
+MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q)
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
  double pos[3],**Im,**Urot,Sum_atomic_pol;
  part_val_e=part_val_e_in; 
+ ind_q=induce_q;
  Urot=new double*[3];Im=new double*[3];
  for(icoord=0;icoord<3;icoord++)
  {
@@ -58,7 +59,7 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in)
   }
   write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
   write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;
-  // Read fragment.dat files to store charges and asign alpha' atomic contributions using the number of val. electrons  
+  // Read fragment.dat files to store charges, Pi, and asign alpha' atomic contributions using the number of val. electrons or tabulated atomic pols.
   // Note: We compute alpha' = U alpha U^T for each fragment 
   read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect,Sum_atomic_pol);
   write_out<<endl;
@@ -80,39 +81,57 @@ void MESCAL::mescal_scs(string name)
  }
  // Enter SC procedure
  if(!(w_mu>=0.0e0 && w_mu<1.0e0)){w_mu=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
+ if(!(w_q>=0.0e0 && w_q<1.0e0) && ind_q){w_q=0.0e0;cout<<" Warning! The weight_q is recommended to be in [0,1)."<<endl;}
  if(r0<tol4){r0=0.0e0;cout<<" Warning! Screening r0 < 10^-4 found, setting r0 = 0.0e0."<<endl;}
+ if(!ind_q){conver_q=true;}
  r0=r0*Angs2au;
  iter=0;
  print_init_sc(name); 
  do
  {
-  if(ind_q && !(conver_E && conver_mu))
-  {
-   set_FV_q_inter_frag(ind_q);
-  }
   // Set mu = alpha F  and check convergence on mu
+  //  also set q_ind = - sum_j Pi_ij (if needed)
   mu_diff_max=-1.0e0;
-  update_mu_ind();
-  // F_mu_ind = D mu_ind if mu is not converged or iter=0
+  q_diff_max=-1.0e0;
+  update_mu_q_ind();
+  // Set F_mu_ind = D mu_ind and V_mu_ind = mu R if mu is not converged or iter=0
+  //  also set q_ind contrib. to F_q_ind and V_q_ind (if needed)
   if(iter==0)
   {
-   set_F_mu_ind();
+   set_FV_mu_ind();
+   if(ind_q){set_FV_q_inter_frag(ind_q);}
   }
   else
   {
-   if(mu_diff_max>threshold_mu)
+   if(ind_q)
    {
-    set_F_mu_ind();
+    if(mu_diff_max>threshold_mu || q_diff_max>threshold_q)
+    {
+     set_FV_mu_ind();
+     set_FV_q_inter_frag(ind_q);
+    }
+    else
+    {
+     conver_mu=true;
+     conver_q=true;
+    }
    }
    else
    {
-    conver_mu=true;
+    if(mu_diff_max>threshold_mu)
+    {
+     set_FV_mu_ind();
+    }
+    else
+    {
+     conver_mu=true;
+    }
    }
   }
   // Check conver Energy (computig energy) and print iter info
   calc_E(name); 
   iter++;
- }while(iter<=maxiter && !(conver_E && conver_mu));
+ }while(iter<=maxiter && !(conver_E && conver_mu && conver_q));
  print_end_sc(name); 
 }
 
@@ -157,7 +176,7 @@ void MESCAL::calc_E(string name)
           +fragments[ifrag].atoms[iatom].F_q_perm[icoord])*fragments[ifrag].atoms[iatom].mu_ind[icoord];
    }
    E_q+=(fragments[ifrag].atoms[iatom].V_ext
-        +fragments[ifrag].atoms[iatom].V_q_perm)*fragments[ifrag].atoms[iatom].charge_ind;
+        +fragments[ifrag].atoms[iatom].V_q_perm)*fragments[ifrag].atoms[iatom].q_ind;
   }
  }
  Energy=0.5e0*(E_q-E_mu);
@@ -176,7 +195,18 @@ void MESCAL::calc_E(string name)
 
 MESCAL::~MESCAL()
 {
- // Nth to be deleted manually
+ int iatom,ifrag;
+ if(ind_q)
+ {
+  for(ifrag=0;ifrag<nfragments;ifrag++)
+  {
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    delete[] fragments[ifrag].Pi[iatom];fragments[ifrag].Pi[iatom]=NULL;
+   }
+   delete[] fragments[ifrag].Pi;fragments[ifrag].Pi=NULL;
+  }
+ } 
 }
 
 // Private functions.
@@ -257,23 +287,43 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
  }
 }
 
-// Update mu_ind
-void MESCAL::update_mu_ind()
+// Update mu_ind and q_ind
+void MESCAL::update_mu_q_ind()
 {
- int ifrag,iatom,icoord;
- double Field[3];
+ int ifrag,iatom,jatom,icoord;
+ double Field[3],V_atom,old_q_ind=0.0e0,q_diff=0.0e0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
+   // Field
    for(icoord=0;icoord<3;icoord++)
    {
     Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
-                 +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
                  +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
+                 +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
                  +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
    }
    alphaF2mu(ifrag,iatom,Field);
+   // Potential 
+   if(ind_q)
+   {
+    if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
+    for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+    {
+     V_atom=fragments[ifrag].atoms[jatom].V_ext
+           +fragments[ifrag].atoms[jatom].V_q_perm
+           +fragments[ifrag].atoms[jatom].V_q_ind
+           +fragments[ifrag].atoms[jatom].V_mu_ind;
+     fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
+    }
+    if(iter>0)
+    {
+     fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_q)*fragments[ifrag].atoms[iatom].q_ind+w_q*old_q_ind; 
+     q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
+     if(q_diff>q_diff_max){q_diff_max=q_diff;}
+    }
+   }
   }
  }
 }
@@ -319,18 +369,18 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
       r3=pow(r,3.0e0);
       if(induced)
       {
-       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[ifrag].atoms[iatom].charge_ind/r;
+       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[ifrag].atoms[iatom].q_ind/r;
        for(icoord=0;icoord<3;icoord++)
        {
-        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[ifrag].atoms[iatom].charge_ind*diff_xyz[icoord]/r3;
+        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[ifrag].atoms[iatom].q_ind*diff_xyz[icoord]/r3;
        }
       }
       else
       {
-       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[ifrag].atoms[iatom].charge/r;
+       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[ifrag].atoms[iatom].q_perm/r;
        for(icoord=0;icoord<3;icoord++)
        {
-        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[ifrag].atoms[iatom].charge*diff_xyz[icoord]/r3;
+        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[ifrag].atoms[iatom].q_perm*diff_xyz[icoord]/r3;
        }
       }
      }
@@ -340,15 +390,16 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
  }
 }
 
-// Set F_mu_ind (due to induced dipoles)
-void MESCAL::set_F_mu_ind()
+// Set FV_mu_ind (due to induced dipoles)
+void MESCAL::set_FV_mu_ind()
 {
  int ifrag,jfrag,iatom,jatom,icoord;
- double r,r2,r5,fr,diff_xyz[3];
+ double r,r2,r3,r5,fr,diff_xyz[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
+   fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
    for(icoord=0;icoord<3;icoord++)
    {
     fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
@@ -367,7 +418,8 @@ void MESCAL::set_F_mu_ind()
       }
       r=pow(r,0.5e0);
       r2=pow(r,2.0e0);
-      r5=pow(r,5.0e0);
+      r3=r*r2;
+      r5=r3*r2;
       if(r0>=tol4) // Screen only for r0>=0.0001
       {
        fr=1.0e0-exp(-pow(r/r0,3.0e0));
@@ -388,6 +440,9 @@ void MESCAL::set_F_mu_ind()
                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
                                                 -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
+      fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
+                                            +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
+                                            +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
      }
     }
    }
@@ -408,8 +463,11 @@ void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
   {
    fragments[ifrag].atoms[iatom].mu_ind[icoord]+=fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]*Field[jcoord];
   }
-  fragments[ifrag].atoms[iatom].mu_ind[icoord]=(1.0e0-w_mu)*fragments[ifrag].atoms[iatom].mu_ind[icoord]+w_mu*old_mu;
-  if(iter>0){mu_diff+=pow(old_mu-fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);}
+  if(iter>0)
+  {
+   fragments[ifrag].atoms[iatom].mu_ind[icoord]=(1.0e0-w_mu)*fragments[ifrag].atoms[iatom].mu_ind[icoord]+w_mu*old_mu;
+   mu_diff+=pow(old_mu-fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
+  }
  }
  if(iter>0)
  {

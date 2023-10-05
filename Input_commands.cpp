@@ -729,7 +729,11 @@ Input::Input(string rho_in)
     }
    }
    else if(rho_in=="$mescal_q_perm"){mescal_qperm=true;}
-   else if(rho_in=="$mescal_q_ind"){mescal_qind=true;}
+   else if(rho_in=="$mescal_q_ind")
+   {
+    mescal_qind=true;
+    rho_input_file>>thresh_mescal_q>>w_q_mescal;
+   }
    else if(rho_in=="$mescal_val_e"){mescal_part_val_e=true;}
    else if(rho_in=="$mescal_atomic_pol"){mescal_part_val_e=false;}
    else if(rho_in=="$debug"){debug=true;}

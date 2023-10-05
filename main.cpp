@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
  {
   string str(argv[1]);
   name_file=str;
+  cout<<"Reading input file "<<name_file<<endl;
  }
  Input Input_commands(name_file);
  name_file=Input_commands.name_fchk_wfn;
@@ -5093,7 +5094,7 @@ int main(int argc, char *argv[])
    {
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
-   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e);
+   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
    // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
    if(Input_commands.mescal_punctual)
    {
@@ -5110,18 +5111,24 @@ int main(int argc, char *argv[])
    }
    // call mescal SCS for mu and F_mu.
    mescal.maxiter=Input_commands.maxiter_mescal;
-   mescal.ind_q=Input_commands.mescal_qind;
    mescal.perm_q=Input_commands.mescal_qperm;
    mescal.threshold_mu=Input_commands.thresh_mescal_mu;
    mescal.threshold_E=Input_commands.thresh_mescal_E;
+   if(mescal.ind_q)
+   {
+    mescal.threshold_q=Input_commands.thresh_mescal_q;
+    mescal.w_q=Input_commands.w_q_mescal;
+   }
    mescal.r0=Input_commands.r0_mescal;
    mescal.w_mu=Input_commands.w_mu_mescal;
    Results<<endl;
    Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
    Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
+   if(mescal.ind_q){Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;}
    Results<<"          Screening r0(Angs)"<<setw(25)<<mescal.r0<<endl;
-   Results<<"              Damping weight"<<setw(25)<<mescal.w_mu<<endl;
+   Results<<"           Damping mu weight"<<setw(25)<<mescal.w_mu<<endl;
+   if(mescal.ind_q){Results<<"            Damping q weight"<<setw(25)<<mescal.w_q<<endl;}
    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
    if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
@@ -5130,6 +5137,7 @@ int main(int argc, char *argv[])
    mescal.mescal_scs(mescal_file);
    Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
    Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
+   if(mescal.ind_q){Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;}
    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
    mescal.close_output(mescal_file,sha);
    Results<<endl;
