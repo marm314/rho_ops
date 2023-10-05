@@ -5117,7 +5117,6 @@ int main(int argc, char *argv[])
    if(mescal.ind_q)
    {
     mescal.threshold_q=Input_commands.thresh_mescal_q;
-    mescal.w_q=Input_commands.w_q_mescal;
    }
    mescal.r0=Input_commands.r0_mescal;
    mescal.w_mu=Input_commands.w_mu_mescal;
@@ -5128,7 +5127,6 @@ int main(int argc, char *argv[])
    if(mescal.ind_q){Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;}
    Results<<"          Screening r0(Angs)"<<setw(25)<<mescal.r0<<endl;
    Results<<"           Damping mu weight"<<setw(25)<<mescal.w_mu<<endl;
-   if(mescal.ind_q){Results<<"            Damping q weight"<<setw(25)<<mescal.w_q<<endl;}
    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
    if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}

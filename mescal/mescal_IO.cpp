@@ -321,7 +321,6 @@ void MESCAL::print_init_sc(string name_output)
  }
  write_out<<" Screening r0 (au) "<<setw(14)<<r0<<endl;
  write_out<<" Damping weight mu "<<setw(14)<<w_mu<<endl;
- if(ind_q ){write_out<<" Damping weight  q "<<setw(14)<<w_q<<endl;}
  if(perm_q){write_out<<" Q_permanent option is ON"<<endl;}
  if(ind_q ){write_out<<" Q_induced option is ON"<<endl;}
  if(part_val_e){write_out<<" Partition of alpha using num. valence electrons is ON"<<endl;}

@@ -81,7 +81,6 @@ void MESCAL::mescal_scs(string name)
  }
  // Enter SC procedure
  if(!(w_mu>=0.0e0 && w_mu<1.0e0)){w_mu=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
- if(!(w_q>=0.0e0 && w_q<1.0e0) && ind_q){w_q=0.0e0;cout<<" Warning! The weight_q is recommended to be in [0,1)."<<endl;}
  if(r0<tol4){r0=0.0e0;cout<<" Warning! Screening r0 < 10^-4 found, setting r0 = 0.0e0."<<endl;}
  if(!ind_q){conver_q=true;}
  r0=r0*Angs2au;
@@ -291,9 +290,10 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
 void MESCAL::update_mu_q_ind()
 {
  int ifrag,iatom,jatom,icoord;
- double Field[3],V_atom,old_q_ind=0.0e0,q_diff=0.0e0;
+ double Field[3],V_atom,old_q_ind=0.0e0,q_diff=0.0e0,sum_q;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
+  sum_q=0.0e0;
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
    // Field
@@ -309,6 +309,7 @@ void MESCAL::update_mu_q_ind()
    if(ind_q)
    {
     if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
+    fragments[ifrag].atoms[iatom].q_ind=0.0e0;
     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
     {
      V_atom=fragments[ifrag].atoms[jatom].V_ext
@@ -319,11 +320,17 @@ void MESCAL::update_mu_q_ind()
     }
     if(iter>0)
     {
-     fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_q)*fragments[ifrag].atoms[iatom].q_ind+w_q*old_q_ind; 
+     fragments[ifrag].atoms[iatom].q_ind=fragments[ifrag].atoms[iatom].q_ind; 
      q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
      if(q_diff>q_diff_max){q_diff_max=q_diff;}
     }
+    sum_q+=fragments[ifrag].atoms[iatom].q_ind;
    }
+  }
+  if(abs(sum_q)>tol6)
+  {
+   cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons "<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
+   cout<<" iter "<<iter+1<<endl;
   }
  }
 }
@@ -369,18 +376,18 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
       r3=pow(r,3.0e0);
       if(induced)
       {
-       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[ifrag].atoms[iatom].q_ind/r;
+       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
        for(icoord=0;icoord<3;icoord++)
        {
-        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[ifrag].atoms[iatom].q_ind*diff_xyz[icoord]/r3;
+        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
        }
       }
       else
       {
-       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[ifrag].atoms[iatom].q_perm/r;
+       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
        for(icoord=0;icoord<3;icoord++)
        {
-        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[ifrag].atoms[iatom].q_perm*diff_xyz[icoord]/r3;
+        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
        }
       }
      }
