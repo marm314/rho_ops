@@ -18,7 +18,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  //
  // Prepare the quadrature grid for each atom
  //
- //Grid for r215
+ //Grid for r
  nrad_becke=nradial;
  ifstream wr_read,r_read;
  r_becke=new double[nrad_becke];
