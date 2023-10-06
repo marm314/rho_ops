@@ -22,7 +22,7 @@ class Input
  int *dmn_orderp,dmnsp,nprocs,order_grid_r,order_grid_ang,num_plot_ops,extra_lines,orb1,orb2,mo_no_cube,nwfns;
  int npoints_mescal,maxiter_mescal;
  bool punctualr,punctualp,scanr,scanp,scanelf,scanindic,indicators,integrals,log,spin_calcs,cas,rotate_grid,cm;
- bool cuba,cubature,quadrature,becke,tfvc,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrot_no,symrotdens,symgrad;
+ bool cuba,cubature,quadrature,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrot_no,symrotdens,symgrad;
  bool dmn_indicators,gnuplot,dmn_plots,nopath,dim3,dim2,Beta_MOs,wfx_print,wfx_print_dmn,store_dmn,print_dm1_fchk;
  bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,v_hartree,extracule,int_pol_hyperpol,intra_1rdm_sij,mulliken,im_wfn_wfx;
  bool mescal,mescal_punctual,mescal_qperm,mescal_qind,mescal_part_val_e; 
@@ -38,7 +38,7 @@ class Input
  char dir_r,dir_p,dir_elf,dir_lh,dir_indic,scan_1,scan_2,not_used_3d,dir_pol_hyper;
  string name_fchk_wfn,name_log,*name_dmn,*name_dmnp,cuba_cubature,method_cuba,*integral_ops,Sij_region,MOorNO;
  string *dmns_read,name_dm1,name_dm2,path,*extra_lines_plot,*plot_ops,opcube,second_fchk_wfn,third_fchk_wfn;
- string fourth_fchk_wfn,fifth_fchk_wfn,mescal_pdb;
+ string fourth_fchk_wfn,fifth_fchk_wfn,mescal_pdb,partition;
  Input();
  Input(string);
  ~Input();

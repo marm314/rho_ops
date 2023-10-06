@@ -6,14 +6,19 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 //Functions description //
 //////////////////////////
-void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,bool &Becke)
+void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,string partition)
 {
+ bool becke=false,tfvc=false,becke_original=false;
  int i,j,k,l,m,ZB,ZC;
  double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_XY_mat,**S_X,*P_X,Sum_PB;
+ // Set the partition to use
+ if(partition=="becke"){becke=true;}
+ if(partition=="becke_original"){becke_original=true;}
+ if(partition=="tfvc"){tfvc=true;}
  //
  // Prepare the quadrature grid for each atom
  //
- //Grid for r
+ //Grid for r215
  nrad_becke=nradial;
  ifstream wr_read,r_read;
  r_becke=new double[nrad_becke];
@@ -56,7 +61,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   S_X[i]=new double[natom];
   Xi_XY_mat[i]=new double[natom];
   for(j=0;j<natom;j++){Xi_XY_mat[i][j]=ONE;}
-  if(!Becke)
+  if(tfvc)
   {
    //for(j=i;j<natom;j++)
    for(j=0;j<natom;j++)
@@ -118,8 +123,13 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        RBC=norm3D(Diff_Point);
        // Compute nu_BC
        mu_BC=(rB-rC)/RBC;
+       // becke_original
+       if(becke_original)
+       {
+        S_X[l][m]=s_mu_stiff(mu_BC,stiff);
+       }
        // Becke
-       if(Becke)
+       if(becke)
        {
         xi_BC=Xi_XY_table(ZB,ZC);
         u_BC=(xi_BC-ONE)/(xi_BC+ONE); 
@@ -127,15 +137,15 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
         if(a_BC<-HALF){a_BC=-HALF;}
         if(a_BC>HALF){a_BC=HALF;}
         nu_BC=mu_BC+a_BC*(ONE-mu_BC*mu_BC);
+        S_X[l][m]=s_mu_stiff(nu_BC,stiff);
        }
        // TFVC
-       else
+       if(tfvc)
        {
         xi_BC=Xi_XY_mat[l][m];  
         nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
+        S_X[l][m]=s_mu_stiff(nu_BC,stiff);
        }
-       // Set S_X(nu_BC)
-       S_X[l][m]=s_mu_stiff(nu_BC,stiff);
       }
      }
     }
@@ -653,7 +663,7 @@ double s_mu_stiff(double &mu,int stiff)
 
 double p_mu(double &mu)
 {
- return HALF*(THREE*mu-pow(mu,THREE));
+ return HALF*mu*(THREE-pow(mu,TWO));
 }
 
 // See J. C. Slater, J. Chem. Phys., 41, 3199 (1964)

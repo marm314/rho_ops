@@ -21,7 +21,7 @@ using namespace std;
 //////////////////////////
 //Functions declaration //
 //////////////////////////
-void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang,int &stiff,bool &Becke);
+void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang,int &stiff,string partition);
 void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration);
 void Integrate_becke_paral(vector<READ_FCHK_WFN>Rho,double *res_integration,int &nprocs);
 void clean_quadrature_becke(string name, int &natoms);

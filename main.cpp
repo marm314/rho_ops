@@ -3125,7 +3125,6 @@ int main(int argc, char *argv[])
    }
    else // Becke or TFVC
    {
-    bool becke=false;
     int grid_theta_phi,nprops=7; // Note: set nprops to numbers of properties !
     double *res_integration,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
@@ -3156,19 +3155,21 @@ int main(int argc, char *argv[])
       Input_commands.nprocs=1;
      }
     }
-    if(Input_commands.becke)
+    if(Input_commands.partition=="becke")
     {
      method="Becke quadrature";
-     becke=true;
     }
-    if(Input_commands.tfvc)
+    if(Input_commands.partition=="tfvc")
     {
      method="TFVC quadrature";
-     becke=false;
+    }
+    if(Input_commands.partition=="becke_original")
+    {
+     method="Becke original quadrature";
     }
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
-    Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,becke);
+    Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
     if(wfn_fchk)  // WFN/WFX
     {
 #ifdef HAVE_LIBXC

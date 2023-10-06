@@ -5,7 +5,7 @@ Input::Input(string rho_in)
  punctualr=false;punctualp=false;scanr=false;scanp=false;scanelf=false;indicators=false;
  integrals=false;log=false;spin_calcs=false;cas=false;cuba=false;debug=false;cm=false;
  int_file=false;dmn=false;dmnp=false;dmn_integrals=false;scanindic=false;mulliken=false;gnuplot=false;  
- dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;becke=false;tfvc=false;
+ dmn_thresh=false;esi_int=false;dmn_indicators=false;nopath=true;dim2=false;dim3=false;quadrature=false;
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
@@ -512,10 +512,9 @@ Input::Input(string rho_in)
       }
      }
     }
-    else //Becke or TFVC Quadrature
+    else //Becke, SSF, or TFVC Quadrature
     {
-     if(cuba_cubature=="becke"){becke=true;}
-     else{tfvc=true;}
+     partition=cuba_cubature;
      rho_input_file>>order_grid_r>>order_grid_ang>>stiff>>nprocs;
      if(order_grid_ang<=70){order_grid_ang=70;}
      if(order_grid_r<=30){order_grid_r=30;}
