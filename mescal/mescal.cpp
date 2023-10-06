@@ -80,10 +80,9 @@ void MESCAL::mescal_scs(string name)
   set_FV_q_inter_frag(tmp_false);
  }
  // Enter SC procedure
- if(!(w_mu>=0.0e0 && w_mu<1.0e0)){w_mu=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
+ if(!(w_damp>=0.0e0 && w_damp<1.0e0)){w_damp=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
  if(r0<tol4){r0=0.0e0;cout<<" Warning! Screening r0 < 10^-4 found, setting r0 = 0.0e0."<<endl;}
  if(!ind_q){conver_q=true;}
- r0=r0*Angs2au;
  iter=0;
  print_init_sc(name); 
  do
@@ -472,7 +471,7 @@ void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
   }
   if(iter>0)
   {
-   fragments[ifrag].atoms[iatom].mu_ind[icoord]=(1.0e0-w_mu)*fragments[ifrag].atoms[iatom].mu_ind[icoord]+w_mu*old_mu;
+   fragments[ifrag].atoms[iatom].mu_ind[icoord]=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].mu_ind[icoord]+w_damp*old_mu;
    mu_diff+=pow(old_mu-fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
   }
  }

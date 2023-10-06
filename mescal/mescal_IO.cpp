@@ -167,8 +167,15 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 {
  bool devItens=false,frag_file_good=true;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord;
  string line;
+ Cartes_coord=new double*[fragments[ifrag].natoms];
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  Cartes_coord[iatom]=new double[3];
+  for(iindex=0;iindex<3;iindex++)
+  {Cartes_coord[iatom][iindex]=0.0e0;}
+ }
  if(ind_q)
  {
   fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
@@ -185,7 +192,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  if(!read_frag.good()){cout<<"Warning! Unable to find the .dat file for fragment "<<setw(5)<<ifrag+1<<" "<<fragments[ifrag].name<<endl;frag_file_good=false;}
  while(getline(read_frag,line))
  {
-  if(line.length()<25){line+="                         ";}
+  if(line.length()<29){line+="                             ";}
   if(line.substr(0,14)=="Polarizability")
   {
    for(iindex=0;iindex<3;iindex++)
@@ -210,6 +217,13 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    }
    if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
   }
+  if(line.substr(0,29)=="Current cartesian coordinates")
+  {
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    for(iindex=0;iindex<3;iindex++){read_frag>>Cartes_coord[iatom][iindex];}
+   }
+  }
   if(line.substr(0,16)=="Mulliken Charges")
   {
    for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>q_read[iindex];}
@@ -228,6 +242,26 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  read_frag.close();
  if(frag_file_good)
  {
+  // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
+  if(ind_q)
+  {
+   for(iindex=0;iindex<3;iindex++)
+   {
+    for(jindex=0;jindex<3;jindex++)
+    {
+     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     {
+      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+      {
+       // alpha ^xy  = alpha ^xy - \sum ij Pi_ij x_i y_j
+       alpha[iindex][jindex]-=fragments[ifrag].Pi[iatom][jatom]
+                             *Cartes_coord[iatom][iindex]
+                             *Cartes_coord[jatom][jindex];
+      }
+     }
+    }
+   }
+  }
   // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
   for(iindex=0;iindex<3;iindex++)
   {
@@ -274,6 +308,11 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   }
   fragments[ifrag].atoms[iatom].q_perm=q_read[iatom]; // Asign permanent charges to atoms (not used in SCF calc. and currently are the Mulliken ones) 
  }
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  delete[] Cartes_coord[iatom];Cartes_coord[iatom]=NULL;
+ }
+ delete[] Cartes_coord;Cartes_coord=NULL;
  delete[] q_read; q_read=NULL;
 }
 
@@ -320,7 +359,7 @@ void MESCAL::print_init_sc(string name_output)
   write_out<<" Threshold  q"<<setw(20)<<threshold_q<<endl;
  }
  write_out<<" Screening r0 (au) "<<setw(14)<<r0<<endl;
- write_out<<" Damping weight mu "<<setw(14)<<w_mu<<endl;
+ write_out<<" Damping weight    "<<setw(14)<<w_damp<<endl;
  if(perm_q){write_out<<" Q_permanent option is ON"<<endl;}
  if(ind_q ){write_out<<" Q_induced option is ON"<<endl;}
  if(part_val_e){write_out<<" Partition of alpha using num. valence electrons is ON"<<endl;}

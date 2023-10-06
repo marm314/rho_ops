@@ -5119,14 +5119,17 @@ int main(int argc, char *argv[])
     mescal.threshold_q=Input_commands.thresh_mescal_q;
    }
    mescal.r0=Input_commands.r0_mescal;
-   mescal.w_mu=Input_commands.w_mu_mescal;
+   mescal.w_damp=Input_commands.w_damp_mescal;
    Results<<endl;
    Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
    Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
-   if(mescal.ind_q){Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;}
-   Results<<"          Screening r0(Angs)"<<setw(25)<<mescal.r0<<endl;
-   Results<<"           Damping mu weight"<<setw(25)<<mescal.w_mu<<endl;
+   if(mescal.ind_q)
+   {
+    Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;
+   }
+   Results<<"          Screening r0(au)  "<<setw(25)<<mescal.r0<<endl;
+   Results<<"           Damping  weight  "<<setw(25)<<mescal.w_damp<<endl;
    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
    if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
@@ -5135,7 +5138,10 @@ int main(int argc, char *argv[])
    mescal.mescal_scs(mescal_file);
    Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
    Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
-   if(mescal.ind_q){Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;}
+   if(mescal.ind_q)
+   {
+    Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;
+   }
    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
    mescal.close_output(mescal_file,sha);
    Results<<endl;
