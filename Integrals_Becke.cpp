@@ -8,13 +8,15 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,string partition)
 {
- bool becke=false,tfvc=false,becke_original=false;
+ bool becke=false,tfvc=false,becke_original=false,ssf=false;
  int i,j,k,l,m,ZB,ZC;
- double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,s_BC=ONE,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_XY_mat,**S_X,*P_X,Sum_PB;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,s_BC=ONE,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,Sum_PB,a_ssf=0.64e0;
+ double **Xi_XY_mat,**S_X,*P_X;
  // Set the partition to use
  if(partition=="becke"){becke=true;}
  if(partition=="becke_original"){becke_original=true;}
  if(partition=="tfvc"){tfvc=true;}
+ if(partition=="ssf"){ssf=true;}
  //
  // Prepare the quadrature grid for each atom
  //
@@ -139,6 +141,17 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        if(a_BC>HALF){a_BC=HALF;}
        nu_BC=mu_BC+a_BC*(ONE-mu_BC*mu_BC);
        s_BC=smooth_stiff(nu_BC,stiff);
+      }
+      // SSF Stratmann, Scuseria, Frisch, Chem. Phys. Lett. 257, 213 (1996)
+      if(ssf)
+      {
+       if(mu_BC<-a_ssf){s_BC=-ONE;}
+       else if(mu_BC>a_ssf){s_BC=ONE;}
+       else
+       {
+        nu_BC=mu_BC/a_ssf;
+        s_BC=(35.0e0*nu_BC-35.0e0*pow(nu_BC,3.0e0)+21.0e0*pow(nu_BC,5.0e0)-5.0e0*pow(nu_BC,7.0e0))/16.0e0;
+       }
       }
       // TFVC
       if(tfvc)

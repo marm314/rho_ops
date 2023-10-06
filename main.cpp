@@ -3167,6 +3167,10 @@ int main(int argc, char *argv[])
     {
      method="Becke original quadrature";
     }
+    if(Input_commands.partition=="ssf")
+    {
+     method="SSF original quadrature";
+    }
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
