@@ -10,7 +10,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
 {
  bool becke=false,tfvc=false,becke_original=false;
  int i,j,k,l,m,ZB,ZC;
- double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_XY_mat,**S_X,*P_X,Sum_PB;
+ double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,s_BC=ONE,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,**Xi_XY_mat,**S_X,*P_X,Sum_PB;
  // Set the partition to use
  if(partition=="becke"){becke=true;}
  if(partition=="becke_original"){becke_original=true;}
@@ -60,7 +60,11 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  {
   S_X[i]=new double[natom];
   Xi_XY_mat[i]=new double[natom];
-  for(j=0;j<natom;j++){Xi_XY_mat[i][j]=ONE;}
+  for(j=0;j<natom;j++)
+  {
+   S_X[i][j]=ONE;
+   Xi_XY_mat[i][j]=ONE;
+  }
   if(tfvc)
   {
    //for(j=i;j<natom;j++)
@@ -99,62 +103,60 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
     Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
     for(l=0;l<natom;l++)
     {
-     for(m=0;m<natom;m++)
+     // Distance r to R_B
+     Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[l][0];
+     Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[l][1];
+     Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[l][2];
+     rB=norm3D(Diff_Point);
+     ZB=(int)Rho.Nu_charge[l];
+     for(m=l+1;m<natom;m++)
      {
-      S_X[l][m]=ONE;
-      if(l!=m)
+      // Distance r to R_C
+      Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[m][0];
+      Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[m][1];
+      Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[m][2];
+      rC=norm3D(Diff_Point);
+      ZC=(int)Rho.Nu_charge[m];
+      // Distance R_B to R_C
+      Diff_Point[0]=Rho.Cartesian_Coor[m][0]-Rho.Cartesian_Coor[l][0];
+      Diff_Point[1]=Rho.Cartesian_Coor[m][1]-Rho.Cartesian_Coor[l][1];
+      Diff_Point[2]=Rho.Cartesian_Coor[m][2]-Rho.Cartesian_Coor[l][2];
+      RBC=norm3D(Diff_Point);
+      // Compute nu_BC
+      mu_BC=(rB-rC)/RBC;
+      // becke_original
+      if(becke_original)
       {
-       // Distance r to R_B
-       Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[l][0];
-       Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[l][1];
-       Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[l][2];
-       rB=norm3D(Diff_Point);
-       ZB=(int)Rho.Nu_charge[l];
-       // Distance r to R_C
-       Diff_Point[0]=Point[0]-Rho.Cartesian_Coor[m][0];
-       Diff_Point[1]=Point[1]-Rho.Cartesian_Coor[m][1];
-       Diff_Point[2]=Point[2]-Rho.Cartesian_Coor[m][2];
-       rC=norm3D(Diff_Point);
-       ZC=(int)Rho.Nu_charge[m];
-       // Distance R_B to R_C
-       Diff_Point[0]=Rho.Cartesian_Coor[m][0]-Rho.Cartesian_Coor[l][0];
-       Diff_Point[1]=Rho.Cartesian_Coor[m][1]-Rho.Cartesian_Coor[l][1];
-       Diff_Point[2]=Rho.Cartesian_Coor[m][2]-Rho.Cartesian_Coor[l][2];
-       RBC=norm3D(Diff_Point);
-       // Compute nu_BC
-       mu_BC=(rB-rC)/RBC;
-       // becke_original
-       if(becke_original)
-       {
-        S_X[l][m]=s_mu_stiff(mu_BC,stiff);
-       }
-       // Becke
-       if(becke)
-       {
-        xi_BC=Xi_XY_table(ZB,ZC);
-        u_BC=(xi_BC-ONE)/(xi_BC+ONE); 
-        a_BC=u_BC/(u_BC*u_BC-ONE);
-        if(a_BC<-HALF){a_BC=-HALF;}
-        if(a_BC>HALF){a_BC=HALF;}
-        nu_BC=mu_BC+a_BC*(ONE-mu_BC*mu_BC);
-        S_X[l][m]=s_mu_stiff(nu_BC,stiff);
-       }
-       // TFVC
-       if(tfvc)
-       {
-        xi_BC=Xi_XY_mat[l][m];  
-        nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
-        S_X[l][m]=s_mu_stiff(nu_BC,stiff);
-       }
+       s_BC=smooth_stiff(mu_BC,stiff);
       }
-     }
+      // Becke
+      if(becke)
+      {
+       xi_BC=Xi_XY_table(ZB,ZC);
+       u_BC=(xi_BC-ONE)/(xi_BC+ONE); 
+       a_BC=u_BC/(u_BC*u_BC-ONE);
+       if(a_BC<-HALF){a_BC=-HALF;}
+       if(a_BC>HALF){a_BC=HALF;}
+       nu_BC=mu_BC+a_BC*(ONE-mu_BC*mu_BC);
+       s_BC=smooth_stiff(nu_BC,stiff);
+      }
+      // TFVC
+      if(tfvc)
+      {
+       xi_BC=Xi_XY_mat[l][m];  
+       nu_BC=(ONE+mu_BC-xi_BC*(ONE-mu_BC))/(ONE+mu_BC+xi_BC*(ONE-mu_BC));
+       s_BC=smooth_stiff(nu_BC,stiff);
+      }
+      S_X[m][l]=HALF*(ONE-s_BC);
+      S_X[l][m]=HALF*(ONE+s_BC);
+     } 
     }
     for(l=0;l<natom;l++)
     {
      P_X[l]=ONE;
      for(m=0;m<natom;m++)
      {
-      P_X[l]=P_X[l]*S_X[l][m];
+      P_X[l]=P_X[l]*S_X[m][l];
      }
     }
     Sum_PB=ZERO;
@@ -650,7 +652,7 @@ double set_radii(int &Z)
  return val;
 }
 
-double s_mu_stiff(double &mu,int stiff)
+double smooth_stiff(double &mu,int stiff)
 {
  int i;
  double val=mu;
@@ -658,7 +660,7 @@ double s_mu_stiff(double &mu,int stiff)
  {
   val=p_mu(val);
  }
- return HALF*(ONE-val);
+ return val;
 }
 
 double p_mu(double &mu)

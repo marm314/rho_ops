@@ -30,5 +30,5 @@ double Xi_XY_table(int &Z1, int &Z2);
 double Xi_XY_bcp(READ_FCHK_WFN &Rho, int &iatom, int &jatom);
 double set_radii(int &Z);
 double p_mu(double &mu);
-double s_mu_stiff(double &mu,int stiff);
+double smooth_stiff(double &mu,int stiff);
 #endif // _INTEGRALS_BECKE_H_
