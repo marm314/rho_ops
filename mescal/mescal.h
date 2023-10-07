@@ -30,6 +30,8 @@ class MESCAL
   int Z2val_electrons(int &Z);
   double Z2atomic_pol(int &Z);
   void jacobi(int n, double **m, double **v);
+  void init_output(string name_output);
+  void close_output(string name_output);
   void read_pdb_file(string name_pbd);
   void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
@@ -45,6 +47,7 @@ class MESCAL
   MESCAL();
   MESCAL(string,string,bool&,bool&);
   ~MESCAL();
+  string sha="";
   bool perm_q=false,ind_q=false,part_val_e=false;
   int nfragments,maxiter=1000,iter=0;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
@@ -56,11 +59,9 @@ class MESCAL
    double **Pi;
   };
   vector<FRAGMENT>fragments;
-  void init_output(string name_output);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void mescal_scs(string name_output);
   void calc_E(string name_output);
-  void close_output(string name_output,string sha);
 
 }; 
 #endif // _MESCAL_H_

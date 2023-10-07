@@ -5100,6 +5100,7 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
+   mescal.sha=sha;
    // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
    if(Input_commands.mescal_punctual)
    {
@@ -5148,7 +5149,6 @@ int main(int argc, char *argv[])
     Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;
    }
    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
-   mescal.close_output(mescal_file,sha);
    Results<<endl;
   }
   /////////////////////////////////////

@@ -131,6 +131,7 @@ void MESCAL::mescal_scs(string name)
   iter++;
  }while(iter<=maxiter && !(conver_E && conver_mu && conver_q));
  print_end_sc(name); 
+ close_output(name);
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
