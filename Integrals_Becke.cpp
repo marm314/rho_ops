@@ -12,9 +12,9 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  int i,j,k,l,m,ZB,ZC;
  double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,s_BC=ONE,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,Sum_PB,a_ssf=0.64e0;
  double **Xi_XY_mat,**S_X,*P_X;
- // Set the partition to use
- if(partition=="becke"){becke=true;}
+ // Select the partition to use
  if(partition=="becke_original"){becke_original=true;}
+ if(partition=="becke"){becke=true;}
  if(partition=="tfvc"){tfvc=true;}
  if(partition=="ssf"){ssf=true;}
  //
