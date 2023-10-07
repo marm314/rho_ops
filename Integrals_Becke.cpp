@@ -150,7 +150,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
        else
        {
         nu_BC=mu_BC/a_ssf;
-        s_BC=(35.0e0*nu_BC-35.0e0*pow(nu_BC,3.0e0)+21.0e0*pow(nu_BC,5.0e0)-5.0e0*pow(nu_BC,7.0e0))/16.0e0;
+        s_BC=(3.5e1*nu_BC-3.5e1*pow(nu_BC,3.0e0)+2.1e1*pow(nu_BC,5.0e0)-5.0e0*pow(nu_BC,7.0e0))/1.6e1;
        }
       }
       // TFVC
