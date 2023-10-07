@@ -69,19 +69,13 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   }
   if(tfvc)
   {
-   //for(j=i;j<natom;j++)
-   for(j=0;j<natom;j++)
+   for(j=i+1;j<natom;j++)
    {
-    if(i!=j)
-    {
-     // Use BCP
-     Xi_XY_mat[i][j]=Xi_XY_bcp(Rho,i,j);
-    }
+    Xi_XY_mat[i][j]=Xi_XY_bcp(Rho,i,j);
    }
   }
  }
-/*
- if(!Becke)
+ if(tfvc)
  {
   for(i=0;i<natom;i++)
   {
@@ -91,7 +85,6 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
    }
   }
  }
-*/
  for(i=0;i<natom;i++)
  {
   wA[i]=new double*[nrad_becke];
@@ -544,10 +537,12 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
    iter++;   
   }while((abs(f1-f3)>tol8 || R_dist>tol6) && iter<1000);
   if(iter==1000){cout<<" Warning! Failed to find the BCP for atoms "<<iatom+1<<","<<jatom<<"."<<endl;}
+
   for(icoord=0;icoord<3;icoord++)
   {
-   x2[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[iatom][icoord];
-   x4[icoord]=HALF*(x1[icoord]+x3[icoord])-Rho.Cartesian_Coor[jatom][icoord];
+   x1[icoord]=HALF*(x1[icoord]+x3[icoord]);
+   x2[icoord]=x1[icoord]-Rho.Cartesian_Coor[iatom][icoord];
+   x4[icoord]=x1[icoord]-Rho.Cartesian_Coor[jatom][icoord];
   }
   rX=norm3D(x2);
   rY=norm3D(x4);

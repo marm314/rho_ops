@@ -3151,7 +3151,7 @@ int main(int argc, char *argv[])
     {
      if(Input_commands.nprocs>1)
      {
-      cout<<"Parallelization for integrating with Becke/TFVC is currently available only for WFN/WFX files"<<endl;
+      cout<<"Parallelization for integrating with Becke/SSF/TFVC is currently available only for WFN/WFX files"<<endl;
       Input_commands.nprocs=1;
      }
     }
