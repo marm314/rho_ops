@@ -9,7 +9,7 @@ Input::Input(string rho_in)
  cubature=false;dmn_plots=false;rotate_grid=false;Beta_MOs=false;wfx_print=false;wfx_print_dmn=false;store_dmn=false;
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
- mescal=false;mescal_punctual=false;mescal_qperm=false;mescal_qind=false;mescal_part_val_e=false;
+ mescal=false;mescal_punctual=false;mescal_qm=false;mescal_qperm=false;mescal_qind=false;mescal_part_val_e=false;
  multiplicity=0;nprocs=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
  ifstream rho_input_file;
@@ -726,6 +726,15 @@ Input::Input(string rho_in)
      Point_mescal[i]=new double[3];
      rho_input_file>>q_mescal>>Point_mescal[i][0]>>Point_mescal[i][1]>>Point_mescal[i][2];
     }
+   }
+   else if(rho_in=="$mescal_qm")
+   {
+    mescal_qm=true;
+    rho_input_file>>order_grid_r>>order_grid_ang>>stiff>>nprocs;
+    if(order_grid_ang<=70){order_grid_ang=70;}
+    if(order_grid_r<=30){order_grid_r=30;}
+    if(stiff<3){stiff=3;}
+    if(nprocs<1){nprocs=1;}
    }
    else if(rho_in=="$mescal_q_perm"){mescal_qperm=true;}
    else if(rho_in=="$mescal_q_ind")

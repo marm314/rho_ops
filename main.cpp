@@ -5087,6 +5087,8 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<"#    MESCAL response to the QM electronic density (F_elec) + F_nuclei     #";
    Results<<endl;
+   Results<<"#               (also adding V_elec and V_nu for Q_ind)                   #";
+   Results<<endl;
    Results<<"#*************************************************************************#";
    Results<<endl;
    Results<<setprecision(10)<<fixed<<scientific;
@@ -5111,9 +5113,9 @@ int main(int argc, char *argv[])
      mescal.set_FV_ext_punct(Input_commands.q_mescal,Point_mescal);
     }
    }
-   else
+   if(Input_commands.mescal_qm)
    {
-    int natoms_pdb,iatom,icoord;
+    int natoms_pdb,iatom,icoord,grid_theta_phi;
     double **F_QM,*V_QM,**Coords_pdb;
     double diff_xyz[3],r,r3;
     natoms_pdb=mescal.natoms_tot();
@@ -5133,7 +5135,6 @@ int main(int argc, char *argv[])
     }
     Results<<endl;
     Results<<" N atoms in the PDB file    "<<setw(15)<<natoms_pdb<<endl;
-    Results<<endl;
     mescal.get_coords(Coords_pdb);
     // Nuclear contrib. to V_ext and F_ext
     for(iatom=0;iatom<natoms_pdb;iatom++)
@@ -5156,6 +5157,13 @@ int main(int argc, char *argv[])
      }
     }
     // Electronic density contrib. to V_ext and F_ext
+    grid_theta_phi=Input_commands.order_grid_ang;
+    grid_avail_becke(grid_theta_phi);
+    Results<<" Using a radial grid of     "<<setw(15)<<Input_commands.order_grid_r<<" points"<<endl;
+    Results<<" Using an agular grid of    "<<setw(15)<<grid_theta_phi<<" points"<<endl;
+    Results<<" Using stiffness of         "<<setw(15)<<Input_commands.stiff<<endl;
+    Results<<" Using OMP running on       "<<setw(15)<<Input_commands.nprocs<<" threads"<<endl;
+    Results<<endl;
 
     // Send QM contrib.
     mescal.set_FV_ext_qm(F_QM,V_QM);
@@ -5167,6 +5175,10 @@ int main(int argc, char *argv[])
     delete F_QM;F_QM=NULL;
     delete Coords_pdb;Coords_pdb=NULL;
     delete V_QM;V_QM=NULL;
+   }
+   if(!Input_commands.mescal_punctual && !Input_commands.mescal_qm)
+   {
+    cout<<"Comment: Calling MESCAL without any punctual/QM field F (and potential V)."<<endl;
    }
    // call mescal SCS for mu and F_mu.
    mescal.maxiter=Input_commands.maxiter_mescal;
