@@ -44,7 +44,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   r_real_becke[i]=r_becke[i]/(ONE-r_becke[i]);
  }
  //Grid for theta, phi
- grid_avail_becke(nang);
+ Grid_avail_becke(nang);
  nang_becke=nang;
  x_becke=new double[nang_becke];
  y_becke=new double[nang_becke];
@@ -317,7 +317,7 @@ void Integrate_becke_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,int
  }
 }
 
-void clean_quadrature_becke(string name,int &natoms)
+void Clean_quadrature_becke(string name,int &natoms)
 {
  int i,j;
  system(("rm "+name+"_w.txt").c_str());
@@ -344,7 +344,7 @@ void clean_quadrature_becke(string name,int &natoms)
 }
 
 //Check for available order in Lebedev
-void grid_avail_becke(int & Order)
+void Grid_avail_becke(int & Order)
 { 
  if(Order<=6)
  {

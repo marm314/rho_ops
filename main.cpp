@@ -3155,24 +3155,12 @@ int main(int argc, char *argv[])
       Input_commands.nprocs=1;
      }
     }
-    if(Input_commands.partition=="becke")
-    {
-     method="Becke quadrature";
-    }
-    if(Input_commands.partition=="tfvc")
-    {
-     method="TFVC quadrature";
-    }
-    if(Input_commands.partition=="becke_original")
-    {
-     method="Becke original quadrature";
-    }
-    if(Input_commands.partition=="ssf")
-    {
-     method="SSF quadrature";
-    }
+    if(Input_commands.partition=="becke"){method="Becke quadrature";}
+    if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
+    if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
+    if(Input_commands.partition=="ssf"){method="SSF quadrature";}
     grid_theta_phi=Input_commands.order_grid_ang;
-    grid_avail_becke(grid_theta_phi);
+    Grid_avail_becke(grid_theta_phi);
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
     if(wfn_fchk)  // WFN/WFX
     {
@@ -3239,7 +3227,7 @@ int main(int argc, char *argv[])
     Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
     Results<<" Using OMP running on    "<<setw(5)<<Input_commands.nprocs<<" threads"<<endl;
     Results<<endl;
-    clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
+    Clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
     delete[] res_integration; res_integration=NULL;
    }
    Results<<"#*************************************************************************#";
@@ -5157,14 +5145,22 @@ int main(int argc, char *argv[])
      }
     }
     // Electronic density contrib. to V_ext and F_ext
+    if(Input_commands.partition=="becke"){method="Becke quadrature";}
+    if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
+    if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
+    if(Input_commands.partition=="ssf"){method="SSF quadrature";}
     grid_theta_phi=Input_commands.order_grid_ang;
-    grid_avail_becke(grid_theta_phi);
+    Grid_avail_becke(grid_theta_phi);
     Results<<" Using a radial grid of     "<<setw(15)<<Input_commands.order_grid_r<<" points"<<endl;
     Results<<" Using an agular grid of    "<<setw(15)<<grid_theta_phi<<" points"<<endl;
     Results<<" Using stiffness of         "<<setw(15)<<Input_commands.stiff<<endl;
     Results<<" Using OMP running on       "<<setw(15)<<Input_commands.nprocs<<" threads"<<endl;
-    Results<<endl;
+    Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
 
+    Clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
+    Results<<" Result of the integration N"<<setw(25)<<Density;
+    Results<<"\t obtained with "<<method<<endl;
+    Results<<endl;
     // Send QM contrib.
     mescal.set_FV_ext_qm(F_QM,V_QM);
     for(i=0;i<natoms_pdb;i++)

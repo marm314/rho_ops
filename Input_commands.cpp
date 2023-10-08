@@ -730,6 +730,12 @@ Input::Input(string rho_in)
    else if(rho_in=="$mescal_qm")
    {
     mescal_qm=true;
+    do
+    {
+     getline(rho_input_file,rho_in);
+     rho_in.erase(std::remove_if(rho_in.begin(),rho_in.end(),::isspace),rho_in.end());
+    }while(rho_in=="");
+    partition=rho_in;
     rho_input_file>>order_grid_r>>order_grid_ang>>stiff>>nprocs;
     if(order_grid_ang<=70){order_grid_ang=70;}
     if(order_grid_r<=30){order_grid_r=30;}
