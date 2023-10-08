@@ -5156,7 +5156,7 @@ int main(int argc, char *argv[])
     Results<<" Using stiffness of         "<<setw(15)<<Input_commands.stiff<<endl;
     Results<<" Using OMP running on       "<<setw(15)<<Input_commands.nprocs<<" threads"<<endl;
     Grid_becke(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
-
+    //Integrate_Becke_mescal(Read_fchk_wfn,F_QM,V_QM,Coords_pdb,natoms_pdb,Input_commands.nprocs);
     Clean_quadrature_becke(name_file,Read_fchk_wfn.natoms);
     Results<<" Result of the integration N"<<setw(25)<<Density;
     Results<<"\t obtained with "<<method<<endl;
