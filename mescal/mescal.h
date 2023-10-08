@@ -59,6 +59,9 @@ class MESCAL
    double **Pi;
   };
   vector<FRAGMENT>fragments;
+  int natoms_tot();
+  void get_coords(double **Coords);
+  void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void mescal_scs(string name_output);
   void calc_E(string name_output);

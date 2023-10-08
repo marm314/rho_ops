@@ -160,6 +160,52 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
  }
 }
 
+// Send the number atoms in the PDB file
+int MESCAL::natoms_tot()
+{
+ int ifrag,natoms=0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  natoms+=fragments[ifrag].natoms;
+ }
+ return natoms;
+}
+
+// Send coordinates on the PDB
+void MESCAL::get_coords(double **Coords)
+{
+ int ifrag,iatom,icoord,jatom=0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    Coords[jatom][icoord]=fragments[ifrag].atoms[iatom].pos[icoord];
+   }
+   jatom++;
+  }
+ }
+}
+
+// Set F_ext and V_ext (due to a/many point charge(s))
+void MESCAL::set_FV_ext_qm(double **F_ext,double *V_ext)
+{
+ int ifrag,iatom,icoord,jatom=0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    fragments[ifrag].atoms[iatom].F_ext[icoord]=F_ext[jatom][icoord];
+   }
+   fragments[ifrag].atoms[iatom].V_ext=V_ext[jatom];
+   jatom++;
+  }
+ }
+}
+
 // Calc E and print iter info
 void MESCAL::calc_E(string name)
 {

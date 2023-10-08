@@ -3123,7 +3123,7 @@ int main(int argc, char *argv[])
      delete[] Sij; Sij=NULL;
     }
    }
-   else // Becke or TFVC
+   else // Becke, SSF, ..., or TFVC
    {
     int grid_theta_phi,nprops=7; // Note: set nprops to numbers of properties !
     double *res_integration,mu[3]={ZERO};
@@ -3169,7 +3169,7 @@ int main(int argc, char *argv[])
     }
     if(Input_commands.partition=="ssf")
     {
-     method="SSF original quadrature";
+     method="SSF quadrature";
     }
     grid_theta_phi=Input_commands.order_grid_ang;
     grid_avail_becke(grid_theta_phi);
@@ -5113,7 +5113,60 @@ int main(int argc, char *argv[])
    }
    else
    {
-    Results<<"Comment: No external punctual charge read. Thus, no F_ext employed in MESCAL"<<endl;
+    int natoms_pdb,iatom,icoord;
+    double **F_QM,*V_QM,**Coords_pdb;
+    double diff_xyz[3],r,r3;
+    natoms_pdb=mescal.natoms_tot();
+    F_QM=new double*[natoms_pdb];
+    Coords_pdb=new double*[natoms_pdb];
+    V_QM=new double[natoms_pdb];
+    for(i=0;i<natoms_pdb;i++)
+    {
+     F_QM[i]=new double[3];
+     Coords_pdb[i]=new double[3];
+     V_QM[i]=ZERO;
+     for(j=0;j<3;j++)
+     {
+      F_QM[i][j]=ZERO;
+      Coords_pdb[i][j]=ZERO;
+     }
+    }
+    Results<<endl;
+    Results<<" N atoms in the PDB file    "<<setw(15)<<natoms_pdb<<endl;
+    Results<<endl;
+    mescal.get_coords(Coords_pdb);
+    // Nuclear contrib. to V_ext and F_ext
+    for(iatom=0;iatom<natoms_pdb;iatom++)
+    {
+     for(i=0;i<Read_fchk_wfn.natoms;i++)
+     {
+      r=ZERO;
+      for(j=0;j<3;j++)
+      {
+       diff_xyz[j]=Coords_pdb[i][j]-Read_fchk_wfn.Cartesian_Coor[i][j];
+       r+=diff_xyz[j]*diff_xyz[j];
+      }
+      r=pow(r,HALF);
+      r3=pow(r,THREE);
+      for(icoord=0;icoord<3;icoord++)
+      {
+       F_QM[iatom][icoord]-=Read_fchk_wfn.Nu_charge[i]*diff_xyz[icoord]/r3;
+      }
+      V_QM[iatom]-=Read_fchk_wfn.Nu_charge[i]/r;
+     }
+    }
+    // Electronic density contrib. to V_ext and F_ext
+
+    // Send QM contrib.
+    mescal.set_FV_ext_qm(F_QM,V_QM);
+    for(i=0;i<natoms_pdb;i++)
+    {
+     delete[] F_QM[i];F_QM[i]=NULL;;
+     delete[] Coords_pdb[i];Coords_pdb[i]=NULL;;
+    }
+    delete F_QM;F_QM=NULL;
+    delete Coords_pdb;Coords_pdb=NULL;
+    delete V_QM;V_QM=NULL;
    }
    // call mescal SCS for mu and F_mu.
    mescal.maxiter=Input_commands.maxiter_mescal;
