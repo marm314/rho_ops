@@ -5103,7 +5103,7 @@ int main(int argc, char *argv[])
    }
    if(Input_commands.mescal_qm)
    {
-    int natoms_pdb,iatom,icoord,grid_theta_phi;
+    int natoms_pdb,iatom,grid_theta_phi;
     double **F_QM,*V_QM,**Coords_pdb;
     double diff_xyz[3],r,r3;
     natoms_pdb=mescal.natoms_tot();
@@ -5137,9 +5137,9 @@ int main(int argc, char *argv[])
       }
       r=pow(r,HALF);
       r3=pow(r,THREE);
-      for(icoord=0;icoord<3;icoord++)
+      for(j=0;j<3;j++)
       {
-       F_QM[iatom][icoord]-=Read_fchk_wfn.Nu_charge[i]*diff_xyz[icoord]/r3;
+       F_QM[iatom][j]-=Read_fchk_wfn.Nu_charge[i]*diff_xyz[j]/r3;
       }
       V_QM[iatom]-=Read_fchk_wfn.Nu_charge[i]/r;
      }
