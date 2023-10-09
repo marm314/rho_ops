@@ -600,7 +600,7 @@ else{checked=true;}
 /*   DGETRF  computes  an  LU factorization of a general M-by-N matrix A using partial pivoting with row interchanges.
      The factorization has the form A = P * L * U where P is the permutation matrix, L is lower triangular with unit diagonal elements
      (lower trapezoidal if m > n), and U is upper tri-angular (upper trapezoidal if m < n) . */
-void inverse(double* A, int N)
+void inverse(double* A, int N,int &info)
 {
  int *IPIV=new int[N+1];
  int LWORK=N*N;
@@ -608,10 +608,11 @@ void inverse(double* A, int N)
  int INFO;
  dgetrf_(&N,&N,A,&N,IPIV,&INFO);
  dgetri_(&N,A,&N,IPIV,WORK,&LWORK,&INFO);
+ info=INFO;
  delete IPIV;
  delete WORK;
 }
-void mat_inverse2(int n,double **A,double **Ainv)
+void mat_inverse2(int n,double **A,double **Ainv,int &info)
 {
  int i,j;
  double *T;
@@ -623,7 +624,7 @@ void mat_inverse2(int n,double **A,double **Ainv)
    T[i+n*j]=A[i][j];
   }
  }
- inverse(T,n);
+ inverse(T,n,info);
  for(i=0;i<n;i++)
  {
   for(j=0;j<n;j++)

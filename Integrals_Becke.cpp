@@ -581,7 +581,7 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
   {
    info=0;
    Rho.rho_hessian(x1,Hess,Grad,f1);
-   mat_inverse2(3,Hess,Inv_Hess);
+   mat_inverse2(3,Hess,Inv_Hess,info);
    if(info==0)
    {
     norm_grad=pow(Grad[0]*Grad[0]+Grad[1]*Grad[1]+Grad[2]*Grad[2],HALF);

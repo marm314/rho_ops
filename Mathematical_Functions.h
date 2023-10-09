@@ -40,7 +40,7 @@ void matmul_full(int dim1,int dim2,int dim3,double **A,double **B, double **RES)
 void mat_inverse(int n,double **A,double **Ainv,int &info);
 void mat_transpose(int n,double **A, double **RES);//Transpose A->A^t==RES
 void mat_equal(int n,double **A,double **RES);//RES=A
-void mat_inverse2(int n,double **A,double **Ainv);//This function and the next one
+void mat_inverse2(int n,double **A,double **Ainv,int &info);//This function and the next one
 void inverse(double* A, int N);                   //work together
 void jacobi(int n, double **m, double **v);//Diagonalization
 double Gamma(double x);//Gamma function of x
