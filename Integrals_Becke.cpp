@@ -8,15 +8,32 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,string partition)
 {
+ string name_bcp;
  bool becke=false,tfvc=false,becke_original=false,ssf=false;
  int i,j,k,l,m,ZB,ZC;
  double r_inf,r_sup,Point[3],Diff_Point[3],rB,rC,mu_BC,s_BC=ONE,nu_BC=ZERO,xi_BC,a_BC,u_BC,RBC,Sum_PB,a_ssf=0.64e0;
- double **Xi_XY_mat,**S_X,*P_X;
+ double **Xi_XY_mat,**S_X,*P_X,Xi_rad;
  // Select the partition to use
  if(partition=="becke_original"){becke_original=true;}
  if(partition=="becke"){becke=true;}
  if(partition=="tfvc"){tfvc=true;}
  if(partition=="ssf"){ssf=true;}
+ if(tfvc)
+ {
+  if((name[name.length()-1]=='n' || name[name.length()-1]=='N')||(name[name.length()-1]=='x' || name[name.length()-1]=='X')) // WFN or WFX
+  {
+   name_bcp=name.substr(0,(name.length()-4))+".bcp";
+  }
+  else // FCHK
+  {
+   name_bcp=name.substr(0,(name.length()-5))+".bcp";
+  }
+  ofstream init_out(name_bcp);
+  init_out<<endl;
+  init_out<<" Searching for BCP in "<<name<<endl;
+  init_out<<endl;
+  init_out.close();
+ }
  //
  // Prepare the quadrature grid for each atom
  //
@@ -71,7 +88,8 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   {
    for(j=i+1;j<natom;j++)
    {
-    Xi_XY_mat[i][j]=Xi_XY_bcp(Rho,i,j);
+    Xi_XY_bcp(Rho,name_bcp,i,j,Xi_rad);
+    Xi_XY_mat[i][j]=Xi_rad;
    }
   }
  }
@@ -476,17 +494,20 @@ void Grid_avail_becke(int & Order)
  }
 }
 
-double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
+void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_rad)
 {
- int icoord,iter=0;
+ int icoord,iter=0,info;
  double R_dist,rX=ONE,rY=ONE,Diff_Point[3],a,b,x1[3],x2[3],x3[3],x4[3],f1,f2,f3,f4;
- double tol8=pow(TEN,-EIGHT),tol6=pow(TEN,-SIX);
+ double tol8=pow(TEN,-EIGHT),tol6=pow(TEN,-SIX),norm_grad,delta;
+ double **Hess,**Inv_Hess,**Eigenvect,*Grad;
  Diff_Point[0]=Rho.Cartesian_Coor[iatom][0]-Rho.Cartesian_Coor[jatom][0];
  Diff_Point[1]=Rho.Cartesian_Coor[iatom][1]-Rho.Cartesian_Coor[jatom][1];
  Diff_Point[2]=Rho.Cartesian_Coor[iatom][2]-Rho.Cartesian_Coor[jatom][2];
  R_dist=norm3D(Diff_Point);
+ ofstream write_bcp(name,std::ios_base::app);
  if(R_dist<SIX && iatom!=jatom) // 6 au ( >3 Angstrom ) to search for BCPs
  {
+  write_bcp<<endl;
   // Find CP, set radious rX and rY
   for(icoord=0;icoord<3;icoord++)
   {
@@ -536,18 +557,95 @@ double Xi_XY_bcp(READ_FCHK_WFN &Rho,int &iatom, int &jatom)
    }
    iter++;   
   }while((abs(f1-f3)>tol8 || R_dist>tol6) && iter<1000);
-  if(iter==1000){cout<<" Warning! Failed to find the BCP for atoms "<<iatom+1<<","<<jatom<<"."<<endl;}
-
+  if(iter==1000){write_bcp<<" Warning! Failed to find min between atoms "<<iatom+1<<","<<jatom<<"."<<endl;}
+  Hess=new double*[3];
+  Inv_Hess=new double*[3];
+  Eigenvect=new double*[3];
+  Grad=new double[3];
+  for(icoord=0;icoord<3;icoord++)
+  {
+   Hess[icoord]=new double[3];
+   Inv_Hess[icoord]=new double[3];
+   Eigenvect[icoord]=new double[3];
+  }
   for(icoord=0;icoord<3;icoord++)
   {
    x1[icoord]=HALF*(x1[icoord]+x3[icoord]);
-   x2[icoord]=x1[icoord]-Rho.Cartesian_Coor[iatom][icoord];
-   x4[icoord]=x1[icoord]-Rho.Cartesian_Coor[jatom][icoord];
+   x2[icoord]=x1[icoord];
   }
-  rX=norm3D(x2);
-  rY=norm3D(x4);
+  write_bcp<<setprecision(10)<<fixed<<scientific;
+  write_bcp<<"Terminated the search for a minimun along the internuclear axis"<<endl;
+  write_bcp<<"Starting the search for a BCP between atoms "<<iatom+1<<" and "<<jatom+1<<endl;
+  iter=0;delta=ONE;
+  do
+  {
+   info=0;
+   Rho.rho_hessian(x1,Hess,Grad,f1);
+   mat_inverse(3,Hess,Inv_Hess,info);
+   if(info==0)
+   {
+    norm_grad=pow(Grad[0]*Grad[0]+Grad[1]*Grad[1]+Grad[2]*Grad[2],HALF);
+/*
+    if(iter==0)
+    {
+     write_bcp<<"Current values for the density, grad, and laplacian"<<endl;
+     write_bcp<<"Density     : "<<setw(17)<<f1<<endl;
+     write_bcp<<"|Grad|      : "<<setw(17)<<norm_grad<<endl;
+     jacobi(3,Hess,Eigenvect);
+     write_bcp<<"Laplacian   : "<<setw(17)<<Hess[0][0]+Hess[1][1]+Hess[2][2]<<endl;
+     write_bcp<<"Eigenval_1  : "<<setw(17)<<Hess[0][0]<<endl;
+     write_bcp<<"Eigenval_2  : "<<setw(17)<<Hess[1][1]<<endl;
+     write_bcp<<"Eigenval_3  : "<<setw(17)<<Hess[2][2]<<endl;
+    }
+*/
+    x1[0]=x1[0]-delta*(Inv_Hess[0][0]*Grad[0]+Inv_Hess[0][1]*Grad[1]+Inv_Hess[0][2]*Grad[2]); 
+    x1[1]=x1[1]-delta*(Inv_Hess[1][0]*Grad[0]+Inv_Hess[1][1]*Grad[1]+Inv_Hess[1][2]*Grad[2]); 
+    x1[2]=x1[2]-delta*(Inv_Hess[2][0]*Grad[0]+Inv_Hess[2][1]*Grad[1]+Inv_Hess[2][2]*Grad[2]); 
+    for(icoord=0;icoord<3;icoord++){x3[icoord]=x2[icoord]-x1[icoord];}
+    if(norm3D(x3)>ONE_THIRD){iter=50;norm_grad=pow(TEN,TEN);}
+    iter++;
+   }
+   else{iter=50;norm_grad=pow(TEN,TEN);}  
+  }while(iter<50 && norm_grad>tol6);
+  for(icoord=0;icoord<3;icoord++){x2[icoord]=x2[icoord]-x1[icoord];}
+  R_dist=norm3D(x2);
+  if(norm_grad<tol6 && iter<50 && R_dist<ONE_THIRD)
+  { 
+   for(icoord=0;icoord<3;icoord++){if(abs(x1[icoord])<tol8){x1[icoord]=ZERO;}}
+   Rho.rho_hessian(x1,Hess,Grad,f1);
+   write_bcp<<"Final values for the density, grad, and laplacian after "<<iter<<" iterations."<<endl;
+   write_bcp<<"BCP  x_coord: "<<setw(17)<<x1[0]<<endl;
+   write_bcp<<"BCP  y_coord: "<<setw(17)<<x1[1]<<endl;
+   write_bcp<<"BCP  z_coord: "<<setw(17)<<x1[2]<<endl;
+   write_bcp<<"Density     : "<<setw(17)<<f1<<endl;
+   write_bcp<<"|Grad|      : "<<setw(17)<<norm_grad<<endl;
+   jacobi(3,Hess,Eigenvect);
+   write_bcp<<"Laplacian   : "<<setw(17)<<Hess[0][0]+Hess[1][1]+Hess[2][2]<<endl;
+   write_bcp<<"Eigenval_1  : "<<setw(17)<<Hess[0][0]<<endl;
+   write_bcp<<"Eigenval_2  : "<<setw(17)<<Hess[1][1]<<endl;
+   write_bcp<<"Eigenval_3  : "<<setw(17)<<Hess[2][2]<<endl;
+   for(icoord=0;icoord<3;icoord++)
+   {
+    x2[icoord]=x1[icoord]-Rho.Cartesian_Coor[iatom][icoord];
+    x4[icoord]=x1[icoord]-Rho.Cartesian_Coor[jatom][icoord];
+   }
+   rX=norm3D(x2);
+   rY=norm3D(x4);
+  }
+  else{rX=ONE,rY=ONE;write_bcp<<"No BCP found between atoms "<<iatom+1<<" and "<<jatom+1<<endl;}
+  for(icoord=0;icoord<3;icoord++)
+  {
+   delete[] Hess[icoord];Hess[icoord]=NULL;
+   delete[] Inv_Hess[icoord];Inv_Hess[icoord]=NULL;
+   delete[] Eigenvect[icoord];Eigenvect[icoord]=NULL;
+  }
+  delete[] Hess;Hess=NULL;
+  delete[] Inv_Hess;Inv_Hess=NULL;
+  delete[] Eigenvect;Eigenvect=NULL;
+  delete[] Grad;Grad=NULL;
  }
- return rX/rY;
+ write_bcp.close();
+ Xi_rad=rX/rY;
 } 
 
 double Xi_XY_table(int &Z1, int &Z2)

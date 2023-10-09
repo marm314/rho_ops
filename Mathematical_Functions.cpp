@@ -267,7 +267,7 @@ void mat_equal(int n,double **A, double **RES)
  }
 }
 //Matrix Inversion by Gauss-Jordan elimination
-void mat_inverse(int n,double **A,double **Ainv)
+void mat_inverse(int n,double **A,double **Ainv,int &info)
 {
  int i,j,k;
  bool noninvrt=false;
@@ -331,7 +331,8 @@ void mat_inverse(int n,double **A,double **Ainv)
   }
   else
   {
-   cout<<"Warning! Not an invertible matrix!"<<endl;
+   //cout<<"Warning! Not an invertible matrix!"<<endl;
+   info=1;
    noninvrt=true;
    break;
   }

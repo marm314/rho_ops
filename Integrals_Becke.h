@@ -27,7 +27,7 @@ void Integrate_becke_paral(vector<READ_FCHK_WFN>Rho,double *res_integration,int 
 void Clean_quadrature_becke(string name, int &natoms);
 void Grid_avail_becke(int & Order);
 double Xi_XY_table(int &Z1, int &Z2);
-double Xi_XY_bcp(READ_FCHK_WFN &Rho, int &iatom, int &jatom);
+void Xi_XY_bcp(READ_FCHK_WFN &Rho, string name, int &iatom, int &jatom, double &Xi_rad);
 double set_radii(int &Z);
 double p_mu(double &mu);
 double smooth_stiff(double &mu,int stiff);
