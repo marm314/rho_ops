@@ -38,3 +38,4 @@ mescal.h
 mescal_IO.cpp
 mescal_utils.
 mescal_utils.cpp
+Integrals_atomic.o
