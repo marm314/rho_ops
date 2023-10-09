@@ -108,7 +108,7 @@ class READ_FCHK_WFN
    void rho_grad_a_b(double [3],double [3],double [3]);
    void rho_lapl(double [3],double &);
    void rho_lapl_a_b(double [3],double &,double &);
-   void rho_hessian(double[3],double [3][3]);
+   void rho_hessian(double [3],double **,double *,double &);
    void orb_grad(double [3],double **res);
    void orb_gradCC(double [3],complex<double> **res);
    void build_NO_grad_wfn(double &,double [3],double [3],int &);

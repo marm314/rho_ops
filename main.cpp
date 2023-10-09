@@ -717,6 +717,15 @@ int main(int argc, char *argv[])
   ///////////////////////////////////////////////
   if(Input_commands.punctualr)
   {
+   double **Hess,**Eigenvect,*Grad;
+   Hess=new double*[3];
+   Eigenvect=new double*[3];
+   Grad=new double[3];
+   for(i=0;i<3;i++)
+   {
+    Hess[i]=new double[3];
+    Eigenvect[i]=new double[3];
+   }
    Results<<"#*************************************************************************#";
    Results<<endl;
    Results<<"#                       Punctual Evaluation (r)                           #";
@@ -785,7 +794,23 @@ int main(int argc, char *argv[])
     Results<<"q_red[rho(r)] alpha: "<<setw(17)<<q_red_alpha<<endl;
     Results<<"q_red[rho(r)] beta : "<<setw(17)<<q_red_beta<<endl;
     Results<<"q_red[rho(r)] = Laplacian[rho(r) alpha or beta] / (k_F[rho(r)] alpha or beta k_F[rho(r)] alpha or beta rho(r) alpha or beta)"<<endl;
+    Read_fchk_wfn.rho_hessian(Point,Hess,Grad,Density);
+    Results<<"Density(Hessian)   : "<<setw(17)<<Density<<endl;
+    Results<<"Grad(Hessian)      : "<<setw(17)<<pow(Grad[0]*Grad[0]+Grad[1]*Grad[1]+Grad[2]*Grad[2],HALF)<<endl;
+    jacobi(3,Hess,Eigenvect);
+    Results<<"Laplacian(Hessian) : "<<setw(17)<<Hess[0][0]+Hess[1][1]+Hess[2][2]<<endl;
+    Results<<"Eigenval_1(Hessian): "<<setw(17)<<Hess[0][0]<<endl;
+    Results<<"Eigenval_2(Hessian): "<<setw(17)<<Hess[1][1]<<endl;
+    Results<<"Eigenval_3(Hessian): "<<setw(17)<<Hess[2][2]<<endl;
     Results<<endl;
+    for(i=0;i<3;i++)
+    {
+     delete[] Hess[i];Hess[i]=NULL;
+     delete[] Eigenvect[i];Eigenvect[i]=NULL;
+    }
+    delete[] Hess;Hess=NULL;
+    delete[] Eigenvect;Eigenvect=NULL;
+    delete[] Grad;Grad=NULL;
    }
    Results<<"#*************************************************************************#";
    Results<<endl;
