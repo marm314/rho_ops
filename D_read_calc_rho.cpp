@@ -2683,6 +2683,84 @@ void READ_FCHK_WFN::rho_lapl_a_b(double point[3],double &result1,double &result2
   {}
  }
 }
+void READ_FCHK_WFN::rho_hessian(double point[3],double hess[3][3])
+{
+ int i;
+ double h=1.0e-4,h2,temp[3];
+ double f_x_y_z;
+ double f_xph_y_z,f_x_yph_z,f_x_y_zph;
+ double f_xmh_y_z,f_x_ymh_z,f_x_y_zmh;
+ double f_xph_yph_z,f_xph_y_zph,f_x_yph_zph;
+ double f_xmh_ymh_z,f_xmh_y_zmh,f_x_ymh_zmh;
+ // h^2
+ h2=h*h;
+ // f_x_y_z
+ rho_eval(point,f_x_y_z);
+ // f_xph_y_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]+=h;
+ rho_eval(point,f_xph_y_z);
+ // f_x_yph_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[1]+=h;
+ rho_eval(point,f_x_yph_z);
+ // f_x_y_zph
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[2]+=h;
+ rho_eval(point,f_x_y_zph);
+ // f_xph_yph_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]+=h;
+ temp[1]+=h;
+ rho_eval(point,f_xph_yph_z);
+ // f_xph_y_zph
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]+=h;
+ temp[2]+=h;
+ rho_eval(point,f_xph_y_zph);
+ // f_x_yph_zph
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[1]+=h;
+ temp[2]+=h;
+ rho_eval(point,f_x_yph_zph);
+ // f_xmh_y_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]-=h;
+ rho_eval(point,f_xmh_y_z);
+ // f_x_ymh_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[1]-=h;
+ rho_eval(point,f_x_ymh_z);
+ // f_x_y_zmh
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[2]-=h;
+ rho_eval(point,f_x_y_zmh);
+ // f_xmh_ymh_z
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]-=h;
+ temp[1]-=h;
+ rho_eval(point,f_xmh_ymh_z);
+ // f_xmh_y_zmh
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[0]-=h;
+ temp[2]-=h;
+ rho_eval(point,f_xmh_y_zmh);
+ // f_x_ymh_zmh
+ for(i=0;i<3;i++){temp[i]=point[3];}
+ temp[1]-=h;
+ temp[2]-=h;
+ rho_eval(point,f_x_ymh_zmh);
+ // Hessian matrix
+ hess[0][0]=(f_xph_y_z+f_xmh_y_z-TWO*f_x_y_z)/h2;
+ hess[1][1]=(f_x_yph_z+f_x_ymh_z-TWO*f_x_y_z)/h2;
+ hess[2][2]=(f_x_y_zph+f_x_y_zmh-TWO*f_x_y_z)/h2;
+ hess[0][1]=(f_xph_yph_z-f_xph_y_z-f_x_yph_z+TWO*f_x_y_z-f_xmh_y_z-f_x_ymh_z+f_xmh_ymh_z)/(FOUR*h2);
+ hess[0][2]=(f_xph_y_zph-f_xph_y_z-f_x_y_zph+TWO*f_x_y_z-f_xmh_y_z-f_x_y_zmh+f_xmh_y_zmh)/(FOUR*h2);
+ hess[1][2]=(f_x_yph_zph-f_x_yph_z-f_x_y_zph+TWO*f_x_y_z-f_x_ymh_z-f_x_y_zmh+f_x_ymh_zmh)/(FOUR*h2);
+ hess[1][0]=hess[0][1];
+ hess[2][0]=hess[0][2];
+ hess[2][1]=hess[1][2];
+}
 void READ_FCHK_WFN::orb_grad(double point[3],double **res)
 {
  int i,j,numbasis;
