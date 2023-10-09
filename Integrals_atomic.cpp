@@ -1,4 +1,4 @@
-#include"Integrals_Becke.h"
+#include"Integrals_atomic.h"
 
 int nrad_becke,nang_becke;
 double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,***wA;

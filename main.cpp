@@ -21,7 +21,7 @@
 #include"Integrals.h"
 #include"Integrals_DMN.h"
 #include"Integrals_quadrature.h"
-#include"Integrals_Becke.h"
+#include"Integrals_atomic.h"
 #include"gauss_quad.h"
 #include"Numbers.h"
 #include"String_ops.h"
