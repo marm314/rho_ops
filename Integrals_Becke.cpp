@@ -585,7 +585,6 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
    if(info==0)
    {
     norm_grad=pow(Grad[0]*Grad[0]+Grad[1]*Grad[1]+Grad[2]*Grad[2],HALF);
-/*
     if(iter==0)
     {
      write_bcp<<"Current values for the density, grad, and laplacian"<<endl;
@@ -597,7 +596,6 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
      write_bcp<<"Eigenval_2  : "<<setw(17)<<Hess[1][1]<<endl;
      write_bcp<<"Eigenval_3  : "<<setw(17)<<Hess[2][2]<<endl;
     }
-*/
     x1[0]=x1[0]-delta*(Inv_Hess[0][0]*Grad[0]+Inv_Hess[0][1]*Grad[1]+Inv_Hess[0][2]*Grad[2]); 
     x1[1]=x1[1]-delta*(Inv_Hess[1][0]*Grad[0]+Inv_Hess[1][1]*Grad[1]+Inv_Hess[1][2]*Grad[2]); 
     x1[2]=x1[2]-delta*(Inv_Hess[2][0]*Grad[0]+Inv_Hess[2][1]*Grad[1]+Inv_Hess[2][2]*Grad[2]); 
@@ -605,7 +603,7 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
     if(norm3D(x3)>ONE_THIRD){iter=50;norm_grad=pow(TEN,TEN);}
     iter++;
    }
-   else{iter=50;norm_grad=pow(TEN,TEN);}  
+   else{iter=50;norm_grad=pow(TEN,TEN);cout<<info<<endl;}  
   }while(iter<50 && norm_grad>tol6);
   for(icoord=0;icoord<3;icoord++){x2[icoord]=x2[icoord]-x1[icoord];}
   R_dist=norm3D(x2);
