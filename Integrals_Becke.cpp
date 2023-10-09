@@ -581,7 +581,7 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
   {
    info=0;
    Rho.rho_hessian(x1,Hess,Grad,f1);
-   mat_inverse(3,Hess,Inv_Hess,info);
+   mat_inverse2(3,Hess,Inv_Hess);
    if(info==0)
    {
     norm_grad=pow(Grad[0]*Grad[0]+Grad[1]*Grad[1]+Grad[2]*Grad[2],HALF);
@@ -603,7 +603,7 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
     if(norm3D(x3)>ONE_THIRD){iter=50;norm_grad=pow(TEN,TEN);}
     iter++;
    }
-   else{iter=50;norm_grad=pow(TEN,TEN);cout<<info<<endl;}  
+   else{iter=50;norm_grad=pow(TEN,TEN);}  
   }while(iter<50 && norm_grad>tol6);
   for(icoord=0;icoord<3;icoord++){x2[icoord]=x2[icoord]-x1[icoord];}
   R_dist=norm3D(x2);
