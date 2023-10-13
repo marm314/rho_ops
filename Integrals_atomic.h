@@ -21,11 +21,12 @@ using namespace std;
 //////////////////////////
 //Functions declaration //
 //////////////////////////
-void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang,int &stiff,string partition);
-void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration);
-void Integrate_becke_paral(vector<READ_FCHK_WFN>Rho,double *res_integration,int &nprocs);
-void Clean_quadrature_becke(string name, int &natoms);
-void Grid_avail_becke(int & Order);
+void Grid_atomic(READ_FCHK_WFN &Rho,string name,int &natom,int &nradial,int &nang,int &stiff,string partition);
+void Integrate_atomic(READ_FCHK_WFN &Rho,double *res_integration);
+void Integrate_atomic_paral(vector<READ_FCHK_WFN>Rho,double *res_integration,int &nprocs);
+void Integrate_atomic_mescal(READ_FCHK_WFN &Rho,double **F_QM,double *V_QM,double &Density,double **Coords_pdb,int &natoms_pdb);
+void Clean_quadrature_atomic(string name, int &natoms);
+void Grid_avail_atomic(int & Order);
 double Xi_XY_table(int &Z1, int &Z2);
 void Xi_XY_bcp(READ_FCHK_WFN &Rho, string name, int &iatom, int &jatom, double &Xi_rad);
 double set_radii(int &Z);

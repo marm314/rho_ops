@@ -6,7 +6,7 @@ double *x_becke,*y_becke,*z_becke;
 //////////////////////////
 //Functions description //
 //////////////////////////
-void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,string partition)
+void Grid_atomic(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nang,int &stiff,string partition)
 {
  string name_bcp;
  bool becke=false,tfvc=false,becke_original=false,ssf=false;
@@ -61,7 +61,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
   r_real_becke[i]=r_becke[i]/(ONE-r_becke[i]);
  }
  //Grid for theta, phi
- Grid_avail_becke(nang);
+ Grid_avail_atomic(nang);
  nang_becke=nang;
  x_becke=new double[nang_becke];
  y_becke=new double[nang_becke];
@@ -202,7 +202,7 @@ void Grid_becke(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &nan
  delete[] Xi_XY_mat;Xi_XY_mat=NULL;
 }
 
-void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
+void Integrate_atomic(READ_FCHK_WFN &Rho,double *res_integration)
 {
  int i,j,k,nprops=7,natoms=Rho.natoms;
  double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
@@ -270,7 +270,7 @@ void Integrate_becke(READ_FCHK_WFN &Rho,double *res_integration)
  }
 }
 
-void Integrate_becke_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,int &nprocs)
+void Integrate_atomic_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,int &nprocs)
 {
  int i,j,k,nprops=7,natoms=Rho[0].natoms;
  double Point[3],normPoint,density,fact_jacob_weight,FIFTEEN=THREE*FIVE;
@@ -335,7 +335,55 @@ void Integrate_becke_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,int
  }
 }
 
-void Clean_quadrature_becke(string name,int &natoms)
+void Integrate_atomic_mescal(READ_FCHK_WFN &Rho,double **F_QM,double *V_QM,double &Density,double **Coords_pdb,int &natoms_pdb)
+{
+ int i,j,k,l,m,natoms=Rho.natoms;
+ double Point[3],diff_xyz[3],r,r3,fact_jacob_weight,density,tol10=pow(TEN,-TEN);
+ // Calc. integrals
+ for(i=0;i<natoms;i++)
+ {
+  for(j=0;j<nrad_becke;j++)
+  { 
+   for(k=0;k<nang_becke;k++)
+   {
+    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
+    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
+    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
+    Rho.rho_eval(Point,density);
+    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    for(l=0;l<natoms_pdb;l++)
+    {
+     r=ZERO;
+     for(m=0;m<3;m++)
+     {
+      diff_xyz[m]=Coords_pdb[l][m]-Point[m];
+      r+=diff_xyz[m]*diff_xyz[m];
+     }
+     r=pow(r,HALF);
+     if(r<tol10){r=tol10;}
+     r3=pow(r,THREE);
+     // Field and potential contributions
+     for(m=0;m<3;m++){F_QM[l][m]+=fact_jacob_weight*density*diff_xyz[m]/r3;} 
+     V_QM[l]+=density*fact_jacob_weight/r;
+    }
+    // Int. electronic density
+    Density+=density*fact_jacob_weight;
+   }
+  }
+ }
+ // Multiply by 4 Pi   
+ for(i=0;i<natoms_pdb;i++)
+ {
+  for(j=0;j<3;j++)
+  {
+   F_QM[i][j]=FOUR*PI*F_QM[i][j];
+  }
+  V_QM[i]=FOUR*PI*V_QM[i];
+ }
+ Density=FOUR*PI*Density;
+}
+
+void Clean_quadrature_atomic(string name,int &natoms)
 {
  int i,j;
  system(("rm "+name+"_w.txt").c_str());
@@ -362,7 +410,7 @@ void Clean_quadrature_becke(string name,int &natoms)
 }
 
 //Check for available order in Lebedev
-void Grid_avail_becke(int & Order)
+void Grid_avail_atomic(int & Order)
 { 
  if(Order<=6)
  {
