@@ -206,6 +206,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     for(jindex=0;jindex<3;jindex++){read_frag>>Im_ref[iindex][jindex];}
    }
+   // Check Inertia tensor similarity
    devItens=false; 
    for(iindex=0;iindex<3;iindex++)
    {
@@ -262,7 +263,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     }
    }
   }
-  // Transform alpha_read -> alpha_rot = U^T alpha U (first check Inertia tensor)
+  // Transform alpha_read -> alpha_rot = U^T alpha U 
   for(iindex=0;iindex<3;iindex++)
   {
    for(jindex=0;jindex<3;jindex++)
