@@ -5175,7 +5175,7 @@ int main(int argc, char *argv[])
       r=ZERO;
       for(j=0;j<3;j++)
       {
-       diff_xyz[j]=Coords_pdb[i][j]-Read_fchk_wfn.Cartesian_Coor[i][j];
+       diff_xyz[j]=Coords_pdb[iatom][j]-Read_fchk_wfn.Cartesian_Coor[i][j];
        r+=diff_xyz[j]*diff_xyz[j];
       }
       r=pow(r,HALF);
