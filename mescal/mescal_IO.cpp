@@ -167,7 +167,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 {
  bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,amo,nbasis=0,nocc=0;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val,val2;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
  string line;
  orb_ene=new double[1];orb_ene[0]=0.0e0;
  Cartes_coord=new double*[fragments[ifrag].natoms];
@@ -315,14 +315,19 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     for(amo=0;amo<=imo;amo++)
     {
-     if(imo==amo){val2=1.0e0;}
-     else{val2=0.0e0;}
      val=0.0e0; 
      for(iatom=0;iatom<fragments[ifrag].natoms-1;iatom++)
      {
       val+=S_mat[iatom][amo][imo];
      }
-     S_mat[fragments[ifrag].natoms-1][amo][imo]=val2-val;
+     if(imo==amo)
+     {
+      S_mat[fragments[ifrag].natoms-1][amo][imo]=1.0e0-val;
+     }
+     else
+     {
+      S_mat[fragments[ifrag].natoms-1][amo][imo]=-val;
+     }
      S_mat[fragments[ifrag].natoms-1][imo][amo]=S_mat[fragments[ifrag].natoms-1][amo][imo];
     }
    }
@@ -557,7 +562,7 @@ void MESCAL::close_output(string name_output)
  write_out<<endl;
  write_out<<"Final induced charges and dipoled"<<endl;
  write_out<<endl;
- write_out<<"#     Z                               R(au)                                     q_ind                                 mu_ind(au)"<<endl;
+ write_out<<"#     Z                               R(au)                                     q_ind                                mu_ind(au)"<<endl;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
