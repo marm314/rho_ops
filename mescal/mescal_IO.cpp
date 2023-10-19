@@ -165,10 +165,11 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
- bool devItens=false,frag_file_good=true;
- int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord;
+ bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true;
+ int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,amo,nbasis=0,nocc=0;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
  string line;
+ orb_ene=new double[1];orb_ene[0]=0.0e0;
  Cartes_coord=new double*[fragments[ifrag].natoms];
  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
  {
@@ -229,8 +230,31 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   {
    for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>q_read[iindex];}
   }
+  if(line.substr(0,25)=="Number of basis functions" && ind_q)
+  {
+   line=line.substr(44,line.length()-44);
+   stringstream ss(line);
+   ss>>nbasis;
+   delete[] orb_ene;orb_ene=NULL;
+   orb_ene=new double[nbasis];
+  }
+  if(line.substr(0,19)=="Number of electrons" && ind_q)
+  {
+   line=line.substr(44,line.length()-44);
+   stringstream ss(line);
+   ss>>nocc;
+   nocc=nocc/2; 
+  }
+  if(line.substr(0,22)=="Alpha Orbital Energies" && ind_q && nbasis!=0)
+  {
+   for(imo=0;imo<nbasis;imo++)
+   {
+    read_frag>>orb_ene[imo];
+   }
+  }
   if(line.substr(0,14)=="Susceptibility")
   {
+   pimatrix_good=true;
    if(ind_q)
    {
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
@@ -243,8 +267,104 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  read_frag.close();
  if(frag_file_good)
  {
+  // Allocate S_mat[natom][n_mo][n_mo]
+  if(ind_q && !pimatrix_good)
+  {
+   S_mat=new double**[fragments[ifrag].natoms]; 
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    S_mat[iatom]=new double*[nbasis];
+    for(imo=0;imo<nbasis;imo++)
+    {
+     S_mat[iatom][imo]=new double[nbasis];
+     for(amo=0;amo<nbasis;amo++)
+     {
+      S_mat[iatom][imo][amo]=0.0e0;
+     }
+    }
+   }
+   // Read S_mat (int files) and check it
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    Z2label(fragments[ifrag].atoms[iatom].Z);
+    jatom=iatom+1;
+    string label_cc= static_cast<ostringstream*>( &(ostringstream() << jatom) )->str();
+    label=label+label_cc+".int";
+    ifstream read_int(label.c_str());
+    if(!read_int.good() && all_int){cout<<"Warning! Unable to find the .int file "<<label+".int"<<endl;all_int=false;}
+    while(getline(read_int,line))
+    {
+     if(line==" The Atomic Overlap Matrix:")
+     {
+      getline(read_int,line);
+      getline(read_int,line);
+      getline(read_int,line);
+      for(imo=0;imo<nbasis;imo++)
+      {
+       for(amo=0;amo<=imo;amo++)
+       {
+        read_int>>S_mat[iatom][imo][amo];
+        if(imo==245 && amo==245){cout<<S_mat[iatom][imo][amo]<<endl;}
+        if(imo!=amo){S_mat[iatom][amo][imo]=S_mat[iatom][imo][amo];}
+       }
+      }
+     }
+    }  
+    read_int.close();
+   }
+   for(imo=0;imo<nbasis;imo++)
+   {
+    for(amo=0;amo<=imo;amo++)
+    {
+     val=0.0e0; 
+     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     {
+      val+=S_mat[iatom][amo][imo];
+     }
+     if(imo!=amo)
+     {
+      if(abs(val)>tol4){cout<<"Warning! Large deviations from identity in the overlap matrix"<<endl;}
+     }
+     else
+     {
+      if(abs(val-1.0e0)>tol4){cout<<"Warning! Large deviations from identity in the overlap matrix"<<endl;}
+     }
+    }
+   }
+   // Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
+   if(all_int)
+   {
+    pimatrix_good=true;
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+     {
+      fragments[ifrag].Pi[iatom][jatom]=0.0e0;
+      for(imo=0;imo<nocc;imo++)
+      {
+       for(amo=nocc;amo<nbasis;amo++)
+       {
+        fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
+       }
+      }
+      fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
+     }
+    }
+   }
+   // Delete S_mat
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    for(imo=0;imo<nbasis;imo++)
+    {
+     delete[] S_mat[iatom][imo];S_mat[iatom][imo]=NULL;
+    }
+    delete[] S_mat[iatom];S_mat[iatom]=NULL;
+   }
+   delete[] S_mat;S_mat=NULL;
+   if(!pimatrix_good){cout<<"Warning! Pi = 0; thus, q_ind = 0 (mu^CR _ind == mu^dipole _ind because alpha(PI) = 0)"<<endl;}
+  }
   // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
-  if(ind_q)
+  if(ind_q && pimatrix_good)
   {
    for(iindex=0;iindex<3;iindex++)
    {
@@ -315,6 +435,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  }
  delete[] Cartes_coord;Cartes_coord=NULL;
  delete[] q_read; q_read=NULL;
+ delete[] orb_ene;orb_ene=NULL;
 }
 
 // Print header ouput file

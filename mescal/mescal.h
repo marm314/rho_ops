@@ -19,6 +19,7 @@ class MESCAL
   bool conver_E=false,conver_mu=false,conver_q=false;
   int order[3];
   double Energy_old;
+  string label;
   struct ATOM
   {
    int Z;
@@ -29,6 +30,7 @@ class MESCAL
   double Z2mass(int &Z);
   int Z2val_electrons(int &Z);
   double Z2atomic_pol(int &Z);
+  void Z2label(int Z);
   void jacobi(int n, double **m, double **v);
   void init_output(string name_output);
   void close_output(string name_output);
