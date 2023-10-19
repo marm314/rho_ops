@@ -167,7 +167,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 {
  bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,amo,nbasis=0,nocc=0;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val,val2;
  string line;
  orb_ene=new double[1];orb_ene[0]=0.0e0;
  Cartes_coord=new double*[fragments[ifrag].natoms];
@@ -304,7 +304,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
        for(amo=0;amo<=imo;amo++)
        {
         read_int>>S_mat[iatom][imo][amo];
-        if(imo==245 && amo==245){cout<<S_mat[iatom][imo][amo]<<endl;}
         if(imo!=amo){S_mat[iatom][amo][imo]=S_mat[iatom][imo][amo];}
        }
       }
@@ -316,19 +315,15 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     for(amo=0;amo<=imo;amo++)
     {
+     if(imo==amo){val2=1.0e0;}
+     else{val2=0.0e0;}
      val=0.0e0; 
-     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     for(iatom=0;iatom<fragments[ifrag].natoms-1;iatom++)
      {
       val+=S_mat[iatom][amo][imo];
      }
-     if(imo!=amo)
-     {
-      if(abs(val)>tol4){cout<<"Warning! Large deviations from identity in the overlap matrix"<<endl;}
-     }
-     else
-     {
-      if(abs(val-1.0e0)>tol4){cout<<"Warning! Large deviations from identity in the overlap matrix"<<endl;}
-     }
+     S_mat[fragments[ifrag].natoms-1][amo][imo]=val2-val;
+     S_mat[fragments[ifrag].natoms-1][imo][amo]=S_mat[fragments[ifrag].natoms-1][amo][imo];
     }
    }
    // Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
@@ -350,6 +345,19 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
       fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
      }
     }
+    ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
+    print_pi_mat<<setprecision(10)<<fixed<<scientific;
+    iindex=0;
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+     {
+      print_pi_mat<<setw(25)<<fragments[ifrag].Pi[iatom][jatom];
+      iindex++;
+      if(iindex==5){iindex=0;print_pi_mat<<endl;}
+     }
+    } 
+    print_pi_mat.close();
    }
    // Delete S_mat
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
