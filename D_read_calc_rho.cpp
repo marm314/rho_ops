@@ -4572,7 +4572,9 @@ void READ_FCHK_WFN::build_NOp_wfn_all(complex<double> *NOp,double Point_p[3])
   complex<double>ztmp(ZERO,evaluation_prim_imag);
   for(k=0;k<MO_coef;k++)
   {
-   NOp[k]=NOp[k]+(MOcoefA[k][i]*evaluation_prim_real+MOcoefA[k][i]*ztmp);
+   complex<double>mocoef_var(MOcoefA[k][i],ZERO);
+   if(im_wfn_wfx){complex<double>mocoef_var2(ZERO,MOcoefA_im[k][i]);mocoef_var=mocoef_var+mocoef_var2;}
+   NOp[k]=NOp[k]+mocoef_var*(evaluation_prim_real+ztmp);
   }
  }
  for(i=0;i<35;i++)
