@@ -379,6 +379,8 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
   if(ind_q && pimatrix_good)
   {
+   ofstream print_alpha_mat((name_frag.substr(0,name_frag.length()-4)+".alpha").c_str());
+   print_alpha_mat<<setprecision(10)<<fixed<<scientific;
    for(iindex=0;iindex<3;iindex++)
    {
     for(jindex=0;jindex<3;jindex++)
@@ -393,8 +395,11 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
                              *Cartes_coord[jatom][jindex];
       }
      }
+     print_alpha_mat<<setw(25)<<alpha[iindex][jindex];
     }
+    print_alpha_mat<<endl;
    }
+   print_alpha_mat.close();
   }
   // Transform alpha_read -> alpha_rot = U^T alpha U 
   for(iindex=0;iindex<3;iindex++)
