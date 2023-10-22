@@ -381,7 +381,8 @@ int main(int argc, char *argv[])
   ///////////////////////////////////////////////////
   if(Input_commands.intra_1rdm_sij)
   {
-   if(name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')
+   if(name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N' || 
+   name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X')
    {
     Results<<"#*************************************************************************#";
     Results<<endl;
