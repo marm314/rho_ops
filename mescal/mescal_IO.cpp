@@ -329,7 +329,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   }
   if(line.substr(0,14)=="Susceptibility") // It is the last quantity, we can read it like this
   {
-cout<<"reading Pi"<<endl;
    pimatrix_good=true;
    if(ind_q)
    {
@@ -474,7 +473,6 @@ cout<<"reading Pi"<<endl;
    // Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
    if(all_int)
    {
-cout<<"computing Pi"<<endl;
     pimatrix_good=true;
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
@@ -520,7 +518,6 @@ cout<<"computing Pi"<<endl;
   // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
   if(ind_q && pimatrix_good)
   {
-cout<<"using Pi"<<endl;
    ofstream print_alpha_mat((name_frag.substr(0,name_frag.length()-4)+".alpha").c_str());
    print_alpha_mat<<setprecision(10)<<fixed<<scientific;
    for(iindex=0;iindex<3;iindex++)
