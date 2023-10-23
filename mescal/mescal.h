@@ -9,7 +9,7 @@
 #define Angs2au 1.8897259886
 #define au2Debye 2.541746276  // To transform dipole moments
 #define tol4 1e-4
-#define tol6 1e-6
+#define tol5 1e-5
 #define tol8 1e-8
 
 using namespace std;

@@ -373,6 +373,7 @@ void MESCAL::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfra
   Im[0][1]+=-mass*Cartes_coord[iatom][0]*Cartes_coord[iatom][1];
   Im[0][2]+=-mass*Cartes_coord[iatom][0]*Cartes_coord[iatom][2];
   Im[1][2]+=-mass*Cartes_coord[iatom][1]*Cartes_coord[iatom][2];
+  for(icoord=0;icoord<3;icoord++){Cartes_coord[iatom][icoord]=Cartes_coord[iatom][icoord]*Norm_saved;}
  }
  if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
  if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
@@ -449,7 +450,7 @@ void MESCAL::update_mu_q_ind()
     sum_q+=fragments[ifrag].atoms[iatom].q_ind;
    }
   }
-  if(abs(sum_q)>tol6)
+  if(abs(sum_q)>tol5)
   {
    cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons "<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
    cout<<" iter "<<iter+1<<endl;

@@ -329,6 +329,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   }
   if(line.substr(0,14)=="Susceptibility") // It is the last quantity, we can read it like this
   {
+cout<<"reading Pi"<<endl;
    pimatrix_good=true;
    if(ind_q)
    {
@@ -347,6 +348,27 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     }
     tmp2.close();
     system("/bin/rm -rf tmp"); 
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     for(jatom=0;jatom<=iatom;jatom++)
+     {
+      fragments[ifrag].Pi[iatom][jatom]=0.5e0*(fragments[ifrag].Pi[iatom][jatom]+fragments[ifrag].Pi[jatom][iatom]);
+      if(iatom!=jatom)
+      {
+       fragments[ifrag].Pi[jatom][iatom]=fragments[ifrag].Pi[iatom][jatom];
+      }
+     }
+    }
+    for(iatom=0;iatom<fragments[ifrag].natoms-1;iatom++)
+    {
+     val=0.0e0;
+     for(jatom=0;jatom<fragments[ifrag].natoms-1;jatom++)
+     {
+      val+=fragments[ifrag].Pi[jatom][iatom];
+     }
+     fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom]=-val;
+     fragments[ifrag].Pi[iatom][fragments[ifrag].natoms-1]=fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom];
+    }
    }
   }
  }
@@ -452,6 +474,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    // Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
    if(all_int)
    {
+cout<<"computing Pi"<<endl;
     pimatrix_good=true;
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
@@ -497,6 +520,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
   if(ind_q && pimatrix_good)
   {
+cout<<"using Pi"<<endl;
    ofstream print_alpha_mat((name_frag.substr(0,name_frag.length()-4)+".alpha").c_str());
    print_alpha_mat<<setprecision(10)<<fixed<<scientific;
    for(iindex=0;iindex<3;iindex++)
@@ -507,7 +531,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      {
       for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
       {
-       // alpha ^xy  = alpha ^xy - \sum ij Pi_ij x_i y_j
+       // alpha ^xy  = alpha ^xy - \sum AB Pi_AB x_A y_B
        alpha[iindex][jindex]-=fragments[ifrag].Pi[iatom][jatom]
                              *Cartes_coord[iatom][iindex]
                              *Cartes_coord[jatom][jindex];
