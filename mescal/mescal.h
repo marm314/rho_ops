@@ -37,6 +37,7 @@ class MESCAL
   void read_pdb_file(string name_pbd);
   void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
+  void Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot);
   void set_FV_q_inter_frag(bool &induced);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
   void update_mu_q_ind();

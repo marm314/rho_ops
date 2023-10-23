@@ -165,12 +165,14 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
- bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true;
+ bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,amo,nbasis=0,nocc=0;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3],*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
+ int *Zfrag;
+ double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0},*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
  string line;
  orb_ene=new double[1];orb_ene[0]=0.0e0;
  Cartes_coord=new double*[fragments[ifrag].natoms];
+ Zfrag=new int[fragments[ifrag].natoms];
  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
  {
   Cartes_coord[iatom]=new double[3];
@@ -194,41 +196,41 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  while(getline(read_frag,line))
  {
   if(line.length()<29){line+="                             ";}
-  if(line.substr(0,14)=="Polarizability")
+  if(line.substr(0,14)=="Atomic numbers")
   {
-   for(iindex=0;iindex<3;iindex++)
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
    {
-    for(jindex=0;jindex<=iindex;jindex++){read_frag>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
-   }
-  }
-  if(line.substr(0,25)=="Normalized inertia tensor")
-  {
-   for(iindex=0;iindex<3;iindex++)
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    for(jindex=0;jindex<3;jindex++){read_frag>>Im_ref[iindex][jindex];}
-   }
-   // Check Inertia tensor similarity
-   devItens=false; 
-   for(iindex=0;iindex<3;iindex++)
-   {
-    for(jindex=0;jindex<3;jindex++)
-    {
-     Temp_mat[iindex][jindex]=0.0e0;
-     if(abs(Im_ref[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
-    }
-   }
-   if(devItens){cout<<"Comment: The Inert. tensor. of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+    tmp2>>Zfrag[iatom];
+   } 
+   tmp2.close();
+   system("/bin/rm -rf tmp");
   }
   if(line.substr(0,29)=="Current cartesian coordinates")
   {
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
+   {
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    for(iindex=0;iindex<3;iindex++){read_frag>>Cartes_coord[iatom][iindex];}
+    for(iindex=0;iindex<3;iindex++){tmp2>>Cartes_coord[iatom][iindex];}
    }
-  }
-  if(line.substr(0,16)=="Mulliken Charges")
-  {
-   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>q_read[iindex];}
+   tmp2.close();
+   system("/bin/rm -rf tmp");
   }
   if(line.substr(0,25)=="Number of basis functions" && ind_q)
   {
@@ -247,26 +249,142 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   }
   if(line.substr(0,22)=="Alpha Orbital Energies" && ind_q && nbasis!=0)
   {
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
+   {
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
    for(imo=0;imo<nbasis;imo++)
    {
-    read_frag>>orb_ene[imo];
+    tmp2>>orb_ene[imo];
    }
+   tmp2.close();
+   system("/bin/rm -rf tmp");
   }
-  if(line.substr(0,14)=="Susceptibility")
+  if(line.substr(0,14)=="Polarizability")
+  {
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
+   {
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
+   for(iindex=0;iindex<3;iindex++)
+   {
+    for(jindex=0;jindex<=iindex;jindex++){tmp2>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
+   }
+   tmp2.close();
+   system("/bin/rm -rf tmp"); 
+  }
+  if(line.substr(0,16)=="Mulliken Charges")
+  {
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
+   {
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
+   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){tmp2>>q_read[iindex];}
+   tmp2.close();
+   system("/bin/rm -rf tmp");
+  }
+  if(line.substr(0,25)=="Normalized inertia tensor")
+  {
+   Itensor=true;
+   ofstream tmp("tmp");
+   getline(read_frag,line);
+   do
+   {
+    tmp<<line<<endl;
+    getline(read_frag,line);
+   }while(line[0]==' ');
+   tmp.close();
+   ifstream tmp2("tmp");
+   for(iindex=0;iindex<3;iindex++)
+   {
+    for(jindex=0;jindex<3;jindex++){tmp2>>Im_ref[iindex][jindex];}
+   }
+   tmp2.close();
+   system("/bin/rm -rf tmp"); 
+   // Check Inertia tensor similarity
+   devItens=false; 
+   for(iindex=0;iindex<3;iindex++)
+   {
+    for(jindex=0;jindex<3;jindex++)
+    {
+     if(abs(Im_ref[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
+    }
+   }
+   if(devItens){cout<<"Comment: The read Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+  }
+  if(line.substr(0,14)=="Susceptibility") // It is the last quantity, we can read it like this
   {
    pimatrix_good=true;
    if(ind_q)
    {
+    ofstream tmp("tmp");
+    getline(read_frag,line);
+    do
+    {
+     tmp<<line<<endl;
+     getline(read_frag,line);
+    }while(line[0]==' ');
+    tmp.close();
+    ifstream tmp2("tmp");
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){read_frag>>fragments[ifrag].Pi[iatom][jatom];}
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){tmp2>>fragments[ifrag].Pi[iatom][jatom];}
     }
+    tmp2.close();
+    system("/bin/rm -rf tmp"); 
    }
   }
  }
  read_frag.close();
  if(frag_file_good)
  {
+  // Build and check the inertia tensor if it was not provided
+  if(!Itensor)
+  {
+   double Rcm[3],**Im,**Urot;
+   Im=new double*[3];
+   Urot=new double*[3];
+   for(iindex=0;iindex<3;iindex++)
+   { 
+    Im[iindex]=new double[3];
+    Urot[iindex]=new double[3];
+    for(jindex=0;jindex<3;jindex++)
+    {Im[iindex][jindex]=0.0e0;Urot[iindex][jindex]=0.0e0;}
+   }
+   Frag_T_inertia_compare(ifrag,Cartes_coord,Zfrag,Rcm,Im,Urot);
+   // Check Inertia tensor similarity
+   devItens=false; 
+   for(iindex=0;iindex<3;iindex++)
+   {
+    for(jindex=0;jindex<3;jindex++)
+    {
+     if(abs(Im[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
+    }
+   }
+   if(devItens){cout<<"Comment: The computed Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+   for(iindex=0;iindex<3;iindex++)
+   { 
+    delete[] Im[iindex];Im[iindex]=NULL;
+    delete[] Urot[iindex];Urot[iindex]=NULL;
+   }
+   delete[] Im;Im=NULL;
+   delete[] Urot;Urot=NULL;
+  }
   // Allocate S_mat[natom][n_mo][n_mo]
   if(ind_q && !pimatrix_good)
   {
@@ -347,7 +465,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
         fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
        }
       }
-      fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
+      fragments[ifrag].Pi[iatom][jatom]=-4.0e0*fragments[ifrag].Pi[iatom][jatom];
      }
     }
     ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
@@ -451,6 +569,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  {
   delete[] Cartes_coord[iatom];Cartes_coord[iatom]=NULL;
  }
+ delete[] Zfrag;Zfrag=NULL;
  delete[] Cartes_coord;Cartes_coord=NULL;
  delete[] q_read; q_read=NULL;
  delete[] orb_ene;orb_ene=NULL;

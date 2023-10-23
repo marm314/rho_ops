@@ -332,6 +332,82 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
  }
 }
 
+// Compute Inertia tensor for reading Fragments (to compare)
+void MESCAL::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot)
+{
+ int iatom,icoord,jcoord,pivot;
+ double mass,mass_tot,Norm,Norm_saved,pivot_doub;
+ for(icoord=0;icoord<3;icoord++){Rcm[icoord]=0.0e0;}
+ mass_tot=0.0e0;
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  mass=Z2mass(Zfrag[iatom]);
+  for(icoord=0;icoord<3;icoord++){Rcm[icoord]+=mass*Cartes_coord[iatom][icoord];}
+  mass_tot+=mass;
+ }
+ for(icoord=0;icoord<3;icoord++){Rcm[icoord]=Rcm[icoord]/(mass_tot+tol8);if(abs(Rcm[icoord])>tol8){cout<<"Warning! The fragment was not computed at the CM"<<endl;}}
+ Norm_saved=-1.0e0;  
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  Norm=0.0e0;
+  for(icoord=0;icoord<3;icoord++)
+  {
+   Cartes_coord[iatom][icoord]=Cartes_coord[iatom][icoord]-Rcm[icoord];
+   if(abs(Cartes_coord[iatom][icoord])<tol4){Cartes_coord[iatom][icoord]=0.0e0;}
+   Norm+=Cartes_coord[iatom][icoord]*Cartes_coord[iatom][icoord];
+  }
+  Norm=pow(Norm,0.5e0);
+  if(abs(Norm)>Norm_saved){Norm_saved=Norm;}
+ }
+ for(icoord=0;icoord<3;icoord++)
+ {
+  for(jcoord=0;jcoord<3;jcoord++){Im[icoord][jcoord]=0.0e0;Urot[icoord][jcoord]=0.0e0;}
+ }
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  for(icoord=0;icoord<3;icoord++){Cartes_coord[iatom][icoord]=Cartes_coord[iatom][icoord]/(Norm_saved+tol8);}
+  mass=Z2mass(Zfrag[iatom]);
+  Im[0][0]+=mass*(pow(Cartes_coord[iatom][1],2.0e0)+pow(Cartes_coord[iatom][2],2.0e0));
+  Im[1][1]+=mass*(pow(Cartes_coord[iatom][0],2.0e0)+pow(Cartes_coord[iatom][2],2.0e0));
+  Im[2][2]+=mass*(pow(Cartes_coord[iatom][0],2.0e0)+pow(Cartes_coord[iatom][1],2.0e0));
+  Im[0][1]+=-mass*Cartes_coord[iatom][0]*Cartes_coord[iatom][1];
+  Im[0][2]+=-mass*Cartes_coord[iatom][0]*Cartes_coord[iatom][2];
+  Im[1][2]+=-mass*Cartes_coord[iatom][1]*Cartes_coord[iatom][2];
+ }
+ if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
+ if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
+ if(abs(Im[1][2])<tol8){Im[1][2]=0.0e0;}
+ Im[1][0]=Im[0][1];
+ Im[2][0]=Im[0][2];
+ Im[2][1]=Im[1][2];
+ if(abs(Im[0][1])<tol8 && abs(Im[0][2])<tol8 && abs(Im[1][2])<tol8)
+ {
+  for(icoord=0;icoord<3;icoord++){Urot[icoord][icoord]=1.0e0;}   
+ }
+ else
+ {
+  jacobi(3,Im,Urot);
+ }
+ for(icoord=0;icoord<3;icoord++){order[icoord]=icoord;}
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Norm=abs(Im[icoord][icoord]);
+  for(jcoord=icoord+1;jcoord<3;jcoord++)
+  {
+   if(abs(Im[jcoord][jcoord])>Norm)
+   {
+    Norm=abs(Im[jcoord][jcoord]);
+    pivot_doub=Im[jcoord][jcoord];
+    Im[jcoord][jcoord]=Im[icoord][icoord];
+    Im[icoord][icoord]=pivot_doub;
+    pivot=order[icoord];
+    order[icoord]=order[jcoord];
+    order[jcoord]=pivot;
+   } 
+  }
+ }
+}
+
 // Update mu_ind and q_ind
 void MESCAL::update_mu_q_ind()
 {
