@@ -443,7 +443,7 @@ void MESCAL::update_mu_q_ind()
     }
     if(iter>0)
     {
-     fragments[ifrag].atoms[iatom].q_ind=fragments[ifrag].atoms[iatom].q_ind; 
+     fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].q_ind+w_damp*old_q_ind;
      q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
      if(q_diff>q_diff_max){q_diff_max=q_diff;}
     }
