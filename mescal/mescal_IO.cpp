@@ -534,6 +534,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
                              *Cartes_coord[jatom][jindex];
       }
      }
+     if(abs(alpha[iindex][jindex])<tol8){alpha[iindex][jindex]=0.0e0;}
      print_alpha_mat<<setw(25)<<alpha[iindex][jindex];
     }
     print_alpha_mat<<endl;
