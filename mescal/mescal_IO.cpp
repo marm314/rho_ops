@@ -662,6 +662,10 @@ void MESCAL::print_end_sc(string name_output)
 {
  ofstream write_out(name_output,std::ios_base::app);
  write_out<<endl;
+ write_out<<setprecision(8)<<fixed;
+ write_out<<" Total SCS energy  "<<setw(14)<<Energy_old<<" a.u."<<endl;
+ write_out<<"                   "<<setw(14)<<Energy_old*au2eV<<" eV"<<endl;
+ write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"---------- Self-consistent procedure completed  ----------------"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;

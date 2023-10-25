@@ -6,8 +6,9 @@
 #include<fstream>
 #include<algorithm>
 #include<cmath>
-#define Angs2au 1.8897259886
-#define au2Debye 2.541746276  // To transform dipole moments
+#define Angs2au 1.8897259886  // Transform length units
+#define au2eV 27.211399       // Transform energy units
+#define au2Debye 2.541746276  // To transform dipole moment units
 #define tol4 1e-4
 #define tol5 1e-5
 #define tol8 1e-8
@@ -27,10 +28,10 @@ class MESCAL
    double mu_ind[3],F_ext[3]={0.0e0},F_q_ind[3]={0.0e0},F_q_perm[3]={0.0e0},F_mu_ind[3]={0.0e0},alpha[3][3]={0.0e0};
   };
   void Asymbol2Z(int &Z, string symbol);
-  double Z2mass(int &Z);
   int Z2val_electrons(int &Z);
-  double Z2atomic_pol(int &Z);
   void Z2label(int Z);
+  double Z2mass(int &Z);
+  double Z2atomic_pol(int &Z);
   void jacobi(int n, double **m, double **v);
   void init_output(string name_output);
   void close_output(string name_output);
@@ -58,7 +59,7 @@ class MESCAL
    string name;
    int natoms;
    vector<ATOM>atoms;
-   double **Pi;
+   double **Pi; // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
   };
   vector<FRAGMENT>fragments;
   int natoms_tot();
