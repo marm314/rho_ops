@@ -73,11 +73,11 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &ind
 // Do self-consistent solution to find induced dipoles (mu) and fields (F_mu)
 void MESCAL::mescal_scs(string name)
 {
- bool tmp_false=false;
+ bool tmp_false=false,tmp_true=true;
  // For permanent charges this is done only once because it does not change
  if(perm_q)
  {
-  set_FV_q_inter_frag(tmp_false);
+  set_FV_inter_frag(tmp_false,tmp_true); // induced_q = false  & permanent_q = true
  }
  // Enter SC procedure
  if(!(w_damp>=0.0e0 && w_damp<1.0e0)){w_damp=0.0e0;cout<<" Warning! The weight_mu is recommended to be in [0,1)."<<endl;}
@@ -96,8 +96,14 @@ void MESCAL::mescal_scs(string name)
   //  also set q_ind contrib. to F_q_ind and V_q_ind (if needed)
   if(iter==0)
   {
-   set_FV_mu_ind();
-   if(ind_q){set_FV_q_inter_frag(ind_q);}
+   if(ind_q)
+   {
+    set_FV_inter_frag(tmp_true,tmp_false); // induced_q = true  & permanent_q = false
+   }
+   else
+   {
+    set_FV_inter_frag(tmp_false,tmp_false); // induced_q = false  & permanent_q = false
+   }
   }
   else
   {
@@ -105,8 +111,7 @@ void MESCAL::mescal_scs(string name)
    {
     if(mu_diff_max>threshold_mu || q_diff_max>threshold_q)
     {
-     set_FV_mu_ind();
-     set_FV_q_inter_frag(ind_q);
+     set_FV_inter_frag(tmp_true,tmp_false); // induced_q = true  & permanent_q = false
     }
     else
     {
@@ -118,7 +123,7 @@ void MESCAL::mescal_scs(string name)
    {
     if(mu_diff_max>threshold_mu)
     {
-     set_FV_mu_ind();
+     set_FV_inter_frag(tmp_false,tmp_false); // induced_q = false  & permanent_q = false
     }
     else
     {
@@ -458,16 +463,24 @@ void MESCAL::update_mu_q_ind()
  }
 }
 
-// Set F_q_inter_fragment and V_q_inter_fragment (due to INDUCED/PERMANENT point charge(s) of the other fragments)
-void MESCAL::set_FV_q_inter_frag(bool &induced)
+// Set F_inter_fragment and V_inter_fragment (due to INDUCED/PERMANENT point charge(s) and INDUCED dipoles of other fragments)
+void MESCAL::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
 {
  int ifrag,jfrag,iatom,jatom,icoord;
- double r,r3,diff_xyz[3];
+ double r,r2,r3,r5,fr,diff_xyz[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
-   if(induced)
+   if(!permanent_q)
+   {	   
+    fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
+    }
+   }
+   if(induced_q)
    {
     fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
     for(icoord=0;icoord<3;icoord++)
@@ -475,7 +488,7 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
      fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
     }
    }
-   else
+   if(permanent_q)
    {
     fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
     for(icoord=0;icoord<3;icoord++)
@@ -486,57 +499,6 @@ void MESCAL::set_FV_q_inter_frag(bool &induced)
    for(jfrag=0;jfrag<nfragments;jfrag++)
    {
     if(ifrag!=jfrag) // Only inter-fragment contributions
-    {
-     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
-     {
-      r=0.0e0;
-      for(icoord=0;icoord<3;icoord++)
-      {
-       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
-       r+=diff_xyz[icoord]*diff_xyz[icoord];
-      }
-      r=pow(r,0.5e0);
-      r3=pow(r,3.0e0);
-      if(induced)
-      {
-       fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
-       for(icoord=0;icoord<3;icoord++)
-       {
-        fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
-       }
-      }
-      else
-      {
-       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
-       for(icoord=0;icoord<3;icoord++)
-       {
-        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
-       }
-      }
-     }
-    }
-   }
-  }
- }
-}
-
-// Set FV_mu_ind (due to induced dipoles)
-void MESCAL::set_FV_mu_ind()
-{
- int ifrag,jfrag,iatom,jatom,icoord;
- double r,r2,r3,r5,fr,diff_xyz[3];
- for(ifrag=0;ifrag<nfragments;ifrag++)
- {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
-   for(icoord=0;icoord<3;icoord++)
-   {
-    fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
-   }
-   for(jfrag=0;jfrag<nfragments;jfrag++)
-   {
-    if(ifrag!=jfrag)
     {
      for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
      {
@@ -558,25 +520,47 @@ void MESCAL::set_FV_mu_ind()
       { 
        fr=1.0e0;
       }
-      fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
+      if(permanent_q)
+      {
+       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
+       for(icoord=0;icoord<3;icoord++)
+       {
+        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
+       }
+      }
+      else
+      {
+       // Induced charges? 
+       if(induced_q)
+       {
+        fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+        for(icoord=0;icoord<3;icoord++)
+        {
+         fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+        }
+       }
+       // Induced dipoles are always updated 
+       fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
                                                 -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
-      fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
-      fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
-                                                +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
-      fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
-                                            +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
-                                            +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
+       fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
+                                                 -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
+       fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
+                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
+                                                 -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
+       fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
+                                              +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
+                                              +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
+ 
+      }
      }
     }
    }
-  } 
+  }
  }
 }
 
