@@ -1,6 +1,6 @@
 #include"Integrals_atomic.h"
 
-int nrad_becke,nang_becke;
+int nrad_becke,nang_becke,n_bcps=0;
 double *r_becke,*r_real_becke,*w_radial_becke,*w_theta_phi_becke,***wA;
 double *x_becke,*y_becke,*z_becke;
 //////////////////////////
@@ -88,13 +88,18 @@ void Grid_atomic(READ_FCHK_WFN &Rho,string name,int &natom, int &nradial,int &na
   {
    for(j=i+1;j<natom;j++)
    {
-    Xi_XY_bcp(Rho,name_bcp,i,j,Xi_rad);
+    Xi_XY_bcp(Rho,name_bcp,i,j,natom,Xi_rad);
     Xi_XY_mat[i][j]=Xi_rad;
    }
   }
  }
  if(tfvc)
  {
+  ofstream write_bcp(name_bcp,std::ios_base::app);
+  write_bcp<<endl;
+  write_bcp<<" Number of BCP "<<setw(10)<<n_bcps<<endl;
+  write_bcp<<endl;
+  write_bcp.close();
   for(i=0;i<natom;i++)
   {
    for(j=0;j<=i;j++)
@@ -542,16 +547,37 @@ void Grid_avail_atomic(int & Order)
  }
 }
 
-void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_rad)
+void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom,int &jatom,int &natom,double &Xi_rad)
 {
- int icoord,iter=0,info;
- double R_dist,rX=ONE,rY=ONE,Diff_Point[3],a,b,x1[3],x2[3],x3[3],x4[3],f1,f2,f3,f4;
+ int icoord,katom,iter=0,info;
+ double R_dist,R_dist2,rX=ONE,rY=ONE,Diff_Point[3],Diff_Point2[3],Middle[3],a,b,x1[3],x2[3],x3[3],x4[3],f1,f2,f3,f4;
  double tol8=pow(TEN,-EIGHT),tol6=pow(TEN,-SIX),norm_grad,delta;
  double **Hess,**Inv_Hess,**Eigenvect,*Grad;
- Diff_Point[0]=Rho.Cartesian_Coor[iatom][0]-Rho.Cartesian_Coor[jatom][0];
- Diff_Point[1]=Rho.Cartesian_Coor[iatom][1]-Rho.Cartesian_Coor[jatom][1];
- Diff_Point[2]=Rho.Cartesian_Coor[iatom][2]-Rho.Cartesian_Coor[jatom][2];
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Diff_Point[icoord]=Rho.Cartesian_Coor[iatom][icoord]-Rho.Cartesian_Coor[jatom][icoord];
+ }
  R_dist=norm3D(Diff_Point);
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Middle[icoord]=Rho.Cartesian_Coor[jatom][icoord]+HALF*Diff_Point[icoord]/(R_dist+tol8); 
+ }
+ for(katom=0;katom<natom;katom++)
+ {
+  if(katom!=iatom && katom!=jatom)
+  {
+   for(icoord=0;icoord<3;icoord++)
+   {
+    Diff_Point2[icoord]=Rho.Cartesian_Coor[katom][icoord]-Middle[icoord];
+   }
+   R_dist2=norm3D(Diff_Point2);
+   if(R_dist2<HALF*R_dist)
+   { 
+    R_dist=TEN;
+    katom=natom;
+   }
+  }
+ }	 
  ofstream write_bcp(name,std::ios_base::app);
  if(R_dist<SIX && iatom!=jatom) // 6 au ( >3 Angstrom ) to search for BCPs
  {
@@ -677,6 +703,7 @@ void Xi_XY_bcp(READ_FCHK_WFN &Rho,string name,int &iatom, int &jatom,double &Xi_
    }
    rX=norm3D(x2);
    rY=norm3D(x4);
+   n_bcps++;
   }
   else{rX=ONE,rY=ONE;write_bcp<<"No BCP found between atoms "<<iatom+1<<" and "<<jatom+1<<endl;}
   for(icoord=0;icoord<3;icoord++)
