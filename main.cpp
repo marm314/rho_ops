@@ -3278,8 +3278,11 @@ int main(int argc, char *argv[])
      }
      else
      {
+      if(Read_fchk_wfn.im_wfn_wfx)
+      {
+       cout<<" Warning! Sij(A) matrices using complex orbitals are not available"<<endl;	     
+      }
       Integrate_atomic_sij(Read_fchk_wfn,S_Aij,Density_vect,nbasis);
-
       int Z;double rho0=ZERO;Density=ZERO;
       Results<<endl;
       Results<<"List of int files generated:"<<endl;
