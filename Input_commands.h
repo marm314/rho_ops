@@ -22,7 +22,7 @@ class Input
  int *dmn_orderp,dmnsp,nprocs,order_grid_r,order_grid_ang,num_plot_ops,extra_lines,orb1,orb2,mo_no_cube,nwfns;
  int npoints_mescal,maxiter_mescal;
  bool punctualr,punctualp,scanr,scanp,scanelf,scanindic,indicators,integrals,log,spin_calcs,cas,rotate_grid,cm;
- bool cuba,cubature,quadrature,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,esi_int,symrot_no,symrotdens,symgrad;
+ bool cuba,cubature,quadrature,debug,int_file,dmn,dmnp,dmn_integrals,dmn_thresh,symrot_no,symrotdens,symgrad;
  bool dmn_indicators,gnuplot,dmn_plots,nopath,dim3,dim2,Beta_MOs,wfx_print,wfx_print_dmn,store_dmn,print_dm1_fchk;
  bool cubature2,cube,tps,r1_moment,intracule,Vr,scan_localhybs,dens_sim,v_hartree,extracule,int_pol_hyperpol,intra_1rdm_sij,mulliken,im_wfn_wfx;
  bool mescal,mescal_punctual,mescal_qm,mescal_qperm,mescal_qind,mescal_part_val_e; 
