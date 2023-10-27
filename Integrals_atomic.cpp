@@ -388,6 +388,67 @@ void Integrate_atomic_mescal(READ_FCHK_WFN &Rho,double **F_QM,double *V_QM,doubl
  Density=FOUR*PI*Density;
 }
 
+void Integrate_atomic_sij(READ_FCHK_WFN &Rho,double ***S_Aij,double *Density,int &nbasis)
+{
+ int i,j,k,l,m,natoms=Rho.natoms;
+ double Point[3],fact_jacob_weight,density;
+ double *NOs,**NOs_grad;
+ NOs=new double[nbasis];
+ NOs_grad=new double*[3];
+ for(i=0;i<3;i++)
+ {
+  NOs_grad[i]=new double[nbasis];
+ }
+ // Calc. integrals
+ for(i=0;i<natoms;i++)
+ {
+  Density[i]=ZERO;
+  for(j=0;j<nrad_becke;j++)
+  { 
+   for(k=0;k<nang_becke;k++)
+   {
+    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
+    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
+    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
+    Rho.build_NO_grad_wfn_all(NOs,NOs_grad,Point);
+    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    density=ZERO;
+    for(l=0;l<nbasis;l++)
+    {
+     if(Rho.Ocupation[l]!=ZERO)
+     {
+      density=density+NOs[l]*NOs[l]*Rho.Ocupation[l];
+     }
+     for(m=0;m<=l;m++)
+     {
+      S_Aij[i][l][m]+=NOs[l]*NOs[m]*fact_jacob_weight;    
+     }
+    }
+    // Int. electronic density
+    Density[i]+=density*fact_jacob_weight;
+   }
+  }
+ }
+ // Multiply by 4 Pi   
+ for(i=0;i<natoms;i++)
+ {
+  for(l=0;l<nbasis;l++)
+  {
+   for(m=0;m<=l;m++)
+   {
+    S_Aij[i][l][m]=FOUR*PI*S_Aij[i][l][m];    
+   }
+  }
+  Density[i]=FOUR*PI*Density[i];
+ }
+ for(i=0;i<3;i++)
+ { 
+  delete[] NOs_grad[i]; NOs_grad[i]=NULL;
+ }
+ delete[] NOs; NOs=NULL;
+ delete[] NOs_grad; NOs_grad=NULL;
+}
+
 void Clean_quadrature_atomic(string name,int &natoms)
 {
  int i,j;

@@ -94,10 +94,11 @@ class READ_FCHK_WFN
    double *Prim_exp, *Contr_Coef, *SP_Contr_Coef,Rot_ICM[3][3];
    double **Spin_rho,**P,**Pbeta,**S,**Sbeta,**Sao;
    bool *SPIN,wfn,open_shell,extra0,rhf,uhf,correlated,error_opens_wfn,overlap,no_beta_wfn,wfx,im_wfn_wfx;
-   string identity;
+   string identity,label;
    ////////////
    //for both//
    ////////////
+   void Z2label(int Z);
    void Quant_fill(int **Quant,int styp);
    void Init_MOim(double **MO_coef_in);
    //Position space

@@ -3142,109 +3142,181 @@ int main(int argc, char *argv[])
    else // Becke, SSF, ..., or TFVC
    {
     int grid_theta_phi,nprops=7; // Note: set nprops to numbers of properties !
-    double *res_integration,mu[3]={ZERO};
+    double *res_integration,***S_Aij,mu[3]={ZERO};
     double T_TF,fact_TF=pow(THREE*PI*PI,TWO/THREE)*THREE/TEN;
+    if(!Input_commands.sij_mat)
+    {	    
 #ifdef HAVE_LIBXC
-    nprops++; // Add E_xc using LIBXC as an extra integrated property
+     nprops++; // Add E_xc using LIBXC as an extra integrated property
 #endif
-    res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
-    if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}  // nprocs < max OMP threads avail
-    if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}    // nprocs < natoms
-    vector<READ_FCHK_WFN>Read_fchk_wfn_th;
-    if(wfn_fchk) // WFN/WFX
-    {
+     res_integration=new double[nprops*Read_fchk_wfn.natoms+nprops]; // N, mu_x, mu_y, mu_z, r, r^2 (per atom) + molecular N, mu_x, mu_y and mu_z, r, r^2
+     if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}  // nprocs < max OMP threads avail
+     if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}    // nprocs < natoms
+     vector<READ_FCHK_WFN>Read_fchk_wfn_th;
+     if(wfn_fchk) // WFN/WFX
+     {
 #ifdef HAVE_LIBXC
-    cout<<"Warning! LibXC OMP integrations are only available in serial mode."<<endl; 
-    Input_commands.nprocs=1;
-#else 
-     for(i=0;i<Input_commands.nprocs;i++)
-     {
-      Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
-     }
-#endif
-    }
-    else         // FCHK
-    {
-     if(Input_commands.nprocs>1)
-     {
-      cout<<"Parallelization for integrating with Becke/SSF/TFVC is currently available only for WFN/WFX files"<<endl;
+      cout<<"Warning! LibXC OMP integrations are only available in serial mode."<<endl; 
       Input_commands.nprocs=1;
-     }
-    }
-    if(Input_commands.partition=="becke"){method="Becke quadrature";}
-    if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
-    if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
-    if(Input_commands.partition=="ssf"){method="SSF quadrature";}
-    grid_theta_phi=Input_commands.order_grid_ang;
-    Grid_avail_atomic(grid_theta_phi);
-    Grid_atomic(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
-    if(wfn_fchk)  // WFN/WFX
-    {
-#ifdef HAVE_LIBXC
-     Integrate_atomic(Read_fchk_wfn,res_integration);
 #else 
-     Integrate_atomic_paral(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
+      for(i=0;i<Input_commands.nprocs;i++)
+      {
+       Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+      }
 #endif
-    }
-    else          // FCHK
-    {
-     Integrate_atomic(Read_fchk_wfn,res_integration);
-    }
-    Results<<endl;
-    for(i=0;i<Read_fchk_wfn.natoms;i++)
-    {
-     Results<<" Atom "<<setw(4)<<i+1<<endl;
-     for(j=0;j<nprops;j++)
-     {
-      if(abs(res_integration[i*nprops+j])<pow(TEN,-EIGHT)){res_integration[i*nprops+j]=ZERO;}
      }
-     Results<<" N electrons   = "<<setw(17)<<res_integration[i*nprops]<<endl;
-     Results<<" mux           = "<<setw(17)<<res_integration[i*nprops+1]<<endl;;
-     Results<<" muy           = "<<setw(17)<<res_integration[i*nprops+2]<<endl;
-     Results<<" muz           = "<<setw(17)<<res_integration[i*nprops+3]<<endl;
-     Results<<" <r>           = "<<setw(17)<<res_integration[i*nprops+4]<<endl;
-     Results<<" <r^2>         = "<<setw(17)<<res_integration[i*nprops+5]<<endl;
-     Results<<" T_TF          = "<<setw(17)<<fact_TF*res_integration[i*nprops+6]<<endl;
+     else         // FCHK
+     {
+      if(Input_commands.nprocs>1)
+      {
+       cout<<"Parallelization for integrating with Becke/SSF/TFVC is currently available only for WFN/WFX files"<<endl;
+       Input_commands.nprocs=1;
+      }
+     }
+     if(Input_commands.partition=="becke"){method="Becke quadrature";}
+     if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
+     if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
+     if(Input_commands.partition=="ssf"){method="SSF quadrature";}
+     grid_theta_phi=Input_commands.order_grid_ang;
+     Grid_avail_atomic(grid_theta_phi);
+     Grid_atomic(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
+     if(wfn_fchk)  // WFN/WFX
+     {
 #ifdef HAVE_LIBXC
-     Results<<" E_xc          = "<<setw(17)<<res_integration[i*nprops+7]<<endl;
+      Integrate_atomic(Read_fchk_wfn,res_integration);
+#else 
+      Integrate_atomic_paral(Read_fchk_wfn_th,res_integration,Input_commands.nprocs);
 #endif
-    Results<<endl;
-    }
-    Results<<endl;
-    Density=res_integration[nprops*Read_fchk_wfn.natoms];
-    Read_fchk_wfn.muATOMS(mu);
-    for(i=0;i<3;i++)
-    {
-     if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
-    }
-    Results<<"Atomic contribution to mux        = "<<setw(17)<<mu[0]<<endl;
-    Results<<"Atomic contribution to muy        = "<<setw(17)<<mu[1]<<endl;
-    Results<<"Atomic contribution to muz        = "<<setw(17)<<mu[2]<<endl;
-    for(i=0;i<3;i++)
-    {
-     mu[i]=-res_integration[nprops*Read_fchk_wfn.natoms+i+1]+mu[i];
-     if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
-    }
-    Results<<"The result of the integration mux = "<<setw(17)<<mu[0]<<endl;
-    Results<<"The result of the integration muy = "<<setw(17)<<mu[1]<<endl;
-    Results<<"The result of the integration muz = "<<setw(17)<<mu[2]<<endl;
-    Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
-    Results<<"The result of the integration <r> = "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+4]<<endl;
-    Results<<"The result of the integration <r2>= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+5]<<endl;
-    T_TF=fact_TF*res_integration[nprops*Read_fchk_wfn.natoms+6];
-    Results<<"The result of the integration T_TF= "<<setw(17)<<T_TF<<endl;
+     }
+     else          // FCHK
+     {
+      Integrate_atomic(Read_fchk_wfn,res_integration);
+     }
+     Results<<endl;
+     for(i=0;i<Read_fchk_wfn.natoms;i++)
+     {
+      Results<<" Atom "<<setw(4)<<i+1<<endl;
+      for(j=0;j<nprops;j++)
+      {
+       if(abs(res_integration[i*nprops+j])<pow(TEN,-EIGHT)){res_integration[i*nprops+j]=ZERO;}
+      }
+      Results<<" N electrons   = "<<setw(17)<<res_integration[i*nprops]<<endl;
+      Results<<" mux           = "<<setw(17)<<res_integration[i*nprops+1]<<endl;;
+      Results<<" muy           = "<<setw(17)<<res_integration[i*nprops+2]<<endl;
+      Results<<" muz           = "<<setw(17)<<res_integration[i*nprops+3]<<endl;
+      Results<<" <r>           = "<<setw(17)<<res_integration[i*nprops+4]<<endl;
+      Results<<" <r^2>         = "<<setw(17)<<res_integration[i*nprops+5]<<endl;
+      Results<<" T_TF          = "<<setw(17)<<fact_TF*res_integration[i*nprops+6]<<endl;
 #ifdef HAVE_LIBXC
-    Results<<"The result of the integration E_xc= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+7]<<endl; // MRM: add one to 7 if there is a new
+      Results<<" E_xc          = "<<setw(17)<<res_integration[i*nprops+7]<<endl;
+#endif
+     Results<<endl;
+     }
+     Results<<endl;
+     Density=res_integration[nprops*Read_fchk_wfn.natoms];
+     Read_fchk_wfn.muATOMS(mu);
+     for(i=0;i<3;i++)
+     {
+      if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
+     }
+     Results<<"Atomic contribution to mux        = "<<setw(17)<<mu[0]<<endl;
+     Results<<"Atomic contribution to muy        = "<<setw(17)<<mu[1]<<endl;
+     Results<<"Atomic contribution to muz        = "<<setw(17)<<mu[2]<<endl;
+     for(i=0;i<3;i++)
+     {
+      mu[i]=-res_integration[nprops*Read_fchk_wfn.natoms+i+1]+mu[i];
+      if(abs(mu[i])<pow(TEN,-EIGHT)){mu[i]=ZERO;}
+     }
+     Results<<"The result of the integration mux = "<<setw(17)<<mu[0]<<endl;
+     Results<<"The result of the integration muy = "<<setw(17)<<mu[1]<<endl;
+     Results<<"The result of the integration muz = "<<setw(17)<<mu[2]<<endl;
+     Results<<"The norm of the dipolar mom. |mu| = "<<setw(17)<<norm3D(mu)<<endl;
+     Results<<"The result of the integration <r> = "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+4]<<endl;
+     Results<<"The result of the integration <r2>= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+5]<<endl;
+     T_TF=fact_TF*res_integration[nprops*Read_fchk_wfn.natoms+6];
+     Results<<"The result of the integration T_TF= "<<setw(17)<<T_TF<<endl;
+#ifdef HAVE_LIBXC
+     Results<<"The result of the integration E_xc= "<<setw(17)<<res_integration[nprops*Read_fchk_wfn.natoms+7]<<endl; // MRM: add one to 7 if there is a new
 #endif                                                                                                               // prop. after T_TF
-    Results<<"The result of the integration  N  = "<<setw(17)<<Density;
-    Results<<"\t obtained with "<<method<<endl;
-    Results<<endl;
-    Results<<" Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
-    Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
-    Results<<" Using OMP running on    "<<setw(5)<<Input_commands.nprocs<<" threads"<<endl;
-    Results<<endl;
-    Clean_quadrature_atomic(name_file,Read_fchk_wfn.natoms);
-    delete[] res_integration; res_integration=NULL;
+     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
+     Results<<"\t obtained with "<<method<<endl;
+     Results<<endl;
+     Results<<" Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
+     Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
+     Results<<" Using OMP running on    "<<setw(5)<<Input_commands.nprocs<<" threads"<<endl;
+     Results<<endl;
+     Clean_quadrature_atomic(name_file,Read_fchk_wfn.natoms);
+     delete[] res_integration; res_integration=NULL;
+    }
+    else
+    {
+     int A;
+     double *Density_vect;
+     nbasis=Read_fchk_wfn.nbasis();
+     if(Input_commands.partition=="becke"){method="Becke quadrature";}
+     if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
+     if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
+     if(Input_commands.partition=="ssf"){method="SSF quadrature";}
+     grid_theta_phi=Input_commands.order_grid_ang;
+     Grid_avail_atomic(grid_theta_phi);
+     Grid_atomic(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
+     Density_vect=new double[Read_fchk_wfn.natoms];
+     S_Aij=new double**[Read_fchk_wfn.natoms];
+     for(A=0;A<Read_fchk_wfn.natoms;A++)
+     {
+      S_Aij[A]=new double*[nbasis];
+      for(i=0;i<nbasis;i++)
+      {
+       S_Aij[A][i]=new double[i+1];
+       for(j=0;j<=i;j++)
+       {S_Aij[A][i][j]=ZERO;}
+      }
+     }
+     if(!wfn_fchk) // WFN/WFX
+     {
+      cout<<" Sij(A) matrices using BECKE/SSF/TFVC are only available for WFN/WFX files"<<endl;	     
+     }
+     else
+     {
+      Integrate_atomic_sij(Read_fchk_wfn,S_Aij,Density_vect,nbasis);
+
+      int Z;double rho0=ZERO;Density=ZERO;
+      Results<<endl;
+      Results<<"List of int files generated:"<<endl;
+      Results<<endl;
+      for(A=0;A<Read_fchk_wfn.natoms;A++)
+      {
+       i=A+1;
+       Z=(int)Read_fchk_wfn.Nu_charge[A];
+       ostringstream convert;
+       convert<<i;
+       region_string=convert.str();
+       Read_fchk_wfn.Z2label(Z); 
+       region_string=Read_fchk_wfn.label+region_string;
+       string name_tmp=region_string+".int";
+       Results<<"  "<<name_tmp<<endl;
+       print_int(Read_fchk_wfn,name_tmp,S_Aij[A],nbasis,Density_vect[A],rho0,rho0,region_string);
+       Density+=Density_vect[A];
+      }
+     }
+     Results<<endl;
+     Results<<"The result of the integration  N  = "<<setw(17)<<Density;
+     Results<<"\t obtained with "<<method<<endl;
+     Results<<endl;
+     Results<<" Using a radial grid of  "<<setw(5)<<Input_commands.order_grid_r<<" points"<<endl;
+     Results<<" Using an agular grid of "<<setw(5)<<grid_theta_phi<<" points"<<endl;
+     Results<<" Using OMP running on    "<<setw(5)<<Input_commands.nprocs<<" threads"<<endl;
+     Results<<endl;
+     for(A=0;A<Read_fchk_wfn.natoms;A++)
+     {
+      for(i=0;i<nbasis;i++)
+      {delete[] S_Aij[A][i];S_Aij[A][i]=NULL;}
+      delete[] S_Aij[A];S_Aij[A]=NULL;
+     }
+     delete[] S_Aij; S_Aij=NULL;
+     delete[] Density_vect;Density_vect=NULL;
+     Clean_quadrature_atomic(name_file,Read_fchk_wfn.natoms);
+    }
    }
    Results<<"#*************************************************************************#";
    Results<<endl;

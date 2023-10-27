@@ -69,7 +69,7 @@ double &rhob,string region)
  {
   for(j=0;j<=i;j++)
   {
-   file_int<<setw(20)<<Sij[i][j];
+   file_int<<setw(25)<<Sij[i][j];
    k++;
    if(k==4){k=0;file_int<<endl;}
   }

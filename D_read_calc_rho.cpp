@@ -6775,3 +6775,118 @@ void READ_FCHK_WFN::Center_of_mass()
  delete[] EigenV;EigenV=NULL;
  delete[] mass;mass=NULL;
 }
+
+// Z -> atomic label
+void READ_FCHK_WFN::Z2label(int Z)
+{
+ if(Z==1){label="h";}
+ else if(Z==2 ){label="he";}
+ else if(Z==3 ){label="li";}
+ else if(Z==4 ){label="be";}
+ else if(Z==5 ){label="b";}
+ else if(Z==6 ){label="c";}
+ else if(Z==7 ){label="n";}
+ else if(Z==8 ){label="o";}
+ else if(Z==9 ){label="f";}
+ else if(Z==10){label="ne";}
+ else if(Z==11){label="na";}
+ else if(Z==12){label="mg";}
+ else if(Z==13){label="al";}
+ else if(Z==14){label="si";}
+ else if(Z==15){label="p";}
+ else if(Z==16){label="s";}
+ else if(Z==17){label="cl";}
+ else if(Z==18){label="ar";}
+ else if(Z==19){label="k";}
+ else if(Z==20){label="ca";}
+ else if(Z==21){label="sc";}
+ else if(Z==22){label="ti";}
+ else if(Z==23){label="v";}
+ else if(Z==24){label="cr";}
+ else if(Z==25){label="mn";}
+ else if(Z==26){label="fe";}
+ else if(Z==27){label="co";}
+ else if(Z==28){label="ni";}
+ else if(Z==29){label="cu";}
+ else if(Z==30){label="zn";}
+ else if(Z==31){label="ga";}
+ else if(Z==32){label="ge";}
+ else if(Z==33){label="as";}
+ else if(Z==34){label="se";}
+ else if(Z==35){label="br";}
+ else if(Z==36){label="kr";}
+ else if(Z==37){label="rb";}
+ else if(Z==38){label="sr";}
+ else if(Z==39){label="y";}
+ else if(Z==40){label="zr";}
+ else if(Z==41){label="nb";}
+ else if(Z==42){label="mo";}
+ else if(Z==43){label="tc";}
+ else if(Z==44){label="ru";}
+ else if(Z==45){label="rh";}
+ else if(Z==46){label="pd";}
+ else if(Z==47){label="ag";}
+ else if(Z==48){label="cd";}
+ else if(Z==49){label="in";}
+ else if(Z==50){label="sn";}
+ else if(Z==51){label="sb";}
+ else if(Z==52){label="te";}
+ else if(Z==53){label="i";}
+ else if(Z==54){label="xe";}
+ else if(Z==55){label="cs";}
+ else if(Z==56){label="ba";}
+ else if(Z==57){label="la";}
+ else if(Z==58){label="ce";}
+ else if(Z==59){label="pr";}
+ else if(Z==60){label="nd";}
+ else if(Z==61){label="pm";}
+ else if(Z==62){label="sm";}
+ else if(Z==63){label="eu";}
+ else if(Z==64){label="gd";}
+ else if(Z==65){label="tb";}
+ else if(Z==66){label="dy";}
+ else if(Z==67){label="ho";}
+ else if(Z==68){label="er";}
+ else if(Z==69){label="tm";}
+ else if(Z==70){label="yb";}
+ else if(Z==71){label="lu";}
+ else if(Z==72){label="hf";}
+ else if(Z==73){label="ta";}
+ else if(Z==74){label="w";}
+ else if(Z==75){label="re";}
+ else if(Z==76){label="os";}
+ else if(Z==77){label="ir";}
+ else if(Z==78){label="pt";}
+ else if(Z==79){label="au";}
+ else if(Z==80){label="hg";}
+ else if(Z==81){label="ti";}
+ else if(Z==82){label="pb";}
+ else if(Z==83){label="bi";}
+ else if(Z==84){label="po";}
+ else if(Z==85){label="at";}
+ else if(Z==86){label="rn";}
+ else if(Z==87){label="fr";}
+ else if(Z==88){label="ra";}
+ else if(Z==89){label="ac";}
+ else if(Z==90){label="th";}
+ else if(Z==91){label="pa";}
+ else if(Z==92){label="u";}
+ else if(Z==93){label="np";}
+ else if(Z==94){label="pu";}
+ else if(Z==95){label="am";}
+ else if(Z==96){label="cm";}
+ else if(Z==97){label="bk";}
+ else if(Z==98){label="cf";}
+ else if(Z==99){label="es";}
+ else if(Z==100){label="fm";}
+ else if(Z==101){label="md";}
+ else if(Z==102){label="no";}
+ else if(Z==103){label="lr";}
+ else if(Z==104){label="rf";}
+ else if(Z==105){label="db";}
+ else if(Z==106){label="sg";}
+ else if(Z==107){label="bh";}
+ else if(Z==108){label="hs";}
+ else if(Z==109){label="mt";}
+ else{label='x';}
+}
