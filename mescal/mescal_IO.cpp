@@ -433,7 +433,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     if(!read_int.good() && all_int){cout<<"Warning! Unable to find the .int file "<<label+".int"<<endl;all_int=false;}
     while(getline(read_int,line))
     {
-     if(line==" The Atomic Overlap Matrix:" || line=="          The Atomic Overlap Matrix")
+     if(line==" The Atomic Overlap Matrix:")
      {
       getline(read_int,line);
       getline(read_int,line);

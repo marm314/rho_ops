@@ -17,7 +17,7 @@ double &rhob,string region)
  file_int<<"              K   0.00000000000000E+00        E(ATOM)   0.00000000000000E+00"<<endl;
  file_int<<"              L   0.00000000000000E+00"<<endl;
  file_int<<endl;
- file_int<<"          The Atomic Overlap Matrix"<<endl;
+ file_int<<" The Atomic Overlap Matrix:"<<endl;
  file_int<<endl;
  if(!Read_fchk_wfn.wfn)
  {
