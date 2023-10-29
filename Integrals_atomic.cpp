@@ -340,54 +340,112 @@ void Integrate_atomic_paral(vector<READ_FCHK_WFN> Rho,double *res_integration,in
  }
 }
 
-void Integrate_atomic_mescal(READ_FCHK_WFN &Rho,double **F_QM,double *V_QM,double &Density,double **Coords_pdb,int &natoms_pdb)
+void Integrate_atomic_sij(vector<READ_FCHK_WFN> Rho,double ***S_Aij,double *Density,int &nbasis,int &nprocs)
 {
- int i,j,k,l,m,natoms=Rho.natoms;
- double Point[3],diff_xyz[3],r,r3,fact_jacob_weight,density,tol10=pow(TEN,-TEN);
+ int i,j,k,l,m,natoms=Rho[0].natoms;
+ double Point[3],fact_jacob_weight,density;
  // Calc. integrals
- for(i=0;i<natoms;i++)
+ #pragma omp parallel num_threads(nprocs) \
+ private(i,j,k,l,m,Point,density,fact_jacob_weight) \
+ shared(r_becke,r_real_becke,x_becke,y_becke,z_becke,natoms,nrad_becke,nang_becke,nbasis,\
+ wA,w_theta_phi_becke,w_radial_becke)
  {
-  for(j=0;j<nrad_becke;j++)
-  { 
-   for(k=0;k<nang_becke;k++)
+  int nth=omp_get_num_threads();
+  int ith=omp_get_thread_num();
+  double ***S_Aij_th,*Density_th,*NOs,**NOs_grad;
+  Density_th=new double[natoms];
+  S_Aij_th=new double**[natoms];
+  for(i=0;i<natoms;i++)
+  {
+   Density_th[i]=ZERO;
+   S_Aij_th[i]=new double*[nbasis];
+   for(j=0;j<nbasis;j++)
    {
-    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
-    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
-    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
-    Rho.rho_eval(Point,density);
-    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
-    for(l=0;l<natoms_pdb;l++)
+    S_Aij_th[i][j]=new double[j+1];
+    for(k=0;k<=j;k++){S_Aij_th[i][j][k]=ZERO;}
+   }
+  } 
+  NOs=new double[nbasis];
+  NOs_grad=new double*[3];
+  for(i=0;i<3;i++){NOs_grad[i]=new double[nbasis];}
+  // Calc. integrals
+  for(i=ith;i<natoms;i=i+nth)
+  {
+   Density[i]=ZERO;
+   for(j=0;j<nrad_becke;j++)
+   { 
+    for(k=0;k<nang_becke;k++)
     {
-     r=ZERO;
-     for(m=0;m<3;m++)
+     Point[0]=r_real_becke[j]*x_becke[k]+Rho[ith].Cartesian_Coor[i][0];
+     Point[1]=r_real_becke[j]*y_becke[k]+Rho[ith].Cartesian_Coor[i][1];
+     Point[2]=r_real_becke[j]*z_becke[k]+Rho[ith].Cartesian_Coor[i][2];
+     Rho[ith].build_NO_grad_wfn_all(NOs,NOs_grad,Point);
+     fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+     density=ZERO;
+     for(l=0;l<nbasis;l++)
      {
-      diff_xyz[m]=Coords_pdb[l][m]-Point[m];
-      r+=diff_xyz[m]*diff_xyz[m];
+      if(Rho[ith].Ocupation[l]!=ZERO)
+      {
+       density=density+NOs[l]*NOs[l]*Rho[ith].Ocupation[l];
+      }
+      for(m=0;m<=l;m++)
+      {
+       S_Aij_th[i][l][m]+=NOs[l]*NOs[m]*fact_jacob_weight;    
+      }
      }
-     r=pow(r,HALF);
-     if(r<tol10){r=tol10;}
-     r3=pow(r,THREE);
-     // Field and potential contributions
-     for(m=0;m<3;m++){F_QM[l][m]+=fact_jacob_weight*density*diff_xyz[m]/r3;} 
-     V_QM[l]+=density*fact_jacob_weight/r;
+     // Int. electronic density
+     Density_th[i]+=density*fact_jacob_weight;
     }
-    // Int. electronic density
-    Density+=density*fact_jacob_weight;
    }
   }
+  #pragma omp barrier
+  #pragma omp critical
+  {
+   for(i=0;i<natoms;i++)
+   {
+    for(j=0;j<nbasis;j++)
+    {
+     for(k=0;k<=j;k++)
+     {
+      S_Aij[i][j][k]+=S_Aij_th[i][j][k];
+     }
+    }	    
+    Density[i]+=Density_th[i];
+   }
+  } 
+  for(i=0;i<natoms;i++)
+  {
+   for(j=0;j<nbasis;j++)
+   {
+    delete[] S_Aij_th[i][j];S_Aij_th[i][j]=NULL;
+   }
+   delete[] S_Aij_th[i];S_Aij_th[i]=NULL;
+  } 
+  for(i=0;i<3;i++)
+  { 
+   delete[] NOs_grad[i]; NOs_grad[i]=NULL;
+  }
+  delete[] S_Aij_th; S_Aij_th=NULL;
+  delete[] Density_th; Density_th=NULL;
+  delete[] NOs; NOs=NULL;
+  delete[] NOs_grad; NOs_grad=NULL;
  }
  // Multiply by 4 Pi   
- for(i=0;i<natoms_pdb;i++)
+ for(i=0;i<natoms;i++)
  {
-  for(j=0;j<3;j++)
+  for(l=0;l<nbasis;l++)
   {
-   F_QM[i][j]=FOUR*PI*F_QM[i][j];
+   for(m=0;m<=l;m++)
+   {
+    S_Aij[i][l][m]=FOUR*PI*S_Aij[i][l][m];    
+   }
   }
-  V_QM[i]=FOUR*PI*V_QM[i];
+  Density[i]=FOUR*PI*Density[i];
  }
- Density=FOUR*PI*Density;
 }
 
+// Save serial version for backup
+/*
 void Integrate_atomic_sij(READ_FCHK_WFN &Rho,double ***S_Aij,double *Density,int &nbasis)
 {
  int i,j,k,l,m,natoms=Rho.natoms;
@@ -447,6 +505,55 @@ void Integrate_atomic_sij(READ_FCHK_WFN &Rho,double ***S_Aij,double *Density,int
  }
  delete[] NOs; NOs=NULL;
  delete[] NOs_grad; NOs_grad=NULL;
+}
+*/
+
+void Integrate_atomic_mescal(READ_FCHK_WFN &Rho,double **F_QM,double *V_QM,double &Density,double **Coords_pdb,int &natoms_pdb)
+{
+ int i,j,k,l,m,natoms=Rho.natoms;
+ double Point[3],diff_xyz[3],r,r3,fact_jacob_weight,density,tol10=pow(TEN,-TEN);
+ // Calc. integrals
+ for(i=0;i<natoms;i++)
+ {
+  for(j=0;j<nrad_becke;j++)
+  { 
+   for(k=0;k<nang_becke;k++)
+   {
+    Point[0]=r_real_becke[j]*x_becke[k]+Rho.Cartesian_Coor[i][0];
+    Point[1]=r_real_becke[j]*y_becke[k]+Rho.Cartesian_Coor[i][1];
+    Point[2]=r_real_becke[j]*z_becke[k]+Rho.Cartesian_Coor[i][2];
+    Rho.rho_eval(Point,density);
+    fact_jacob_weight=wA[i][j][k]*w_theta_phi_becke[k]*w_radial_becke[j]*pow(r_real_becke[j],TWO)/pow(ONE-r_becke[j],TWO);
+    for(l=0;l<natoms_pdb;l++)
+    {
+     r=ZERO;
+     for(m=0;m<3;m++)
+     {
+      diff_xyz[m]=Coords_pdb[l][m]-Point[m];
+      r+=diff_xyz[m]*diff_xyz[m];
+     }
+     r=pow(r,HALF);
+     if(r<tol10){r=tol10;}
+     r3=pow(r,THREE);
+     // Field and potential contributions
+     for(m=0;m<3;m++){F_QM[l][m]+=fact_jacob_weight*density*diff_xyz[m]/r3;} 
+     V_QM[l]+=density*fact_jacob_weight/r;
+    }
+    // Int. electronic density
+    Density+=density*fact_jacob_weight;
+   }
+  }
+ }
+ // Multiply by 4 Pi   
+ for(i=0;i<natoms_pdb;i++)
+ {
+  for(j=0;j<3;j++)
+  {
+   F_QM[i][j]=FOUR*PI*F_QM[i][j];
+  }
+  V_QM[i]=FOUR*PI*V_QM[i];
+ }
+ Density=FOUR*PI*Density;
 }
 
 void Clean_quadrature_atomic(string name,int &natoms)

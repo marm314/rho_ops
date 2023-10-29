@@ -3278,11 +3278,18 @@ int main(int argc, char *argv[])
      }
      else
      {
+      if(Input_commands.nprocs>omp_get_max_threads()){Input_commands.nprocs=omp_get_max_threads();}  // nprocs < max OMP threads avail
+      if(Input_commands.nprocs>Read_fchk_wfn.natoms){Input_commands.nprocs=Read_fchk_wfn.natoms;}    // nprocs < natoms
+      vector<READ_FCHK_WFN>Read_fchk_wfn_th;
+      for(i=0;i<Input_commands.nprocs;i++)
+      {
+       Read_fchk_wfn_th.push_back(Read_fchk_wfn); // Generate as many copies as nprocs
+      }
       if(Read_fchk_wfn.im_wfn_wfx)
       {
        cout<<" Warning! Sij(A) matrices using complex orbitals are not available"<<endl;	     
       }
-      Integrate_atomic_sij(Read_fchk_wfn,S_Aij,Density_vect,nbasis);
+      Integrate_atomic_sij(Read_fchk_wfn_th,S_Aij,Density_vect,nbasis,Input_commands.nprocs);
       int Z;double rho0=ZERO;Density=ZERO;
       Results<<endl;
       Results<<"List of int files generated:"<<endl;
