@@ -165,16 +165,21 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
- bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
- int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,amo,nbasis=0,nocc=0;
+ bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,good_dims=true,Itensor=false;
+ int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1;
  int *Zfrag;
- double tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0},*q_read,**Cartes_coord,***S_mat,*orb_ene,val;
+ double *q_read,**Cartes_coord,***S_mat,**inv_ApB_mat,**U_cphf_cpks;//*orb_ene;
+ double val,tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0};//*orb_ene;
  string line;
- orb_ene=new double[1];orb_ene[0]=0.0e0;
+ inv_ApB_mat=new double*[npair];
+ inv_ApB_mat[0]=new double[npair];
+ //orb_ene=new double[1];orb_ene[0]=0.0e0;
+ U_cphf_cpks=new double*[fragments[ifrag].natoms];
  Cartes_coord=new double*[fragments[ifrag].natoms];
  Zfrag=new int[fragments[ifrag].natoms];
  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
  {
+  U_cphf_cpks[iatom]=new double[npair];
   Cartes_coord[iatom]=new double[3];
   for(iindex=0;iindex<3;iindex++)
   {Cartes_coord[iatom][iindex]=0.0e0;}
@@ -237,8 +242,8 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    line=line.substr(44,line.length()-44);
    stringstream ss(line);
    ss>>nbasis;
-   delete[] orb_ene;orb_ene=NULL;
-   orb_ene=new double[nbasis];
+   //delete[] orb_ene;orb_ene=NULL;
+   //orb_ene=new double[nbasis];
   }
   if(line.substr(0,19)=="Number of electrons" && ind_q)
   {
@@ -247,6 +252,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    ss>>nocc;
    nocc=nocc/2; 
   }
+  /*
   if(line.substr(0,22)=="Alpha Orbital Energies" && ind_q && nbasis!=0)
   {
    ofstream tmp("tmp");
@@ -265,6 +271,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    tmp2.close();
    system("/bin/rm -rf tmp");
   }
+  */
   if(line.substr(0,14)=="Polarizability")
   {
    ofstream tmp("tmp");
@@ -409,6 +416,50 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   // Allocate S_mat[natom][n_mo][n_mo]
   if(ind_q && !pimatrix_good)
   {
+   ifstream read_invApB("inv_apb_mat");
+   if(!read_invApB.good()){cout<<"Warning! Unable to find the inv_apb_mat file"<<endl;good_dims=false;}
+   else
+   {	    
+    read_invApB>>iindex>>jindex;
+    if(jindex!=nbasis)
+    {
+     cout<<"Reading the inv_apb_mat file"<<endl;
+     cout<<"Warning! The number of basis functions (lin. indep. AOs) "<<setw(5)<<nbasis<<" does not match the numer of MOs "<<setw(5)<<jindex<<endl;
+     cout<<"Setting nbasis ="<<setw(5)<<jindex<<endl;
+     nbasis=jindex;
+    }
+    nvir=nbasis-nocc;
+    if(iindex!=nocc*nvir)
+    {
+     cout<<"Warning! The size of the matrix (A+B)^-1 read "<<setw(5)<<iindex<<" does not match the nocc x nvir = "<<setw(5)<<nocc*nvir<<endl;
+     good_dims=false;  
+    }
+    else
+    {
+     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     {
+      delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
+     }
+     delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
+     delete[] inv_ApB_mat;inv_ApB_mat=NULL;
+     npair=nvir*nocc;
+     inv_ApB_mat=new double*[npair];
+     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     {
+      U_cphf_cpks[iatom]=new double[npair];
+      for(iindex=0;iindex<npair;iindex++){U_cphf_cpks[iatom][iindex]=0.0e0;}
+     }
+     for(iindex=0;iindex<npair;iindex++)
+     {
+      inv_ApB_mat[iindex]=new double[npair];
+      for(jindex=0;jindex<npair;jindex++)
+      {
+       read_invApB>>kindex>>kindex>>inv_ApB_mat[iindex][jindex];
+      }
+     }
+    }
+   }  
+   read_invApB.close();  
    S_mat=new double**[fragments[ifrag].natoms]; 
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
@@ -422,7 +473,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      }
     }
    }
-   // Read S_mat (int files) and check it
+   // Read S_mat (int files) and make the sum produce the identity matrix
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
     Z2label(fragments[ifrag].atoms[iatom].Z);
@@ -470,23 +521,49 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      S_mat[fragments[ifrag].natoms-1][imo][amo]=S_mat[fragments[ifrag].natoms-1][amo][imo];
     }
    }
-   // Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
-   if(all_int)
+   // We do not use the non-interacting approximation:
+   // This is crap -> Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
+   // We use the CPHF/CPKS Pi
+   // Pi = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][i][a] = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][ ipair = (i-1)*nvir + a ]   
+   if(all_int && good_dims)
    {
     pimatrix_good=true;
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     ipair=0;
+     for(imo=0;imo<nocc;imo++)
+     {
+      for(amo=nocc;amo<nbasis;amo++)
+      {
+       jpair=0;
+       for(jmo=0;jmo<nocc;jmo++)
+       {
+        for(bmo=nocc;bmo<nbasis;bmo++)
+        {
+         U_cphf_cpks[iatom][ipair]+=inv_ApB_mat[ipair][jpair]*S_mat[iatom][jmo][bmo];
+	 jpair++;
+	}
+       }
+       ipair++;	
+      }
+     }
+    }
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
      {
       fragments[ifrag].Pi[iatom][jatom]=0.0e0;
+      ipair=0;
       for(imo=0;imo<nocc;imo++)
       {
        for(amo=nocc;amo<nbasis;amo++)
        {
-        fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
+        fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*U_cphf_cpks[jatom][ipair];
+        ipair++;	
+        //fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
        }
       }
-      fragments[ifrag].Pi[iatom][jatom]=-4.0e0*fragments[ifrag].Pi[iatom][jatom];
+      fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
      }
     }
     ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
@@ -594,7 +671,15 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
  delete[] Zfrag;Zfrag=NULL;
  delete[] Cartes_coord;Cartes_coord=NULL;
  delete[] q_read; q_read=NULL;
- delete[] orb_ene;orb_ene=NULL;
+ for(iindex=0;iindex<npair;iindex++)
+ {delete[] inv_ApB_mat[iindex];inv_ApB_mat[iindex]=NULL;}
+ delete[] inv_ApB_mat;inv_ApB_mat=NULL;
+ for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+ {
+  delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
+ }
+ delete[] U_cphf_cpks;U_cphf_cpks=NULL;
+// delete[] orb_ene;orb_ene=NULL;
 }
 
 // Print header ouput file
