@@ -522,9 +522,9 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     }
    }
    // We do not use the non-interacting approximation:
-   // This is crap -> Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
-   // We use the CPHF/CPKS Pi
-   // Pi = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][i][a] = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][ ipair = (i-1)*nvir + a ]   
+   // This is crap -> PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
+   // We use the CPHF/CPKS Pi:
+   // Pi = 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][i][a] = 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][ ipair = (i-1)*nvir + a ]   
    if(all_int)
    {
     pimatrix_good=true;
@@ -566,6 +566,27 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
       fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
      }
     }
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     for(jatom=0;jatom<=iatom;jatom++)
+     {
+      fragments[ifrag].Pi[iatom][jatom]=0.5e0*(fragments[ifrag].Pi[iatom][jatom]+fragments[ifrag].Pi[jatom][iatom]);
+      if(iatom!=jatom)
+      {
+       fragments[ifrag].Pi[jatom][iatom]=fragments[ifrag].Pi[iatom][jatom];
+      }
+     }
+    }
+    for(iatom=0;iatom<fragments[ifrag].natoms-1;iatom++)
+    {
+     val=0.0e0;
+     for(jatom=0;jatom<fragments[ifrag].natoms-1;jatom++)
+     {
+      val+=fragments[ifrag].Pi[jatom][iatom];
+     }
+     fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom]=-val;
+     fragments[ifrag].Pi[iatom][fragments[ifrag].natoms-1]=fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom];
+    } 
     ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
     print_pi_mat<<setprecision(10)<<fixed<<scientific;
     iindex=0;
