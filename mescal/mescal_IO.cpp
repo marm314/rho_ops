@@ -165,8 +165,8 @@ void MESCAL::read_pdb_file(string name_pdb)
 // Read fragment file
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
- bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,good_dims=true,Itensor=false;
- int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1;
+ bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
+ int iindex,jindex,kindex,lindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1,npair_read;
  int *Zfrag;
  double *q_read,**Cartes_coord,***S_mat,**inv_ApB_mat,**U_cphf_cpks;//*orb_ene;
  double val,tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0};//*orb_ene;
@@ -417,10 +417,10 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   if(ind_q && !pimatrix_good)
   {
    ifstream read_invApB("inv_apb_mat");
-   if(!read_invApB.good()){cout<<"Warning! Unable to find the inv_apb_mat file"<<endl;good_dims=false;}
+   if(!read_invApB.good()){cout<<"Warning! Unable to find the inv_apb_mat file"<<endl;}
    else
    {	    
-    read_invApB>>iindex>>jindex;
+    read_invApB>>npair_read>>jindex;
     if(jindex!=nbasis)
     {
      cout<<"Reading the inv_apb_mat file"<<endl;
@@ -428,34 +428,34 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      cout<<"Setting nbasis ="<<setw(5)<<jindex<<endl;
      nbasis=jindex;
     }
-    nvir=nbasis-nocc;
-    if(iindex!=nocc*nvir)
+    nvir=nbasis-nocc;npair=nocc*nvir;
+    if(npair_read!=npair)
     {
-     cout<<"Warning! The size of the matrix (A+B)^-1 read "<<setw(5)<<iindex<<" does not match the nocc x nvir = "<<setw(5)<<nocc*nvir<<endl;
-     good_dims=false;  
+     cout<<"Comment: The size of the matrix (A+B)^-1 read "<<setw(5)<<npair_read<<" does not match the nocc x nvir = "<<setw(5)<<npair<<endl;
     }
-    else
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+     delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
+    }
+    delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
+    delete[] inv_ApB_mat;inv_ApB_mat=NULL;
+    inv_ApB_mat=new double*[npair];
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     U_cphf_cpks[iatom]=new double[npair];
+     for(iindex=0;iindex<npair;iindex++){U_cphf_cpks[iatom][iindex]=0.0e0;}
+    }
+    for(iindex=0;iindex<npair;iindex++)
+    {
+     inv_ApB_mat[iindex]=new double[npair];
+     for(jindex=0;jindex<npair;jindex++){inv_ApB_mat[iindex][jindex]=0.0e0;}
+    } 
+    for(iindex=0;iindex<npair_read;iindex++)
+    {
+     for(jindex=0;jindex<npair_read;jindex++)
      {
-      delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
-     }
-     delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
-     delete[] inv_ApB_mat;inv_ApB_mat=NULL;
-     npair=nvir*nocc;
-     inv_ApB_mat=new double*[npair];
-     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-     {
-      U_cphf_cpks[iatom]=new double[npair];
-      for(iindex=0;iindex<npair;iindex++){U_cphf_cpks[iatom][iindex]=0.0e0;}
-     }
-     for(iindex=0;iindex<npair;iindex++)
-     {
-      inv_ApB_mat[iindex]=new double[npair];
-      for(jindex=0;jindex<npair;jindex++)
-      {
-       read_invApB>>kindex>>kindex>>inv_ApB_mat[iindex][jindex];
-      }
+      read_invApB>>kindex>>lindex>>val;
+      inv_ApB_mat[kindex-1][lindex-1]=val;
      }
     }
    }  
@@ -525,7 +525,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    // This is crap -> Compute PI[iatom][jatom] = 4 sum _{ia} S_mat[iatom][i][a] S_mat[jatom][a][i] / ( e_i - e_a ) with i occ and a virtual
    // We use the CPHF/CPKS Pi
    // Pi = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][i][a] = - 4 sum_{ia} S_mat[iatom][i][a] U_cphf_cpks[jatom][ ipair = (i-1)*nvir + a ]   
-   if(all_int && good_dims)
+   if(all_int)
    {
     pimatrix_good=true;
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
