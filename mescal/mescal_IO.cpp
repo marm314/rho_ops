@@ -626,14 +626,17 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      {
       for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
       {
-       // alpha ^xy  = alpha ^xy - \sum AB Pi_AB x_A y_B
-       alpha[iindex][jindex]-=fragments[ifrag].Pi[iatom][jatom]
-                             *Cartes_coord[iatom][iindex]
-                             *Cartes_coord[jatom][jindex];
+       // alpha ^xy (Pi)  = \sum AB Pi_AB x_A y_B
+       Temp_mat[iindex][jindex]+=fragments[ifrag].Pi[iatom][jatom]
+	                          *Cartes_coord[iatom][iindex]
+				  *Cartes_coord[jatom][jindex];
       }
      }
+     // alpha ^xy = alpha ^xy,QM  - alpha ^xy (Pi)
+     alpha[iindex][jindex]-=Temp_mat[iindex][jindex];
      if(abs(alpha[iindex][jindex])<tol8){alpha[iindex][jindex]=0.0e0;}
-     print_alpha_mat<<setw(25)<<alpha[iindex][jindex];
+     if(abs(Temp_mat[iindex][jindex])<tol8){Temp_mat[iindex][jindex]=0.0e0;}
+     print_alpha_mat<<setw(25)<<Temp_mat[iindex][jindex];
     }
     print_alpha_mat<<endl;
    }
@@ -644,6 +647,7 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   {
    for(jindex=0;jindex<3;jindex++)
    {
+    Temp_mat[iindex][jindex]=0.0e0;
     for(kindex=0;kindex<3;kindex++)
     {
      Temp_mat[iindex][jindex]+=Urot[iindex][kindex]*alpha[kindex][jindex];
