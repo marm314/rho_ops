@@ -166,10 +166,10 @@ void MESCAL::read_pdb_file(string name_pdb)
 void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
  bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
- int iindex,jindex,kindex,lindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1,npair_read;
+ int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1,npair_read;
  int *Zfrag;
- double *q_read,**Cartes_coord,***S_mat,**inv_ApB_mat,**U_cphf_cpks;//*orb_ene;
- double val,tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0};//*orb_ene;
+ double *q_read,**Cartes_coord,***S_mat,**inv_ApB_mat,**U_cphf_cpks;
+ double val,tol2=pow(10.0e0,-2.0e0),fact_weight,Im_ref[3][3],alpha[3][3]={0.0e0},Temp_mat[3][3]={0.0e0};
  string line;
  inv_ApB_mat=new double*[npair];
  inv_ApB_mat[0]=new double[npair];
@@ -237,14 +237,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    tmp2.close();
    system("/bin/rm -rf tmp");
   }
-  if(line.substr(0,25)=="Number of basis functions" && ind_q)
-  {
-   line=line.substr(44,line.length()-44);
-   stringstream ss(line);
-   ss>>nbasis;
-   //delete[] orb_ene;orb_ene=NULL;
-   //orb_ene=new double[nbasis];
-  }
   if(line.substr(0,19)=="Number of electrons" && ind_q)
   {
    line=line.substr(44,line.length()-44);
@@ -252,26 +244,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    ss>>nocc;
    nocc=nocc/2; 
   }
-  /*
-  if(line.substr(0,22)=="Alpha Orbital Energies" && ind_q && nbasis!=0)
-  {
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
-   for(imo=0;imo<nbasis;imo++)
-   {
-    tmp2>>orb_ene[imo];
-   }
-   tmp2.close();
-   system("/bin/rm -rf tmp");
-  }
-  */
   if(line.substr(0,14)=="Polarizability")
   {
    ofstream tmp("tmp");
@@ -420,46 +392,42 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    if(!read_invApB.good()){cout<<"Warning! Unable to find the inv_apb_mat file"<<endl;}
    else
    {	    
+    cout<<"Reading the inv_apb_mat file"<<endl;
+    delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
+    delete[] inv_ApB_mat;inv_ApB_mat=NULL;
     read_invApB>>npair_read>>jindex;
-    if(jindex!=nbasis)
+    read_invApB.close();
+    inv_ApB_mat=new double*[npair_read];
+    read_invApB.open("inv_apb_mat");
+    getline(read_invApB,line); 
+    for(iindex=0;iindex<npair_read;iindex++)
     {
-     cout<<"Reading the inv_apb_mat file"<<endl;
-     cout<<"Warning! The number of basis functions (lin. indep. AOs) "<<setw(5)<<nbasis<<" does not match the numer of MOs "<<setw(5)<<jindex<<endl;
-     cout<<"Setting nbasis ="<<setw(5)<<jindex<<endl;
-     nbasis=jindex;
+     inv_ApB_mat[iindex]=new double[npair_read];
+     for(jindex=0;jindex<npair_read;jindex++)
+     {
+      getline(read_invApB,line);
+      for(kindex=0;kindex<(int)line.length();kindex++)
+      {
+       if(line[kindex]=='d' || line[kindex]=='D'){line[kindex]='E';}
+      }
+      stringstream ss(line);
+      ss>>val;
+      inv_ApB_mat[iindex][jindex]=val;
+     }
     }
+    read_invApB>>nbasis;
+    read_invApB.close();
     nvir=nbasis-nocc;npair=nocc*nvir;
-    if(npair_read!=npair)
-    {
-     cout<<"Comment: The size of the matrix (A+B)^-1 read "<<setw(5)<<npair_read<<" does not match the nocc x nvir = "<<setw(5)<<npair<<endl;
-    }
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
     }
-    delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
-    delete[] inv_ApB_mat;inv_ApB_mat=NULL;
-    inv_ApB_mat=new double*[npair];
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      U_cphf_cpks[iatom]=new double[npair];
      for(iindex=0;iindex<npair;iindex++){U_cphf_cpks[iatom][iindex]=0.0e0;}
     }
-    for(iindex=0;iindex<npair;iindex++)
-    {
-     inv_ApB_mat[iindex]=new double[npair];
-     for(jindex=0;jindex<npair;jindex++){inv_ApB_mat[iindex][jindex]=0.0e0;}
-    } 
-    for(iindex=0;iindex<npair_read;iindex++)
-    {
-     for(jindex=0;jindex<npair_read;jindex++)
-     {
-      read_invApB>>kindex>>lindex>>val;
-      inv_ApB_mat[kindex-1][lindex-1]=val;
-     }
-    }
    }  
-   read_invApB.close();  
    S_mat=new double**[fragments[ifrag].natoms]; 
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
@@ -704,7 +672,6 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
  }
  delete[] U_cphf_cpks;U_cphf_cpks=NULL;
-// delete[] orb_ene;orb_ene=NULL;
 }
 
 // Print header ouput file
