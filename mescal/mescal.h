@@ -61,7 +61,7 @@ class MESCAL
    int natoms;
    vector<ATOM>atoms;
    double **Pi,Rcm[3],dist_RcmO; // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
-   bool active=true;
+   bool active=true,i_was_active=false;
   };
   vector<FRAGMENT>fragments;
   int natoms_tot();

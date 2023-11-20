@@ -182,7 +182,8 @@ void MESCAL::clean_FV_ext_punct()
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   if(fragments[ifrag].active)
-  {	  
+  {	 
+   fragments[ifrag].i_was_active=true;
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
     for(icoord=0;icoord<3;icoord++)
@@ -476,46 +477,49 @@ void MESCAL::update_mu_q_ind()
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   if(fragments[ifrag].active)
-  {	 
-   sum_q=0.0e0;
-   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-   {
-    // Field
-    for(icoord=0;icoord<3;icoord++)
+  {
+   if(!(iter==0 && fragments[ifrag].i_was_active)) // Using as guess the previous mu_ind and q_ind for the fragments that were active
+   {	                                           // in the previous run of the SCS.
+    sum_q=0.0e0;
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
-                  +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
-                  +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
-                  +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+     // Field
+     for(icoord=0;icoord<3;icoord++)
+     {
+      Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
+                   +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
+                   +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
+                   +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+     }
+     alphaF2mu(ifrag,iatom,Field);
+     // Potential 
+     if(ind_q)
+     {
+      if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
+      fragments[ifrag].atoms[iatom].q_ind=0.0e0;
+      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+      {
+       V_atom=fragments[ifrag].atoms[jatom].V_ext
+             +fragments[ifrag].atoms[jatom].V_q_perm
+             +fragments[ifrag].atoms[jatom].V_q_ind
+             +fragments[ifrag].atoms[jatom].V_mu_ind;
+       fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
+      }
+      if(iter>0)
+      {
+       fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].q_ind+w_damp*old_q_ind;
+       q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
+       if(q_diff>q_diff_max){q_diff_max=q_diff;}
+      }
+      sum_q+=fragments[ifrag].atoms[iatom].q_ind;
+     }
     }
-    alphaF2mu(ifrag,iatom,Field);
-    // Potential 
-    if(ind_q)
+    if(abs(sum_q)>tol5)
     {
-     if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
-     fragments[ifrag].atoms[iatom].q_ind=0.0e0;
-     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
-     {
-      V_atom=fragments[ifrag].atoms[jatom].V_ext
-            +fragments[ifrag].atoms[jatom].V_q_perm
-            +fragments[ifrag].atoms[jatom].V_q_ind
-            +fragments[ifrag].atoms[jatom].V_mu_ind;
-      fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
-     }
-     if(iter>0)
-     {
-      fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].q_ind+w_damp*old_q_ind;
-      q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
-      if(q_diff>q_diff_max){q_diff_max=q_diff;}
-     }
-     sum_q+=fragments[ifrag].atoms[iatom].q_ind;
+     cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons ";
+     cout<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
+     cout<<" iter "<<iter+1<<endl;
     }
-   }
-   if(abs(sum_q)>tol5)
-   {
-    cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons ";
-    cout<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
-    cout<<" iter "<<iter+1<<endl;
    }
   } 
  }

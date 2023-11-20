@@ -5194,8 +5194,18 @@ int main(int argc, char *argv[])
    if(Input_commands.mescal_radius)
    {
     mescal.deactivate_fragments(Input_commands.mescal_r1);
+    // Call mescal function twice to do radius convergence
+
    }
-   // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
+   //else // Call mescal scs only once as we did before.
+   //{
+   //
+   //
+   //}
+
+   // TODO : move all this to a function call it once as an else or twice inside the above if  
+
+   // Init F_ext punctual charges 
    if(Input_commands.mescal_punctual)
    {
     double Point_mescal[3];
@@ -5205,7 +5215,7 @@ int main(int argc, char *argv[])
      mescal.set_FV_ext_punct(Input_commands.q_mescal,Point_mescal);
     }
    }
-   if(Input_commands.mescal_qm)
+   if(Input_commands.mescal_qm) // Sending info QM -> MM
    {
     int natoms_pdb,iatom,grid_theta_phi;
     double **F_QM,*V_QM,**Coords_pdb;
@@ -5316,6 +5326,9 @@ int main(int argc, char *argv[])
    }
    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
    Results<<endl;
+
+   // TODO: Up to here this must be inside a function
+
   }
   ///////////////////////////
   // Mulliken analysis     //
