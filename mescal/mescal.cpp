@@ -5,7 +5,7 @@ MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
 MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q)
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
- double pos[3],**Im,**Urot,Sum_atomic_pol;
+ double pos[3],**Im,**Urot,Sum_atomic_pol,norm_cm;
  part_val_e=part_val_e_in; 
  ind_q=induce_q;
  Urot=new double*[3];Im=new double*[3];
@@ -40,7 +40,14 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &ind
    Sum_atomic_pol+=Z2atomic_pol(fragments[ifrag].atoms[iatom].Z);
   }
   Frag_T_inertia(ifrag,pos,Im,Urot);
-  write_out<<"  Center of Mass "<<setw(20)<<pos[0]<<setw(20)<<pos[1]<<setw(20)<<pos[2]<<endl;
+  norm_cm=0.0e0;
+  for(icoord=0;icoord<3;icoord++){fragments[ifrag].Rcm[icoord]=pos[icoord];norm_cm+=pow(pos[icoord],2.0e0);}
+  write_out<<"  Center of Mass ";
+  for(icoord=0;icoord<3;icoord++){write_out<<setw(20)<<fragments[ifrag].Rcm[icoord];}
+  write_out<<endl;
+  norm_cm=pow(norm_cm,0.5e0);
+  fragments[ifrag].dist_RcmO=norm_cm;
+  write_out<<"  Distance of the center of mass to the origin "<<setw(20)<<norm_cm<<endl;
   write_out<<"  Normalized and diagonalized inertia tensor"<<endl;
   if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
   if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
@@ -146,22 +153,57 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
  double r,r3,diff_xyz[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   r=0.0e0;
-   for(icoord=0;icoord<3;icoord++)
+  if(fragments[ifrag].active)
+  {	  
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-Point_mescal[icoord];
-    r+=diff_xyz[icoord]*diff_xyz[icoord];
+    r=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-Point_mescal[icoord];
+     r+=diff_xyz[icoord]*diff_xyz[icoord];
+    }
+    r=pow(r,0.5e0);
+    r3=pow(r,3.0e0);
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_ext[icoord]+=q_ext*diff_xyz[icoord]/r3;
+    }
+    fragments[ifrag].atoms[iatom].V_ext+=q_ext/r;
    }
-   r=pow(r,0.5e0);
-   r3=pow(r,3.0e0);
-   for(icoord=0;icoord<3;icoord++)
-   {
-    fragments[ifrag].atoms[iatom].F_ext[icoord]+=q_ext*diff_xyz[icoord]/r3;
-   }
-   fragments[ifrag].atoms[iatom].V_ext+=q_ext/r;
   }
+ }
+}
+
+// Clean F_ext and V_ext (due to a/many point charge(s))
+void MESCAL::clean_FV_ext_punct()
+{
+ int ifrag,iatom,icoord;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  if(fragments[ifrag].active)
+  {	  
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_ext[icoord]=0.0e0;
+    }
+    fragments[ifrag].atoms[iatom].V_ext=0.0e0;
+   }
+  }
+ }
+}
+
+// Deactivate fragments at distance higher than rad
+void MESCAL::deactivate_fragments(double &rad)
+{
+ int ifrag;
+ nactive=0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  if(fragments[ifrag].dist_RcmO<rad){fragments[ifrag].active=true;nactive++;}
+  else{fragments[ifrag].active=false;}
  }
 }
 
@@ -171,7 +213,10 @@ int MESCAL::natoms_tot()
  int ifrag,natoms=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  natoms+=fragments[ifrag].natoms;
+  if(fragments[ifrag].active)
+  {
+   natoms+=fragments[ifrag].natoms;
+  }
  }
  return natoms;
 }
@@ -182,13 +227,16 @@ void MESCAL::get_coords(double **Coords)
  int ifrag,iatom,icoord,jatom=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  if(fragments[ifrag].active)
   {
-   for(icoord=0;icoord<3;icoord++)
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    Coords[jatom][icoord]=fragments[ifrag].atoms[iatom].pos[icoord];
+    for(icoord=0;icoord<3;icoord++)
+    {
+     Coords[jatom][icoord]=fragments[ifrag].atoms[iatom].pos[icoord];
+    }
+    jatom++;
    }
-   jatom++;
   }
  }
 }
@@ -199,14 +247,17 @@ void MESCAL::set_FV_ext_qm(double **F_ext,double *V_ext)
  int ifrag,iatom,icoord,jatom=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  if(fragments[ifrag].active) 
   {
-   for(icoord=0;icoord<3;icoord++)
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    fragments[ifrag].atoms[iatom].F_ext[icoord]=F_ext[jatom][icoord];
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_ext[icoord]=F_ext[jatom][icoord];
+    }
+    fragments[ifrag].atoms[iatom].V_ext=V_ext[jatom];
+    jatom++;
    }
-   fragments[ifrag].atoms[iatom].V_ext=V_ext[jatom];
-   jatom++;
   }
  }
 }
@@ -218,15 +269,18 @@ void MESCAL::calc_E(string name)
  double E_mu=0.0e0,E_q=0.0e0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  if(fragments[ifrag].active)
   {
-   for(icoord=0;icoord<3;icoord++)
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    E_mu+=(fragments[ifrag].atoms[iatom].F_ext[icoord]
-          +fragments[ifrag].atoms[iatom].F_q_perm[icoord])*fragments[ifrag].atoms[iatom].mu_ind[icoord];
+    for(icoord=0;icoord<3;icoord++)
+    {
+     E_mu+=(fragments[ifrag].atoms[iatom].F_ext[icoord]
+           +fragments[ifrag].atoms[iatom].F_q_perm[icoord])*fragments[ifrag].atoms[iatom].mu_ind[icoord];
+    }
+    E_q+=(fragments[ifrag].atoms[iatom].V_ext
+         +fragments[ifrag].atoms[iatom].V_q_perm)*fragments[ifrag].atoms[iatom].q_ind;
    }
-   E_q+=(fragments[ifrag].atoms[iatom].V_ext
-        +fragments[ifrag].atoms[iatom].V_q_perm)*fragments[ifrag].atoms[iatom].q_ind;
   }
  }
  Energy=0.5e0*(E_q-E_mu);
@@ -421,45 +475,49 @@ void MESCAL::update_mu_q_ind()
  double Field[3],V_atom,old_q_ind=0.0e0,q_diff=0.0e0,sum_q;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  sum_q=0.0e0;
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   // Field
-   for(icoord=0;icoord<3;icoord++)
+  if(fragments[ifrag].active)
+  {	 
+   sum_q=0.0e0;
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
-                 +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
-                 +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
-                 +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+    // Field
+    for(icoord=0;icoord<3;icoord++)
+    {
+     Field[icoord]=fragments[ifrag].atoms[iatom].F_ext[icoord]
+                  +fragments[ifrag].atoms[iatom].F_q_perm[icoord]
+                  +fragments[ifrag].atoms[iatom].F_q_ind[icoord]
+                  +fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+    }
+    alphaF2mu(ifrag,iatom,Field);
+    // Potential 
+    if(ind_q)
+    {
+     if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
+     fragments[ifrag].atoms[iatom].q_ind=0.0e0;
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+     {
+      V_atom=fragments[ifrag].atoms[jatom].V_ext
+            +fragments[ifrag].atoms[jatom].V_q_perm
+            +fragments[ifrag].atoms[jatom].V_q_ind
+            +fragments[ifrag].atoms[jatom].V_mu_ind;
+      fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
+     }
+     if(iter>0)
+     {
+      fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].q_ind+w_damp*old_q_ind;
+      q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
+      if(q_diff>q_diff_max){q_diff_max=q_diff;}
+     }
+     sum_q+=fragments[ifrag].atoms[iatom].q_ind;
+    }
    }
-   alphaF2mu(ifrag,iatom,Field);
-   // Potential 
-   if(ind_q)
+   if(abs(sum_q)>tol5)
    {
-    if(iter>0){old_q_ind=fragments[ifrag].atoms[iatom].q_ind;}
-    fragments[ifrag].atoms[iatom].q_ind=0.0e0;
-    for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
-    {
-     V_atom=fragments[ifrag].atoms[jatom].V_ext
-           +fragments[ifrag].atoms[jatom].V_q_perm
-           +fragments[ifrag].atoms[jatom].V_q_ind
-           +fragments[ifrag].atoms[jatom].V_mu_ind;
-     fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
-    }
-    if(iter>0)
-    {
-     fragments[ifrag].atoms[iatom].q_ind=(1.0e0-w_damp)*fragments[ifrag].atoms[iatom].q_ind+w_damp*old_q_ind;
-     q_diff=abs(fragments[ifrag].atoms[iatom].q_ind-old_q_ind);
-     if(q_diff>q_diff_max){q_diff_max=q_diff;}
-    }
-    sum_q+=fragments[ifrag].atoms[iatom].q_ind;
+    cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons ";
+    cout<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
+    cout<<" iter "<<iter+1<<endl;
    }
-  }
-  if(abs(sum_q)>tol5)
-  {
-   cout<<"Warning! The total ind. charge in fragment "<<ifrag+1<<" does not conserve the num. of electrons "<<setprecision(4)<<fixed<<scientific<<sum_q<<endl;
-   cout<<" iter "<<iter+1<<endl;
-  }
+  } 
  }
 }
 
@@ -470,92 +528,95 @@ void MESCAL::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
  double r,r2,r3,r5,fr,diff_xyz[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   if(!permanent_q)
-   {	   
-    fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
-    }
-   }
-   if(induced_q)
+  if(fragments[ifrag].active)
+  {	  
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
-    }
-   }
-   if(permanent_q)
-   {
-    fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
-    for(icoord=0;icoord<3;icoord++)
-    {
-     fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
-    }
-   }
-   for(jfrag=0;jfrag<nfragments;jfrag++)
-   {
-    if(ifrag!=jfrag) // Only inter-fragment contributions
-    {
-     for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
+    if(!permanent_q)
+    {	   
+     fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
+     for(icoord=0;icoord<3;icoord++)
      {
-      r=0.0e0;
-      for(icoord=0;icoord<3;icoord++)
+      fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
+     }
+    }
+    if(induced_q)
+    {
+     fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
+     for(icoord=0;icoord<3;icoord++)
+     {
+      fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
+     }
+    }
+    if(permanent_q)
+    {
+     fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
+     for(icoord=0;icoord<3;icoord++)
+     {
+      fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
+     }
+    }
+    for(jfrag=0;jfrag<nfragments;jfrag++)
+    {
+     if(ifrag!=jfrag && fragments[jfrag].active) // Only inter-fragment contributions
+     {
+      for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
       {
-       diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
-       r+=diff_xyz[icoord]*diff_xyz[icoord];
-      }
-      r=pow(r,0.5e0);
-      r2=pow(r,2.0e0);
-      r3=r*r2;
-      r5=r3*r2;
-      if(r0>=tol4) // Screen only for r0>=0.0001
-      {
-       fr=1.0e0-exp(-pow(r/r0,3.0e0));
-      }
-      else
-      { 
-       fr=1.0e0;
-      }
-      if(permanent_q)
-      {
-       fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
+       r=0.0e0;
        for(icoord=0;icoord<3;icoord++)
        {
-        fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
+        diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
+        r+=diff_xyz[icoord]*diff_xyz[icoord];
        }
-      }
-      else
-      {
-       // Induced charges? 
-       if(induced_q)
+       r=pow(r,0.5e0);
+       r2=pow(r,2.0e0);
+       r3=r*r2;
+       r5=r3*r2;
+       if(r0>=tol4) // Screen only for r0>=0.0001
        {
-        fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+        fr=1.0e0-exp(-pow(r/r0,3.0e0));
+       }
+       else
+       { 
+        fr=1.0e0;
+       }
+       if(permanent_q)
+       {
+        fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
         for(icoord=0;icoord<3;icoord++)
         {
-         fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+         fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
         }
        }
-       // Induced dipoles are always updated 
-       fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
-                                                -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
-       fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
-                                                 -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
-       fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
-                                                 +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
-                                                 -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
-       fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
-                                              +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
-                                              +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
- 
+       else
+       {
+        // Induced charges? 
+        if(induced_q)
+        {
+         fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+         for(icoord=0;icoord<3;icoord++)
+         {
+          fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+         }
+        }
+        // Induced dipoles are always updated 
+        fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
+                                                 -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
+        fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
+                                                  -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
+        fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
+                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
+                                                  -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
+        fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
+                                               +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
+                                               +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
+    
+       }
       }
      }
     }

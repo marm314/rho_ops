@@ -5179,7 +5179,8 @@ int main(int argc, char *argv[])
    Results<<endl;
    Results<<setprecision(10)<<fixed<<scientific;
    string mescal_file;
-   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
+   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||
+		   (name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
    {
     mescal_file=name_file.substr(0,(name_file.length()-4))+"_MESCAL.out";
    }
@@ -5189,6 +5190,11 @@ int main(int argc, char *argv[])
    }
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
    mescal.sha=sha;
+   // Activate and deactivate fragments
+   if(Input_commands.mescal_radius)
+   {
+    mescal.deactivate_fragments(Input_commands.mescal_r1);
+   }
    // Init F_ext (here we could have an 'else if' to send info QM -> MM integrating the density)
    if(Input_commands.mescal_punctual)
    {

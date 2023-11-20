@@ -709,6 +709,10 @@ void MESCAL::print_init_sc(string name_output)
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<endl;
  write_out<<setprecision(4)<<fixed<<scientific;
+ if(nactive!=-1)
+ {
+  write_out<<" Nactive Frag"<<setw(20)<<nactive<<endl;
+ }
  write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
  write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;
  write_out<<" Threshold  E"<<setw(20)<<threshold_E<<endl;
