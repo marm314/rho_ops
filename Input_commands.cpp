@@ -745,7 +745,7 @@ Input::Input(string rho_in)
    else if(rho_in=="$mescal_radius")
    {
     mescal_radius=true;
-    rho_input_file>>mescal_r1>>mescal_r2;
+    rho_input_file>>mescal_r[0]>>mescal_r[1];
    }
    else if(rho_in=="$mescal_val_e"){mescal_part_val_e=true;}
    else if(rho_in=="$mescal_atomic_pol"){mescal_part_val_e=false;}

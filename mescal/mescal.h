@@ -19,7 +19,7 @@ class MESCAL
  private:
   bool conver_E=false,conver_mu=false,conver_q=false;
   int order[3],nactive=-1;
-  double Energy_old;
+  double Energy_old,radius;
   string label;
   struct ATOM
   {
@@ -68,7 +68,7 @@ class MESCAL
   void get_coords(double **Coords);
   void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
-  void clean_FV_ext_punct();
+  void clean(); // It also saves information of fragments that were active before
   void mescal_scs(string name_output);
   void calc_E(string name_output);
   void deactivate_fragments(double &rad);

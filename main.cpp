@@ -5169,6 +5169,7 @@ int main(int argc, char *argv[])
   /////////////////////////////////////
   if(Input_commands.mescal)
   {
+   int icall_mescal=0,ncalls_mescal=1;
    Results<<"#*************************************************************************#";
    Results<<endl;
    Results<<"#    MESCAL response to the QM electronic density (F_elec) + F_nuclei     #";
@@ -5190,145 +5191,148 @@ int main(int argc, char *argv[])
    }
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
    mescal.sha=sha;
-   // Activate and deactivate fragments
-   if(Input_commands.mescal_radius)
+   if(Input_commands.mescal_radius){ncalls_mescal=2;}
+   do
    {
-    mescal.deactivate_fragments(Input_commands.mescal_r1);
-    // Call mescal function twice to do radius convergence
-
-   }
-   //else // Call mescal scs only once as we did before.
-   //{
-   //
-   //
-   //}
-
-   // TODO : move all this to a function call it once as an else or twice inside the above if  
-
-   // Init F_ext punctual charges 
-   if(Input_commands.mescal_punctual)
-   {
-    double Point_mescal[3];
-    for(i=0;i<Input_commands.npoints_mescal;i++)
+    if(Input_commands.mescal_radius)
     {
-     for(j=0;j<3;j++){Point_mescal[j]=Input_commands.Point_mescal[i][j];}
-     mescal.set_FV_ext_punct(Input_commands.q_mescal,Point_mescal);
+     mescal.deactivate_fragments(Input_commands.mescal_r[icall_mescal]); 
     }
-   }
-   if(Input_commands.mescal_qm) // Sending info QM -> MM
-   {
-    int natoms_pdb,iatom,grid_theta_phi;
-    double **F_QM,*V_QM,**Coords_pdb;
-    double diff_xyz[3],r,r3;
-    natoms_pdb=mescal.natoms_tot();
-    F_QM=new double*[natoms_pdb];
-    Coords_pdb=new double*[natoms_pdb];
-    V_QM=new double[natoms_pdb];
-    for(i=0;i<natoms_pdb;i++)
+    // Init F_ext punctual charges 
+    if(Input_commands.mescal_punctual)
     {
-     F_QM[i]=new double[3];
-     Coords_pdb[i]=new double[3];
-     V_QM[i]=ZERO;
-     for(j=0;j<3;j++)
+     double Point_mescal[3];
+     for(i=0;i<Input_commands.npoints_mescal;i++)
      {
-      F_QM[i][j]=ZERO;
-      Coords_pdb[i][j]=ZERO;
+      for(j=0;j<3;j++){Point_mescal[j]=Input_commands.Point_mescal[i][j];}
+      mescal.set_FV_ext_punct(Input_commands.q_mescal,Point_mescal);
      }
     }
-    Results<<endl;
-    Results<<" N atoms in the PDB file    "<<setw(15)<<natoms_pdb<<endl;
-    mescal.get_coords(Coords_pdb);
-    // Electronic density contrib. to V_ext and F_ext
-    Density=ZERO;
-    if(Input_commands.partition=="becke"){method="Becke quadrature";}
-    if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
-    if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
-    if(Input_commands.partition=="ssf"){method="SSF quadrature";}
-    grid_theta_phi=Input_commands.order_grid_ang;
-    Grid_avail_atomic(grid_theta_phi);
-    Grid_atomic(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
-    Integrate_atomic_mescal(Read_fchk_wfn,F_QM,V_QM,Density,Coords_pdb,natoms_pdb);
-    Results<<" Using a radial grid of     "<<setw(15)<<Input_commands.order_grid_r<<" points"<<endl;
-    Results<<" Using an agular grid of    "<<setw(15)<<grid_theta_phi<<" points"<<endl;
-    Results<<" Using stiffness of         "<<setw(15)<<Input_commands.stiff<<endl;
-    Results<<" Using OMP running on       "<<setw(15)<<Input_commands.nprocs<<" threads"<<endl;
-    Clean_quadrature_atomic(name_file,Read_fchk_wfn.natoms);
-    Results<<" Result of the integration N"<<setw(25)<<Density;
-    Results<<"\t obtained with "<<method<<endl;
-    Results<<endl;
-    // Nuclear contrib. to V_ext and F_ext
-    for(iatom=0;iatom<natoms_pdb;iatom++)
+    if(Input_commands.mescal_qm) // Sending info QM -> MM
     {
-     for(i=0;i<Read_fchk_wfn.natoms;i++)
+     int natoms_pdb,iatom,grid_theta_phi;
+     double **F_QM,*V_QM,**Coords_pdb;
+     double diff_xyz[3],r,r3;
+     natoms_pdb=mescal.natoms_tot();
+     F_QM=new double*[natoms_pdb];
+     Coords_pdb=new double*[natoms_pdb];
+     V_QM=new double[natoms_pdb];
+     for(i=0;i<natoms_pdb;i++)
      {
-      r=ZERO;
+      F_QM[i]=new double[3];
+      Coords_pdb[i]=new double[3];
+      V_QM[i]=ZERO;
       for(j=0;j<3;j++)
       {
-       diff_xyz[j]=Coords_pdb[iatom][j]-Read_fchk_wfn.Cartesian_Coor[i][j];
-       r+=diff_xyz[j]*diff_xyz[j];
+       F_QM[i][j]=ZERO;
+       Coords_pdb[i][j]=ZERO;
       }
-      r=pow(r,HALF);
-      r3=pow(r,THREE);
-      for(j=0;j<3;j++)
-      {
-       F_QM[iatom][j]-=Read_fchk_wfn.Nu_charge[i]*diff_xyz[j]/r3;
-      }
-      V_QM[iatom]-=Read_fchk_wfn.Nu_charge[i]/r;
      }
+     Results<<endl;
+     Results<<" N atoms in the PDB file    "<<setw(15)<<natoms_pdb<<endl;
+     mescal.get_coords(Coords_pdb);
+     // Electronic density contrib. to V_ext and F_ext
+     Density=ZERO;
+     if(Input_commands.partition=="becke"){method="Becke quadrature";}
+     if(Input_commands.partition=="tfvc"){method="TFVC quadrature";}
+     if(Input_commands.partition=="becke_original"){method="Becke original quadrature";}
+     if(Input_commands.partition=="ssf"){method="SSF quadrature";}
+     grid_theta_phi=Input_commands.order_grid_ang;
+     Grid_avail_atomic(grid_theta_phi);
+     Grid_atomic(Read_fchk_wfn,name_file,Read_fchk_wfn.natoms,Input_commands.order_grid_r,grid_theta_phi,Input_commands.stiff,Input_commands.partition);
+     Integrate_atomic_mescal(Read_fchk_wfn,F_QM,V_QM,Density,Coords_pdb,natoms_pdb);
+     Results<<" Using a radial grid of     "<<setw(15)<<Input_commands.order_grid_r<<" points"<<endl;
+     Results<<" Using an agular grid of    "<<setw(15)<<grid_theta_phi<<" points"<<endl;
+     Results<<" Using stiffness of         "<<setw(15)<<Input_commands.stiff<<endl;
+     Results<<" Using OMP running on       "<<setw(15)<<Input_commands.nprocs<<" threads"<<endl;
+     Clean_quadrature_atomic(name_file,Read_fchk_wfn.natoms);
+     Results<<" Result of the integration N"<<setw(25)<<Density;
+     Results<<"\t obtained with "<<method<<endl;
+     Results<<endl;
+     // Nuclear contrib. to V_ext and F_ext
+     for(iatom=0;iatom<natoms_pdb;iatom++)
+     {
+      for(i=0;i<Read_fchk_wfn.natoms;i++)
+      {
+       r=ZERO;
+       for(j=0;j<3;j++)
+       {
+        diff_xyz[j]=Coords_pdb[iatom][j]-Read_fchk_wfn.Cartesian_Coor[i][j];
+        r+=diff_xyz[j]*diff_xyz[j];
+       }
+       r=pow(r,HALF);
+       r3=pow(r,THREE);
+       for(j=0;j<3;j++)
+       {
+        F_QM[iatom][j]-=Read_fchk_wfn.Nu_charge[i]*diff_xyz[j]/r3;
+       }
+       V_QM[iatom]-=Read_fchk_wfn.Nu_charge[i]/r;
+      }
+     }
+     // Send QM contrib.
+     mescal.set_FV_ext_qm(F_QM,V_QM);
+     for(i=0;i<natoms_pdb;i++)
+     {
+      delete[] F_QM[i];F_QM[i]=NULL;;
+      delete[] Coords_pdb[i];Coords_pdb[i]=NULL;;
+     }
+     delete F_QM;F_QM=NULL;
+     delete Coords_pdb;Coords_pdb=NULL;
+     delete V_QM;V_QM=NULL;
     }
-    // Send QM contrib.
-    mescal.set_FV_ext_qm(F_QM,V_QM);
-    for(i=0;i<natoms_pdb;i++)
+    if(!Input_commands.mescal_punctual && !Input_commands.mescal_qm)
     {
-     delete[] F_QM[i];F_QM[i]=NULL;;
-     delete[] Coords_pdb[i];Coords_pdb[i]=NULL;;
+     cout<<"Comment: Calling MESCAL without any punctual/QM field F (and potential V)."<<endl;
     }
-    delete F_QM;F_QM=NULL;
-    delete Coords_pdb;Coords_pdb=NULL;
-    delete V_QM;V_QM=NULL;
-   }
-   if(!Input_commands.mescal_punctual && !Input_commands.mescal_qm)
-   {
-    cout<<"Comment: Calling MESCAL without any punctual/QM field F (and potential V)."<<endl;
-   }
-   // call mescal SCS for mu and F_mu.
-   mescal.maxiter=Input_commands.maxiter_mescal;
-   mescal.perm_q=Input_commands.mescal_qperm;
-   mescal.threshold_mu=Input_commands.thresh_mescal_mu;
-   mescal.threshold_E=Input_commands.thresh_mescal_E;
-   if(mescal.ind_q)
-   {
-    mescal.threshold_q=Input_commands.thresh_mescal_q;
-   }
-   mescal.r0=Input_commands.r0_mescal;
-   mescal.w_damp=Input_commands.w_damp_mescal;
-   Results<<endl;
-   Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
-   Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
-   Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
-   if(mescal.ind_q)
-   {
-    Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;
-   }
-   Results<<"          Screening r0(au)  "<<setw(25)<<mescal.r0<<endl;
-   Results<<"           Damping  weight  "<<setw(25)<<mescal.w_damp<<endl;
-   if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
-   if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
-   if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
-   else{Results<<" Partition of alpha using atomic polarizabilities is ON"<<endl;}
-   Results<<endl;
-   mescal.mescal_scs(mescal_file);
-   Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
-   Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
-   if(mescal.ind_q)
-   {
-    Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;
-   }
-   Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
-   Results<<endl;
-
-   // TODO: Up to here this must be inside a function
-
+    // call mescal SCS for mu and F_mu.
+    mescal.maxiter=Input_commands.maxiter_mescal;
+    mescal.perm_q=Input_commands.mescal_qperm;
+    mescal.threshold_mu=Input_commands.thresh_mescal_mu;
+    mescal.threshold_E=Input_commands.thresh_mescal_E;
+    if(mescal.ind_q)
+    {
+     mescal.threshold_q=Input_commands.thresh_mescal_q;
+    }
+    mescal.r0=Input_commands.r0_mescal;
+    mescal.w_damp=Input_commands.w_damp_mescal;
+    Results<<endl;
+    Results<<" Running mescal with maxiter"<<setw(15)<<mescal.maxiter<<endl;
+    Results<<"    Threshold mu convergence"<<setw(25)<<mescal.threshold_mu<<endl;
+    Results<<"    Threshold  E convergence"<<setw(25)<<mescal.threshold_E<<endl;
+    if(mescal.ind_q)
+    {
+     Results<<"    Threshold  q convergence"<<setw(25)<<mescal.threshold_q<<endl;
+    }
+    Results<<"          Screening r0(au)  "<<setw(25)<<mescal.r0<<endl;
+    Results<<"           Damping  weight  "<<setw(25)<<mescal.w_damp<<endl;
+    if(mescal.perm_q){Results<<" Q_permanent option is ON"<<endl;}
+    if(mescal.ind_q){Results<<" Q_induced option is ON"<<endl;}
+    if(mescal.part_val_e){Results<<" Partition of alpha using num. valence electrons is ON"<<endl;}
+    else{Results<<" Partition of alpha using atomic polarizabilities is ON"<<endl;}
+    if(Input_commands.mescal_radius)
+    {
+     Results<<" Radius max dist. fragment  "<<setw(25)<<Input_commands.mescal_r[icall_mescal]<<endl;
+    }
+    Results<<endl;
+    mescal.mescal_scs(mescal_file);
+    Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
+    Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
+    if(mescal.ind_q)
+    {
+     Results<<"    Final max abs(q_diff)   "<<setw(25)<<mescal.q_diff_max<<endl;
+    }
+    Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
+    Results<<endl;
+    icall_mescal++;
+    if(Input_commands.mescal_radius)
+    {
+     mescal.clean(); // Also saves info about the fragments that were active
+     ostringstream convert;
+     convert<<icall_mescal;
+     region_string=convert.str();
+     system(("mv "+mescal_file+" "+mescal_file.substr(0,mescal_file.length()-4)+"_"+region_string+".out").c_str());
+    }
+   }while(icall_mescal<ncalls_mescal);
   }
   ///////////////////////////
   // Mulliken analysis     //

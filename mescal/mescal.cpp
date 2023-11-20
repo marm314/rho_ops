@@ -175,8 +175,8 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
  }
 }
 
-// Clean F_ext and V_ext (due to a/many point charge(s))
-void MESCAL::clean_FV_ext_punct()
+// Clean data from previous run (also store info about active fragments) 
+void MESCAL::clean()
 {
  int ifrag,iatom,icoord;
  for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -194,6 +194,8 @@ void MESCAL::clean_FV_ext_punct()
    }
   }
  }
+ nactive=-1;
+ conver_E=false,conver_mu=false,conver_q=false;
 }
 
 // Deactivate fragments at distance higher than rad
@@ -201,6 +203,7 @@ void MESCAL::deactivate_fragments(double &rad)
 {
  int ifrag;
  nactive=0;
+ radius=rad;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   if(fragments[ifrag].dist_RcmO<rad){fragments[ifrag].active=true;nactive++;}

@@ -712,6 +712,7 @@ void MESCAL::print_init_sc(string name_output)
  if(nactive!=-1)
  {
   write_out<<" Nactive Frag"<<setw(20)<<nactive<<endl;
+  write_out<<" Radius Frag "<<setw(20)<<radius<<endl;
  }
  write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
  write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;
