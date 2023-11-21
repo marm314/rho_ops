@@ -1,7 +1,81 @@
 #include"mescal.h"
 
 // Public functions.
-MESCAL::MESCAL(){cout<<"Not allowed default constructor in MESCAL"<<endl;}
+MESCAL::MESCAL()
+{
+ int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
+ double pos[3],**Im,**Urot,Sum_atomic_pol,norm_cm;
+ string name_output="mescal.out",name_pdb="mescal.pdb";
+ part_val_e=false;ind_q=false;
+ Urot=new double*[3];Im=new double*[3];
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Urot[icoord]=new double[3];
+  Im[icoord]=new double[3];
+ }
+ // Init output file
+ init_output(name_output);
+ ofstream write_out(name_output,std::ios_base::app);
+ write_out<<setprecision(8)<<fixed<<scientific;
+ // Read PDB file to store Fragment and atomic information
+ nfragments=0;
+ read_pdb_file(name_pdb);
+ write_out<<endl;
+ write_out<<" Fragments read from the PDB file (distances in Bohr) "<<endl;
+ write_out<<endl;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  Sum_Val_elect=0;
+  Sum_atomic_pol=0.0e0;
+  write_out<<" Fragment "<<ifrag+1<<endl;
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   write_out<<"  Atom ";
+   write_out<<setw(5)<<fragments[ifrag].atoms[iatom].Z;
+   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[0];
+   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[1];
+   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[2]<<endl;
+   Sum_Val_elect+=Z2val_electrons(fragments[ifrag].atoms[iatom].Z);
+   Sum_atomic_pol+=Z2atomic_pol(fragments[ifrag].atoms[iatom].Z);
+  }
+  Frag_T_inertia(ifrag,pos,Im,Urot);
+  norm_cm=0.0e0;
+  for(icoord=0;icoord<3;icoord++){fragments[ifrag].Rcm[icoord]=pos[icoord];norm_cm+=pow(pos[icoord],2.0e0);}
+  write_out<<"  Center of Mass ";
+  for(icoord=0;icoord<3;icoord++){write_out<<setw(20)<<fragments[ifrag].Rcm[icoord];}
+  write_out<<endl;
+  norm_cm=pow(norm_cm,0.5e0);
+  fragments[ifrag].dist_RcmO=norm_cm;
+  write_out<<"  Distance of the center of mass to the origin "<<setw(20)<<norm_cm<<endl;
+  write_out<<"  Normalized and diagonalized inertia tensor"<<endl;
+  if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
+  if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
+  if(abs(Im[1][2])<tol8){Im[1][2]=0.0e0;}
+  Im[1][0]=Im[0][1];
+  Im[2][0]=Im[0][2];
+  Im[2][1]=Im[1][2];
+  for(icoord=0;icoord<3;icoord++)
+  {
+   for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Im[icoord][jcoord];}write_out<<endl;
+  }
+  write_out<<"  Rotation matrix (columns)"<<endl;
+  for(icoord=0;icoord<3;icoord++)
+  {
+   for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
+  }
+  write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+  write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;
+  // Read fragment.dat files to store charges, Pi, and asign alpha' atomic contributions using the number of val. electrons or tabulated atomic pols.
+  // Note: We compute alpha' = U alpha U^T for each fragment 
+  read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect,Sum_atomic_pol);
+  write_out<<endl;
+ }
+ // Delete Urot and Im because they are no longer needed
+ for(icoord=0;icoord<3;icoord++){delete[] Urot[icoord];Urot[icoord]=NULL; delete[] Im[icoord];Im[icoord]=NULL;}
+ delete[] Urot; Urot=NULL; delete[] Im; Im=NULL;
+ write_out.close();
+}
+
 MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q)
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
