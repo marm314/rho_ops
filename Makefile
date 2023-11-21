@@ -4,7 +4,7 @@
 #CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -lstdc++
 #CPP = g++ -DHAVE_LIBXC /usr/lib/x86_64-linux-gnu/libxc.so
 CPP = c++
-CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -lstdc++ 
+CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -llapack -lblas -lstdc++ 
 Cln = /bin/rm -rf
 NAME=rho_ops
 ###########################################
