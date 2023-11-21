@@ -1,8 +1,6 @@
 # Makefile for rho_ops
 #
-#CPP = icc
-#CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -lstdc++
-#CPP = g++ -DHAVE_LIBXC /usr/lib/x86_64-linux-gnu/libxc.so
+#CPP = c++ -DHAVE_LIBXC /usr/lib/x86_64-linux-gnu/libxc.so
 CPP = c++
 CPPFLAGS = -Wall -Wl,--allow-multiple-definition -O3 -fopenmp -llapack -lblas -lstdc++ 
 Cln = /bin/rm -rf
@@ -11,7 +9,7 @@ NAME=rho_ops
 ###########################################
 SCR= main.cpp Corr_indicators.cpp utils_IO.cpp gauss_quad.cpp sphere_lebedev_rule.cpp legendre_quadrature.cpp hcubature.c Integrals_quadrature.cpp Integrals_atomic.cpp DMN_ops_p_class.cpp Input_commands.cpp Integrals_DMN.cpp Mathematical_Functions.cpp MOp_class.cpp String_ops.cpp gitver.cpp DMN_ops_class.cpp D_read_calc_rho.cpp Integrals.cpp MO_class.cpp NO_class.cpp NO_DMN_class.cpp gnuplot.cpp mescal.cpp mescal_utils.cpp mescal_IO.cpp
 OBJECTS= main.o Corr_indicators.o utils_IO.o gauss_quad.o sphere_lebedev_rule.o legendre_quadrature.o hcubature.o Integrals_quadrature.o Integrals_atomic.o DMN_ops_p_class.o Input_commands.o Integrals_DMN.o Mathematical_Functions.o MOp_class.o String_ops.o gitver.o DMN_ops_class.o D_read_calc_rho.o Integrals.o MO_class.o NO_class.o NO_DMN_class.o gnuplot.o mescal.o mescal_utils.o mescal_IO.o
-LIB=libcuba.a
+LIB=libcuba.a 
 
 all:
 	./check_mescal.sh
