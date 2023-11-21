@@ -446,7 +446,9 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
    {
     Z2label(fragments[ifrag].atoms[iatom].Z);
     jatom=iatom+1;
-    string label_cc= static_cast<ostringstream*>( &(ostringstream() << jatom) )->str();
+    ostringstream convert;
+    convert<<jatom;
+    string label_cc=convert.str();
     label=label+label_cc+".int";
     ifstream read_int(label.c_str());
     if(!read_int.good() && all_int){cout<<"Warning! Unable to find the .int file "<<label+".int"<<endl;all_int=false;}
