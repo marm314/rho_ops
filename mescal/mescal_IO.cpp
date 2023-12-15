@@ -10,7 +10,7 @@ void MESCAL::read_pdb_file(string name_pdb)
  ifstream read_pdb(name_pdb);
  while(getline(read_pdb,line))
  {
-  if(line.substr(0,4)!="ATOM")
+  if(line.substr(0,4)!="ATOM" && line.length()>0)
   {
    do
    {
