@@ -10,6 +10,13 @@ void MESCAL::read_pdb_file(string name_pdb)
  ifstream read_pdb(name_pdb);
  while(getline(read_pdb,line))
  {
+  if(line.substr(0,4)!="ATOM")
+  {
+   do
+   {
+    getline(read_pdb,line);
+   }while(line.substr(0,4)!="ATOM");
+  }	
   // Find blank spaces in the lines of the PDB file
   ichar1=0;space=false;
   for(ichar=0;ichar<(int)line.length();ichar++)
