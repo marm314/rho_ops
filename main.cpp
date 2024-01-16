@@ -5333,7 +5333,8 @@ int main(int argc, char *argv[])
     Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
     Results<<endl;
     icall_mescal++;
-    // Use mu_ind and q_ind to compute potential V at a given point
+    // Use mu_ind and q_ind to compute potential V at a given point.
+    // The point chosen is the (0,0,0)
     mescal.get_V_punct(V_r,Point);
     Results<<endl;
     Results<<" V(q_ind,mu_ind) at origin  "<<setw(25)<<V_r<<endl;
