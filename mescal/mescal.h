@@ -69,6 +69,7 @@ class MESCAL
   void get_coords(double **Coords);
   void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
+  void get_V_punct(double &V_r,double Point_r[3]);
   void clean(); // It also saves information of fragments that were active before
   void mescal_scs();
   void calc_E();

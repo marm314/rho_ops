@@ -319,6 +319,36 @@ void MESCAL::calc_E()
  print_iter_info();
 }
 
+// Get V at Point_r (due to induced dipoles and charges)
+void MESCAL::get_V_punct(double &V_r,double Point_r[3])
+{
+ int ifrag,iatom,icoord;
+ double r,r3,diff_xyz[3];
+ V_r=0.0e0;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  if(fragments[ifrag].active)
+  {	  
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    r=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     diff_xyz[icoord]=Point_r[icoord]-fragments[ifrag].atoms[iatom].pos[icoord];
+     r+=diff_xyz[icoord]*diff_xyz[icoord];
+    }
+    r=pow(r,0.5e0);
+    r3=pow(r,3.0e0);
+    for(icoord=0;icoord<3;icoord++) // Pot. due to mu_ind 
+    {
+     V_r+=fragments[ifrag].atoms[iatom].mu_ind[icoord]*diff_xyz[icoord]/r3;
+    }                               // Pot. due to q_ind
+    V_r+=fragments[ifrag].atoms[iatom].q_ind/r;
+   }
+  }
+ }
+}
+
 MESCAL::~MESCAL()
 {
  int iatom,ifrag;

@@ -5170,6 +5170,7 @@ int main(int argc, char *argv[])
   if(Input_commands.mescal)
   {
    int icall_mescal=0,ncalls_mescal=1;
+   double V_r;
    Results<<"#*************************************************************************#";
    Results<<endl;
    Results<<"#    MESCAL response to the QM electronic density (F_elec) + F_nuclei     #";
@@ -5332,6 +5333,11 @@ int main(int argc, char *argv[])
     Results<<"    Final Energy diff       "<<setw(25)<<mescal.E_diff<<endl;
     Results<<endl;
     icall_mescal++;
+    // Use mu_ind and q_ind to compute potential V at a given point
+    mescal.get_V_punct(V_r,Point);
+    Results<<endl;
+    Results<<" V(q_ind,mu_ind) at origin  "<<setw(25)<<V_r<<endl;
+    Results<<endl;
     if(Input_commands.mescal_radius)
     {
      mescal.clean(); // Also saves info about the fragments that were active
