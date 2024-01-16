@@ -5189,7 +5189,15 @@ int main(int argc, char *argv[])
    {
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
+   // RHO_OPS init version
    MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
+   // Lua init version
+   /*
+   MESCAL mescal;
+   mescal.part_val_e=Input_commands.mescal_part_val_e;
+   mescal.ind_q=Input_commands.mescal_qind;
+   */
+   mescal.mescal_get_frag_info();
    mescal.sha=sha;
    if(Input_commands.mescal_radius){ncalls_mescal=2;}
    do
@@ -5314,7 +5322,7 @@ int main(int argc, char *argv[])
      Results<<" Radius max dist. fragment  "<<setw(25)<<Input_commands.mescal_r[icall_mescal]<<endl;
     }
     Results<<endl;
-    mescal.mescal_scs(mescal_file);
+    mescal.mescal_scs();
     Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
     Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
     if(mescal.ind_q)

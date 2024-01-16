@@ -684,9 +684,9 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 }
 
 // Print header ouput file
-void MESCAL::init_output(string name_output)
+void MESCAL::init_output()
 {
- ofstream write_out(name_output);
+ ofstream write_out(mescal_ofile);
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"------                 MESCAL ( in C++ )                   -----"<<endl;
@@ -709,9 +709,9 @@ void MESCAL::init_output(string name_output)
 }
 
 // Print init SC procedure
-void MESCAL::print_init_sc(string name_output)
+void MESCAL::print_init_sc()
 {
- ofstream write_out(name_output,std::ios_base::app);
+ ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"---------- Performing self-consistent procedure ----------------"<<endl;
@@ -749,9 +749,9 @@ void MESCAL::print_init_sc(string name_output)
 }
 
 // Print end SC procedure
-void MESCAL::print_end_sc(string name_output)
+void MESCAL::print_end_sc()
 {
- ofstream write_out(name_output,std::ios_base::app);
+ ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<endl;
  write_out<<setprecision(8)<<fixed;
  write_out<<" Total SCS energy  "<<setw(14)<<Energy_old<<" a.u."<<endl;
@@ -765,9 +765,9 @@ void MESCAL::print_end_sc(string name_output)
 }
 
 // Print iter information
-void MESCAL::print_iter_info(string name_output)
+void MESCAL::print_iter_info()
 {
- ofstream write_out(name_output,std::ios_base::app);
+ ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<setprecision(8)<<fixed;
  if(ind_q)
  {
@@ -795,10 +795,10 @@ void MESCAL::print_iter_info(string name_output)
 }
 
 // Print footer ouput file
-void MESCAL::close_output(string name_output)
+void MESCAL::close_output()
 {
  int ifrag,iatom;
- ofstream write_out(name_output,std::ios_base::app);
+ ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<setprecision(8)<<fixed;
  write_out<<endl;
  write_out<<"Final induced charges and dipoled"<<endl;

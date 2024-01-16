@@ -20,7 +20,7 @@ class MESCAL
   bool conver_E=false,conver_mu=false,conver_q=false;
   int order[3],nactive=-1;
   double Energy_old,radius;
-  string label;
+  string label,mescal_ofile;
   struct ATOM
   {
    int Z;
@@ -33,8 +33,8 @@ class MESCAL
   double Z2mass(int &Z);
   double Z2atomic_pol(int &Z);
   void jacobi(int n, double **m, double **v);
-  void init_output(string name_output);
-  void close_output(string name_output);
+  void init_output();
+  void close_output();
   void read_pdb_file(string name_pbd);
   void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
@@ -42,10 +42,10 @@ class MESCAL
   void set_FV_inter_frag(bool &induced_q,bool &permanent_q);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
   void update_mu_q_ind();
-  void print_init_sc(string name);
-  void print_end_sc(string name);
-  void print_iter_info(string name);
-  void print_iactive_info(string name);
+  void print_init_sc();
+  void print_end_sc();
+  void print_iter_info();
+  void print_iactive_info();
 
  public:
   MESCAL();
@@ -65,12 +65,13 @@ class MESCAL
   };
   vector<FRAGMENT>fragments;
   int natoms_tot();
+  void mescal_get_frag_info();
   void get_coords(double **Coords);
   void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void clean(); // It also saves information of fragments that were active before
-  void mescal_scs(string name_output);
-  void calc_E(string name_output);
+  void mescal_scs();
+  void calc_E();
   void deactivate_fragments(double &rad);
 
 }; 
