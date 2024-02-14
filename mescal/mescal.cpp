@@ -421,7 +421,7 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
  }
  else
  {
-  jacobi(3,Im,Urot);
+  jacobi_mescal(3,Im,Urot);
  }
  for(icoord=0;icoord<3;icoord++){order[icoord]=icoord;}
  for(icoord=0;icoord<3;icoord++)
@@ -498,7 +498,7 @@ void MESCAL::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfra
  }
  else
  {
-  jacobi(3,Im,Urot);
+  jacobi_mescal(3,Im,Urot);
  }
  for(icoord=0;icoord<3;icoord++){order[icoord]=icoord;}
  for(icoord=0;icoord<3;icoord++)

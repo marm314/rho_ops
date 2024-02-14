@@ -27,12 +27,9 @@ class MESCAL
    double pos[3],q_perm=0.0e0,q_ind=0.0e0,V_ext=0.0e0,V_q_ind=0.0e0,V_q_perm=0.0e0,V_mu_ind=0.0e0,dipole_ind[3]={0.0e0},pos_wrt_cm[3]={0.0e0};
    double mu_ind[3],F_ext[3]={0.0e0},F_q_ind[3]={0.0e0},F_q_perm[3]={0.0e0},F_mu_ind[3]={0.0e0},alpha[3][3]={0.0e0};
   };
-  void Asymbol2Z(int &Z, string symbol);
   int Z2val_electrons(int &Z);
   void Z2label(int Z);
-  double Z2mass(int &Z);
   double Z2atomic_pol(int &Z);
-  void jacobi(int n, double **m, double **v);
   void init_output();
   void close_output();
   void read_pdb_file(string name_pbd);
@@ -75,5 +72,9 @@ class MESCAL
   void calc_E();
   void deactivate_fragments(double &rad);
 
-}; 
+};
+double Z2mass(int &Z);
+void Asymbol2Z(int &Z, string symbol);
+void xyz_to_new_xyz(string name_xyz); 
+void jacobi_mescal(int n, double **m, double **v);
 #endif // _MESCAL_H_

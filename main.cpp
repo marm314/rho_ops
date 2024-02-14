@@ -124,6 +124,11 @@ int main(int argc, char *argv[])
  {
   my_chk.close();//Close it after checked!
   /////////////////////////////////////////////////
+  if((name_file[name_file.length()-1]=='z' && name_file[name_file.length()-2]=='y')&& name_file[name_file.length()-3]=='x')
+  {
+   xyz_to_new_xyz(name_file);
+   return 0;
+  }
   if((name_file[name_file.length()-1]=='n' || name_file[name_file.length()-1]=='N')||(name_file[name_file.length()-1]=='x' || name_file[name_file.length()-1]=='X'))
   {
    wfn_fchk=true;//True for wfn

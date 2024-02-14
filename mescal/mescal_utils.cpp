@@ -1,8 +1,149 @@
 #include"mescal.h"
 
+// Convert xyz file to xyz at CM and rotate to principal axis
+void xyz_to_new_xyz(string name_xyz)
+{
+ int iline=0,iline2,iatom,icoord,jcoord,pivot,order[3];
+ double dval,mass_tot,Norm,Norm_saved=-1.0e0,Rcm[3],Coord[3],**Im,**Urot;
+ string line,aux;
+ vector<string>atoms;
+ vector<double>mass;
+ vector<double>coord;
+ string new_xyz="new_"+name_xyz;
+ ifstream read_xyz(name_xyz);
+ ofstream write_xyz(new_xyz);
+ write_xyz<<setprecision(10)<<fixed;
+ while(getline(read_xyz,line))
+ {
+  if(iline<2){write_xyz<<line<<endl;iline++;}
+  else
+  {
+   aux=line.substr(0,5);
+   aux.erase(std::remove_if(aux.begin(),aux.end(),::isspace),aux.end());
+   if(aux!="")
+   {
+    Asymbol2Z(iatom,aux);
+    atoms.push_back(aux); 
+    mass.push_back(Z2mass(iatom));
+    aux=line.substr(5,22);
+    stringstream ss(aux);
+    ss>>dval;
+    coord.push_back(dval);
+    aux=line.substr(27,22);
+    stringstream ss1(aux);
+    ss1>>dval;
+    coord.push_back(dval);
+    aux=line.substr(49,20);
+    stringstream ss2(aux);
+    ss2>>dval;
+    coord.push_back(dval);
+    iline++;
+   }
+  }
+ }
+ read_xyz.close();
+ iline=iline-2;
+ // Move to the Center of Mass
+ for(icoord=0;icoord<3;icoord++){Rcm[icoord]=0.0e0;}
+ mass_tot=0.0e0;
+ for(iline2=0;iline2<iline;iline2++)
+ {
+  Rcm[0]+=mass[iline2]*coord[3*iline2];
+  Rcm[1]+=mass[iline2]*coord[3*iline2+1];
+  Rcm[2]+=mass[iline2]*coord[3*iline2+2];
+  mass_tot+=mass[iline2];
+ }
+ for(icoord=0;icoord<3;icoord++){Rcm[icoord]=Rcm[icoord]/(mass_tot+tol8);}
+ cout<<setprecision(10)<<fixed;
+ cout<<"Coordinates of the CM "<<setw(20)<<Rcm[0]<<setw(20)<<Rcm[1]<<setw(20)<<Rcm[2]<<endl;
+ for(iline2=0;iline2<iline;iline2++)
+ {
+  Norm=0.0e0;
+  coord[3*iline2]-=Rcm[0];
+  coord[3*iline2+1]-=Rcm[1];
+  coord[3*iline2+2]-=Rcm[2];
+  Norm=coord[3*iline2]*coord[3*iline2]+coord[3*iline2+1]*coord[3*iline2+1]+coord[3*iline2+2]*coord[3*iline2+2];
+  Norm=pow(Norm,0.5e0);
+  if(abs(Norm)>Norm_saved){Norm_saved=Norm;}
+ }
+ Im=new double*[3];Urot=new double*[3];
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Im[icoord]=new double[3];
+  Urot[icoord]=new double[3];
+  for(jcoord=0;jcoord<3;jcoord++)
+  {
+   Im[icoord][jcoord]=0.0e0;
+   Urot[icoord][jcoord]=0.0e0;
+  }
+ }
+ for(iline2=0;iline2<iline;iline2++)
+ {
+  coord[3*iline2]=coord[3*iline2]/Norm_saved;       
+  coord[3*iline2+1]=coord[3*iline2+1]/Norm_saved;   
+  coord[3*iline2+2]=coord[3*iline2+2]/Norm_saved;   
+  Im[0][0]+=mass[iline2]*(pow(coord[3*iline2+1],2.0e0)+pow(coord[3*iline2+2],2.0e0));
+  Im[1][1]+=mass[iline2]*(pow(coord[3*iline2],2.0e0)+pow(coord[3*iline2+2],2.0e0));
+  Im[2][2]+=mass[iline2]*(pow(coord[3*iline2],2.0e0)+pow(coord[3*iline2+1],2.0e0));
+  Im[0][1]+=-mass[iline2]*coord[3*iline2]*coord[3*iline2+1];
+  Im[0][2]+=-mass[iline2]*coord[3*iline2]*coord[3*iline2+2];
+  Im[1][2]+=-mass[iline2]*coord[3*iline2+1]*coord[3*iline2+2];
+ }
+ if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
+ if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
+ if(abs(Im[1][2])<tol8){Im[1][2]=0.0e0;}
+ Im[1][0]=Im[0][1];
+ Im[2][0]=Im[0][2];
+ Im[2][1]=Im[1][2];
+ if(abs(Im[0][1])<tol8 && abs(Im[0][2])<tol8 && abs(Im[1][2])<tol8)
+ {
+  for(icoord=0;icoord<3;icoord++){Urot[icoord][icoord]=1.0e0;}
+ }
+ else
+ {
+  jacobi_mescal(3,Im,Urot);
+ }
+ for(icoord=0;icoord<3;icoord++){order[icoord]=icoord;}
+ for(icoord=0;icoord<3;icoord++)
+ {
+  Norm=abs(Im[icoord][icoord]);
+  for(jcoord=icoord+1;jcoord<3;jcoord++)
+  {
+   if(abs(Im[jcoord][jcoord])>Norm)
+   {
+    Norm=abs(Im[jcoord][jcoord]);
+    dval=Im[jcoord][jcoord];
+    Im[jcoord][jcoord]=Im[icoord][icoord];
+    Im[icoord][icoord]=dval;
+    pivot=order[icoord];
+    order[icoord]=order[jcoord];
+    order[jcoord]=pivot;
+   } 
+  }
+ }
+ for(iline2=0;iline2<iline;iline2++)
+ {
+  coord[3*iline2]=coord[3*iline2]*Norm_saved;       
+  coord[3*iline2+1]=coord[3*iline2+1]*Norm_saved;   
+  coord[3*iline2+2]=coord[3*iline2+2]*Norm_saved;
+  Coord[0]=Urot[0][order[0]]*coord[3*iline2]+Urot[1][order[0]]*coord[3*iline2+1]+Urot[2][order[0]]*coord[3*iline2+2];
+  Coord[1]=Urot[0][order[1]]*coord[3*iline2]+Urot[1][order[1]]*coord[3*iline2+1]+Urot[2][order[1]]*coord[3*iline2+2];
+  Coord[2]=Urot[0][order[2]]*coord[3*iline2]+Urot[1][order[2]]*coord[3*iline2+1]+Urot[2][order[2]]*coord[3*iline2+2];
+  write_xyz<<atoms[iline2]<<setw(25)<<Coord[0]<<setw(25)<<Coord[1]<<setw(25)<<Coord[2]<<endl;
+ }
+ write_xyz.close();
+ for(icoord=0;icoord<3;icoord++)
+ {
+  delete[] Im[icoord];Im[icoord]=NULL;
+  delete[] Urot[icoord];Urot[icoord]=NULL;
+ }
+ delete[] Im;Im=NULL;
+ delete[] Urot;Urot=NULL;
+}
+
 // Jacobi diag procedure
 //Matrix diagonalization and calculation of eigenvectors
-void MESCAL::jacobi(int n, double **m, double **v)
+void jacobi_mescal(int n, double **m, double **v)
 {
  int i,j,k,ip,iq,maxiter=10000;
  double tol = pow(10.0,-12.0),apq,t,alpha,c,s,tau,d,delta,temp1,temp2;
@@ -99,7 +240,7 @@ void MESCAL::jacobi(int n, double **m, double **v)
 
 // Bellow this point we have functions that only work as libraries to asing values. 
 // Atomic symbol -> Z 
-void MESCAL::Asymbol2Z(int &Z, string symbol)
+void Asymbol2Z(int &Z, string symbol)
 {
  if(symbol.length()==2)
  {
@@ -229,7 +370,7 @@ void MESCAL::Asymbol2Z(int &Z, string symbol)
  }
 } 
 // Z -> mass  
-double MESCAL::Z2mass(int &Z)
+double Z2mass(int &Z)
 {
  double mass=0.0e0;
  if(Z==1){mass=1.00079;}
