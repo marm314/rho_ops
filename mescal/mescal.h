@@ -39,6 +39,7 @@ class MESCAL
   void set_FV_inter_frag(bool &induced_q,bool &permanent_q);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
   void update_mu_q_ind();
+  void print_charges_file();
   void print_init_sc();
   void print_end_sc();
   void print_iter_info();

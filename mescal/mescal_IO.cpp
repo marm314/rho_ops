@@ -841,3 +841,56 @@ void MESCAL::close_output()
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out.close();
 }
+
+// Print charges ouput file
+void MESCAL::print_charges_file()
+{
+ int ifrag,iatom,icoord,n_charges=0;
+ double distO,distAU,u_vec,norm_vec,q_charge[2]={0.0e0},coord_q[2][3]={0.0e0}; 
+ distO=5.0e-4;distAU=2.0e0*distO*Angs2au;
+ string mescal_charges=mescal_ofile.substr(0,mescal_ofile.length()-3)+"charges";
+ ofstream write_charges(mescal_charges);
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   n_charges++;
+  }
+ }
+ write_charges<<setw(9)<<n_charges*2<<endl;
+ write_charges<<setprecision(8)<<fixed;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   norm_vec=0.0e0;
+   for(icoord=0;icoord<3;icoord++)
+   {
+    norm_vec=norm_vec+pow(fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
+   }
+   norm_vec=pow(norm_vec,0.5e0);
+   for(icoord=0;icoord<3;icoord++)
+   {
+    u_vec=fragments[ifrag].atoms[iatom].mu_ind[icoord]/norm_vec;
+    coord_q[0][icoord]=u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;
+    coord_q[1][icoord]=-u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;   
+   }
+   q_charge[0]=norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+   q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+   write_charges<<setprecision(8)<<fixed;
+   write_charges<<setw(16)<<q_charge[0];
+   for(icoord=0;icoord<3;icoord++)
+   {
+    write_charges<<setw(16)<<coord_q[0][icoord];
+   }
+   write_charges<<endl;
+   write_charges<<setw(16)<<q_charge[1];
+   for(icoord=0;icoord<3;icoord++)
+   {
+    write_charges<<setw(16)<<coord_q[1][icoord];
+   }
+   write_charges<<endl;
+  }
+ }
+ write_charges.close();
+}

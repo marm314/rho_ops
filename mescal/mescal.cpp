@@ -160,6 +160,7 @@ void MESCAL::mescal_scs()
   calc_E(); 
   iter++;
  }while(iter<=maxiter && !(conver_E && conver_mu && conver_q));
+ print_charges_file(); 
  print_end_sc(); 
  close_output();
 }
