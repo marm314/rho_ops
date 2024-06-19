@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
  int i,j,points,num_integrals,nbasis,region_int=1;
  bool fish=false,shan=false,fishp=false,shanp=false,inertiar=false,inertiap=false,pos=false,mom=false,rho=false;
  bool r1=false,r2=false,rm1=false,p1=false,p2=false,not_elf=false,sij=false,r1_moment=false,mos_to_nos_dmn=false,dipolar=false,not_indic=false;
+ bool mute=false;
  double counter,Density,Density_alpha,Density_beta,Nelec,tauW_alpha,ELF,ELFa,ELFb,coef_elf;
  double Grad_norm,Grad_norm_alpha,Grad_norm_beta,tauW_beta,tau_alpha,tau_beta,k_F_alpha;
  double k_F_beta,k_s_alpha,k_s_beta,q_red_alpha,q_red_beta,s_r_alpha,s_r_beta,tcurr_alpha,tcurr_beta;
@@ -5196,7 +5197,7 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    // RHO_OPS init version
-   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind);
+   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind,mute);
    // Lua init version
    /*
    MESCAL mescal;

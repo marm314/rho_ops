@@ -563,20 +563,23 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      }
      fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom]=-val;
      fragments[ifrag].Pi[iatom][fragments[ifrag].natoms-1]=fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom];
-    } 
-    ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
-    print_pi_mat<<setprecision(10)<<fixed<<scientific;
-    iindex=0;
-    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-    {
-     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+    }
+    if(!mute)
+    { 
+     ofstream print_pi_mat((name_frag.substr(0,name_frag.length()-4)+".pi").c_str());
+     print_pi_mat<<setprecision(10)<<fixed<<scientific;
+     iindex=0;
+     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
      {
-      print_pi_mat<<setw(25)<<fragments[ifrag].Pi[iatom][jatom];
-      iindex++;
-      if(iindex==5){iindex=0;print_pi_mat<<endl;}
-     }
-    } 
-    print_pi_mat.close();
+      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+      {
+       print_pi_mat<<setw(25)<<fragments[ifrag].Pi[iatom][jatom];
+       iindex++;
+       if(iindex==5){iindex=0;print_pi_mat<<endl;}
+      }
+     } 
+     print_pi_mat.close();
+    }
    }
    // Delete S_mat
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
@@ -593,8 +596,12 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
   // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
   if(ind_q && pimatrix_good)
   {
-   ofstream print_alpha_mat((name_frag.substr(0,name_frag.length()-4)+".alpha").c_str());
-   print_alpha_mat<<setprecision(10)<<fixed<<scientific;
+   ofstream print_alpha_mat;
+   if(!mute)
+   {
+    print_alpha_mat.open((name_frag.substr(0,name_frag.length()-4)+".alpha").c_str());
+    print_alpha_mat<<setprecision(10)<<fixed<<scientific;
+   }
    for(iindex=0;iindex<3;iindex++)
    {
     for(jindex=0;jindex<3;jindex++)
@@ -613,11 +620,20 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
      alpha[iindex][jindex]-=Temp_mat[iindex][jindex];
      if(abs(alpha[iindex][jindex])<tol8){alpha[iindex][jindex]=0.0e0;}
      if(abs(Temp_mat[iindex][jindex])<tol8){Temp_mat[iindex][jindex]=0.0e0;}
-     print_alpha_mat<<setw(25)<<Temp_mat[iindex][jindex];
+     if(!mute)
+     {
+      print_alpha_mat<<setw(25)<<Temp_mat[iindex][jindex];
+     }
     }
-    print_alpha_mat<<endl;
+    if(!mute)
+    {
+     print_alpha_mat<<endl;
+    }
    }
-   print_alpha_mat.close();
+   if(!mute)
+   {
+    print_alpha_mat.close();
+   }
   }
   // Transform alpha_read -> alpha_rot = U^T alpha U 
   for(iindex=0;iindex<3;iindex++)

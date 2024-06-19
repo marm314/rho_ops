@@ -43,14 +43,13 @@ class MESCAL
   void print_init_sc();
   void print_end_sc();
   void print_iter_info();
-  void print_iactive_info();
 
  public:
   MESCAL();
-  MESCAL(string,string,bool&,bool&);
+  MESCAL(string,string,bool&,bool&,bool&);
   ~MESCAL();
   string sha="";
-  bool perm_q=false,ind_q=false,part_val_e=false;
+  bool perm_q=false,ind_q=false,part_val_e=false,mute=true;
   int nfragments,maxiter=1000,iter=0;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
   struct FRAGMENT

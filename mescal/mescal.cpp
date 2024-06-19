@@ -4,21 +4,22 @@
 MESCAL::MESCAL()
 {
  string name_pdb="mescal.pdb";
- mescal_ofile="mescal.out";
- // Init output file
- init_output();
+ // Never Init output file (this version is mute)
+ //mescal_ofile="mescal.out";
+ //init_output();
  // Read PDB file to store Fragment arrays
  nfragments=0;
  read_pdb_file(name_pdb);
 }
 
-MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q)
+MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q, bool &mute_in)
 {
  part_val_e=part_val_e_in; 
  ind_q=induce_q;
+ mute=mute_in;
  mescal_ofile=name_output;
  // Init output file
- init_output();
+ if(!mute){init_output();}
  // Read PDB file to store Fragment arrays
  nfragments=0;
  read_pdb_file(name_pdb);
@@ -36,63 +37,88 @@ void MESCAL::mescal_get_frag_info()
   Im[icoord]=new double[3];
  }
  // Init output file
- ofstream write_out(mescal_ofile,std::ios_base::app);
- write_out<<setprecision(8)<<fixed<<scientific;
- // Read atomic information for each fragment
- write_out<<endl;
- write_out<<" Fragments read from the PDB file (distances in Bohr) "<<endl;
- write_out<<endl;
+ ofstream write_out;
+ if(!mute)
+ {
+  write_out.open(mescal_ofile,std::ios_base::app);
+  write_out<<setprecision(8)<<fixed<<scientific;
+  // Read atomic information for each fragment
+  write_out<<endl;
+  write_out<<" Fragments read from the PDB file (distances in Bohr) "<<endl;
+  write_out<<endl;
+ }
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   Sum_Val_elect=0;
   Sum_atomic_pol=0.0e0;
-  write_out<<" Fragment "<<ifrag+1<<endl;
+  if(!mute)
+  {
+   write_out<<" Fragment "<<ifrag+1<<endl;
+  }
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
-   write_out<<"  Atom ";
-   write_out<<setw(5)<<fragments[ifrag].atoms[iatom].Z;
-   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[0];
-   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[1];
-   write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[2]<<endl;
+   if(!mute)
+   {
+    write_out<<"  Atom ";
+    write_out<<setw(5)<<fragments[ifrag].atoms[iatom].Z;
+    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[0];
+    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[1];
+    write_out<<setw(17)<<fragments[ifrag].atoms[iatom].pos[2]<<endl;
+   }
    Sum_Val_elect+=Z2val_electrons(fragments[ifrag].atoms[iatom].Z);
    Sum_atomic_pol+=Z2atomic_pol(fragments[ifrag].atoms[iatom].Z);
   }
   Frag_T_inertia(ifrag,pos,Im,Urot);
   norm_cm=0.0e0;
   for(icoord=0;icoord<3;icoord++){fragments[ifrag].Rcm[icoord]=pos[icoord];norm_cm+=pow(pos[icoord],2.0e0);}
-  write_out<<"  Center of Mass ";
-  for(icoord=0;icoord<3;icoord++){write_out<<setw(20)<<fragments[ifrag].Rcm[icoord];}
-  write_out<<endl;
+  if(!mute)
+  {
+   write_out<<"  Center of Mass ";
+   for(icoord=0;icoord<3;icoord++){write_out<<setw(20)<<fragments[ifrag].Rcm[icoord];}
+   write_out<<endl;
+  }
   norm_cm=pow(norm_cm,0.5e0);
   fragments[ifrag].dist_RcmO=norm_cm;
-  write_out<<"  Distance of the center of mass to the origin "<<setw(20)<<norm_cm<<endl;
-  write_out<<"  Normalized and diagonalized inertia tensor"<<endl;
+  if(!mute)
+  {
+   write_out<<"  Distance of the center of mass to the origin "<<setw(20)<<norm_cm<<endl;
+   write_out<<"  Normalized and diagonalized inertia tensor"<<endl;
+  }
   if(abs(Im[0][1])<tol8){Im[0][1]=0.0e0;}
   if(abs(Im[0][2])<tol8){Im[0][2]=0.0e0;}
   if(abs(Im[1][2])<tol8){Im[1][2]=0.0e0;}
   Im[1][0]=Im[0][1];
   Im[2][0]=Im[0][2];
   Im[2][1]=Im[1][2];
-  for(icoord=0;icoord<3;icoord++)
+  if(!mute)
   {
-   for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Im[icoord][jcoord];}write_out<<endl;
+   for(icoord=0;icoord<3;icoord++)
+   {
+    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Im[icoord][jcoord];}write_out<<endl;
+   }
+   write_out<<"  Rotation matrix (columns)"<<endl;
+   for(icoord=0;icoord<3;icoord++)
+   {
+    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
+   }
+   write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
+   write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;
   }
-  write_out<<"  Rotation matrix (columns)"<<endl;
-  for(icoord=0;icoord<3;icoord++)
-  {
-   for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
-  }
-  write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
-  write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;
   // Read fragment.dat files to store charges, Pi, and asign alpha' atomic contributions using the number of val. electrons or tabulated atomic pols.
   // Note: We compute alpha' = U alpha U^T for each fragment 
   read_fragment_file((fragments[ifrag].name+".dat").c_str(),Im,Urot,ifrag,Sum_Val_elect,Sum_atomic_pol);
-  write_out<<endl;
+  if(!mute)
+  {
+   write_out<<endl;
+  }
  }
  // Delete Urot and Im because they are no longer needed
  for(icoord=0;icoord<3;icoord++){delete[] Urot[icoord];Urot[icoord]=NULL; delete[] Im[icoord];Im[icoord]=NULL;}
  delete[] Urot; Urot=NULL; delete[] Im; Im=NULL;
- write_out.close();
+ if(!mute)
+ {
+  write_out.close();
+ }
 }
 
 // Do self-consistent solution to find induced dipoles (mu) and fields (F_mu)
@@ -109,7 +135,7 @@ void MESCAL::mescal_scs()
  if(r0<tol4){r0=0.0e0;cout<<" Warning! Screening r0 < 10^-4 found, setting r0 = 0.0e0."<<endl;}
  if(!ind_q){conver_q=true;}
  iter=0;
- print_init_sc(); 
+ if(!mute){print_init_sc();}
  do
  {
   // Set mu = alpha F  and check convergence on mu
@@ -160,9 +186,12 @@ void MESCAL::mescal_scs()
   calc_E(); 
   iter++;
  }while(iter<=maxiter && !(conver_E && conver_mu && conver_q));
- print_charges_file(); 
- print_end_sc(); 
- close_output();
+ if(!mute)
+ {
+  print_charges_file();
+  print_end_sc();
+  close_output();
+ }
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
@@ -317,7 +346,7 @@ void MESCAL::calc_E()
   E_diff=0.0e0;
  }
  Energy_old=Energy;
- print_iter_info();
+ if(!mute){print_iter_info();}
 }
 
 // Get V at Point_r (due to induced dipoles and charges)
