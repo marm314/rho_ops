@@ -31,7 +31,7 @@
 #include"DMN_ops_p_class.h"
 #include"gnuplot.h"
 #include"N_fchks_wfns.h"
-#include"mescal.h"
+#include"Mescal.h"
 #include"gitver.h"
 #define Angs2au 1.8897259886
 #define au2eV 27.211399
@@ -5197,10 +5197,10 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    // RHO_OPS init version
-   MESCAL mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind,mute);
+   Mescal mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind,mute);
    // Lua init version
    /*
-   MESCAL mescal;
+   Mescal mescal;
    mescal.part_val_e=Input_commands.mescal_part_val_e;
    mescal.ind_q=Input_commands.mescal_qind;
    */
@@ -5297,7 +5297,7 @@ int main(int argc, char *argv[])
     }
     if(!Input_commands.mescal_punctual && !Input_commands.mescal_qm)
     {
-     cout<<"Comment: Calling MESCAL without any punctual/QM field F (and potential V)."<<endl;
+     cout<<"Comment: Calling Mescal without any punctual/QM field F (and potential V)."<<endl;
     }
     // call mescal SCS for mu and F_mu.
     mescal.maxiter=Input_commands.maxiter_mescal;
@@ -5331,7 +5331,7 @@ int main(int argc, char *argv[])
     Results<<endl;
     // Dynamically allocated objects (saved for example)
     /*
-    vector<MESCAL>mescal_objects;
+    vector<Mescal>mescal_objects;
     mescal_objects.push_back(mescal); 
     mescal_objects[0]=mescal; 
     mescal_objects[0].mescal_scs(); 
@@ -5343,7 +5343,7 @@ int main(int argc, char *argv[])
     */
     /*
     // Two different copies of the initial object (saved for example)
-    MESCAL mescal_sys[2];
+    Mescal mescal_sys[2];
     mescal_sys[0]=mescal;
     mescal_sys[0].mescal_scs();
     cout<<"New copied object 1 "<<mescal_sys[0].Energy<<endl;
@@ -5353,7 +5353,7 @@ int main(int argc, char *argv[])
     */
     /*
     // Two pointers to same object (saved for example)
-    MESCAL *mescal_sys[2];
+    Mescal *mescal_sys[2];
     mescal_sys[0]=&mescal;
     mescal_sys[0]->mescal_scs();
     cout<<"Pointer 1 to object "<<mescal_sys[0]->Energy<<endl;

@@ -1,7 +1,7 @@
-#include"mescal.h"
+#include"Mescal.h"
 
 // Public functions.
-MESCAL::MESCAL()
+Mescal::Mescal()
 {
  string name_pdb="mescal.pdb";
  // Never Init output file (this version is mute)
@@ -12,7 +12,7 @@ MESCAL::MESCAL()
  read_pdb_file(name_pdb);
 }
 
-MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q, bool &mute_in)
+Mescal::Mescal(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q, bool &mute_in)
 {
  part_val_e=part_val_e_in; 
  ind_q=induce_q;
@@ -25,63 +25,63 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &ind
  read_pdb_file(name_pdb);
 }
 
-MESCAL::MESCAL(const MESCAL&MESCAL_obj)
+Mescal::Mescal(const Mescal&Mescal_obj)
 {
  int ifrag,iatom,jatom,icoord,jcoord;
- sha=MESCAL_obj.sha;
- perm_q=MESCAL_obj.perm_q;
- ind_q=MESCAL_obj.ind_q;
- part_val_e=MESCAL_obj.part_val_e;
- mute=MESCAL_obj.mute;
- nfragments=MESCAL_obj.nfragments;
- maxiter=MESCAL_obj.maxiter;
- ifrac_deact=MESCAL_obj.ifrac_deact;
- iter=MESCAL_obj.iter;
- r0=MESCAL_obj.r0;
- w_damp=MESCAL_obj.w_damp;
- mu_diff_max=MESCAL_obj.mu_diff_max;
- q_diff_max=MESCAL_obj.q_diff_max;
- E_diff=MESCAL_obj.E_diff;
- threshold_mu=MESCAL_obj.threshold_mu;
- threshold_E=MESCAL_obj.threshold_E;
- threshold_q=MESCAL_obj.threshold_q;
- Energy=MESCAL_obj.Energy;
- deact_rad=MESCAL_obj.deact_rad;
+ sha=Mescal_obj.sha;
+ perm_q=Mescal_obj.perm_q;
+ ind_q=Mescal_obj.ind_q;
+ part_val_e=Mescal_obj.part_val_e;
+ mute=Mescal_obj.mute;
+ nfragments=Mescal_obj.nfragments;
+ maxiter=Mescal_obj.maxiter;
+ ifrac_deact=Mescal_obj.ifrac_deact;
+ iter=Mescal_obj.iter;
+ r0=Mescal_obj.r0;
+ w_damp=Mescal_obj.w_damp;
+ mu_diff_max=Mescal_obj.mu_diff_max;
+ q_diff_max=Mescal_obj.q_diff_max;
+ E_diff=Mescal_obj.E_diff;
+ threshold_mu=Mescal_obj.threshold_mu;
+ threshold_E=Mescal_obj.threshold_E;
+ threshold_q=Mescal_obj.threshold_q;
+ Energy=Mescal_obj.Energy;
+ deact_rad=Mescal_obj.deact_rad;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  fragments.push_back({MESCAL_obj.fragments[ifrag].name,MESCAL_obj.fragments[ifrag].natoms}); 
+  fragments.push_back({Mescal_obj.fragments[ifrag].name,Mescal_obj.fragments[ifrag].natoms}); 
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
-   fragments[ifrag].atoms.push_back({MESCAL_obj.fragments[ifrag].atoms[iatom].Z});
+   fragments[ifrag].atoms.push_back({Mescal_obj.fragments[ifrag].atoms[iatom].Z});
    for(icoord=0;icoord<3;icoord++)
    {
-    fragments[ifrag].atoms[iatom].pos[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].pos[icoord];
-    fragments[ifrag].atoms[iatom].mu_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].mu_ind[icoord];
-    fragments[ifrag].atoms[iatom].F_ext[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_ext[icoord];
-    fragments[ifrag].atoms[iatom].F_q_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_q_ind[icoord];
-    fragments[ifrag].atoms[iatom].F_q_perm[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_q_perm[icoord];
-    fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
-    fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord];
-    fragments[ifrag].atoms[iatom].dipole_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].dipole_ind[icoord];
+    fragments[ifrag].atoms[iatom].pos[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].pos[icoord];
+    fragments[ifrag].atoms[iatom].mu_ind[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].mu_ind[icoord];
+    fragments[ifrag].atoms[iatom].F_ext[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].F_ext[icoord];
+    fragments[ifrag].atoms[iatom].F_q_ind[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].F_q_ind[icoord];
+    fragments[ifrag].atoms[iatom].F_q_perm[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].F_q_perm[icoord];
+    fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+    fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord];
+    fragments[ifrag].atoms[iatom].dipole_ind[icoord]=Mescal_obj.fragments[ifrag].atoms[iatom].dipole_ind[icoord];
     for(jcoord=0;jcoord<3;jcoord++)
     {
-     fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].alpha[icoord][jcoord];
+     fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]=Mescal_obj.fragments[ifrag].atoms[iatom].alpha[icoord][jcoord];
     }
    }
-   fragments[ifrag].atoms[iatom].q_perm=MESCAL_obj.fragments[ifrag].atoms[iatom].q_perm;
-   fragments[ifrag].atoms[iatom].q_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].q_ind;
-   fragments[ifrag].atoms[iatom].V_ext=MESCAL_obj.fragments[ifrag].atoms[iatom].V_ext;
-   fragments[ifrag].atoms[iatom].V_q_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].V_q_ind;
-   fragments[ifrag].atoms[iatom].V_q_perm=MESCAL_obj.fragments[ifrag].atoms[iatom].V_q_perm;
-   fragments[ifrag].atoms[iatom].V_mu_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].V_mu_ind;
+   fragments[ifrag].atoms[iatom].q_perm=Mescal_obj.fragments[ifrag].atoms[iatom].q_perm;
+   fragments[ifrag].atoms[iatom].q_ind=Mescal_obj.fragments[ifrag].atoms[iatom].q_ind;
+   fragments[ifrag].atoms[iatom].V_ext=Mescal_obj.fragments[ifrag].atoms[iatom].V_ext;
+   fragments[ifrag].atoms[iatom].V_q_ind=Mescal_obj.fragments[ifrag].atoms[iatom].V_q_ind;
+   fragments[ifrag].atoms[iatom].V_q_perm=Mescal_obj.fragments[ifrag].atoms[iatom].V_q_perm;
+   fragments[ifrag].atoms[iatom].V_mu_ind=Mescal_obj.fragments[ifrag].atoms[iatom].V_mu_ind;
   }
   for(icoord=0;icoord<3;icoord++)
   {
-   fragments[ifrag].Rcm[icoord]=MESCAL_obj.fragments[ifrag].Rcm[icoord];
+   fragments[ifrag].Rcm[icoord]=Mescal_obj.fragments[ifrag].Rcm[icoord];
   }
-  fragments[ifrag].dist_RcmO=MESCAL_obj.fragments[ifrag].dist_RcmO;
-  fragments[ifrag].active=MESCAL_obj.fragments[ifrag].active;
-  fragments[ifrag].i_was_active=MESCAL_obj.fragments[ifrag].i_was_active;
+  fragments[ifrag].dist_RcmO=Mescal_obj.fragments[ifrag].dist_RcmO;
+  fragments[ifrag].active=Mescal_obj.fragments[ifrag].active;
+  fragments[ifrag].i_was_active=Mescal_obj.fragments[ifrag].i_was_active;
   if(ind_q)
   {
    for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -92,7 +92,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
      fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
      {
-      fragments[ifrag].Pi[iatom][jatom]=MESCAL_obj.fragments[ifrag].Pi[iatom][jatom];
+      fragments[ifrag].Pi[iatom][jatom]=Mescal_obj.fragments[ifrag].Pi[iatom][jatom];
      }
     }
    }
@@ -101,7 +101,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
 }
 
 // Prepare fragments info 
-void MESCAL::mescal_get_frag_info()
+void Mescal::mescal_get_frag_info()
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
  double pos[3],**Im,**Urot,Sum_atomic_pol,norm_cm;
@@ -197,7 +197,7 @@ void MESCAL::mescal_get_frag_info()
 }
 
 // Do self-consistent solution to find induced dipoles (mu) and fields (F_mu)
-void MESCAL::mescal_scs()
+void Mescal::mescal_scs()
 {
  bool tmp_false=false,tmp_true=true;
  // For permanent charges this is done only once because it does not change
@@ -270,7 +270,7 @@ void MESCAL::mescal_scs()
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
-void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
+void Mescal::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
 {
  int ifrag,iatom,icoord;
  double r,r3,diff_xyz[3];
@@ -299,7 +299,7 @@ void MESCAL::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
 }
 
 // Clean data from previous run (also store info about active fragments) 
-void MESCAL::clean()
+void Mescal::clean()
 {
  int ifrag,iatom,icoord;
  for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -322,7 +322,7 @@ void MESCAL::clean()
 }
 
 // Deactivate a particular fragment given the atomic number Z and its coordinates (a.u. are assumed)
-void MESCAL::deactivate_fragment(int &natoms_in, int *Z,double **coord)
+void Mescal::deactivate_fragment(int &natoms_in, int *Z,double **coord)
 {
  bool located=false;
  int ifrag,iatom;
@@ -357,7 +357,7 @@ void MESCAL::deactivate_fragment(int &natoms_in, int *Z,double **coord)
 }
 
 // Deactivate fragments at distance higher than rad
-void MESCAL::deactivate_fragments(double &rad)
+void Mescal::deactivate_fragments(double &rad)
 {
  int ifrag;
  nactive=0;
@@ -371,7 +371,7 @@ void MESCAL::deactivate_fragments(double &rad)
 }
 
 // Send the number atoms in the PDB file
-int MESCAL::natoms_tot()
+int Mescal::natoms_tot()
 {
  int ifrag,natoms=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -385,7 +385,7 @@ int MESCAL::natoms_tot()
 }
 
 // Send coordinates on the PDB
-void MESCAL::get_coords(double **Coords)
+void Mescal::get_coords(double **Coords)
 {
  int ifrag,iatom,icoord,jatom=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -405,7 +405,7 @@ void MESCAL::get_coords(double **Coords)
 }
 
 // Set F_ext and V_ext (due to a/many point charge(s))
-void MESCAL::set_FV_ext_qm(double **F_ext,double *V_ext)
+void Mescal::set_FV_ext_qm(double **F_ext,double *V_ext)
 {
  int ifrag,iatom,icoord,jatom=0;
  for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -426,7 +426,7 @@ void MESCAL::set_FV_ext_qm(double **F_ext,double *V_ext)
 }
 
 // Calc E and print iter info
-void MESCAL::calc_E()
+void Mescal::calc_E()
 {
  int ifrag,iatom,icoord;
  double E_mu=0.0e0,E_q=0.0e0;
@@ -461,7 +461,7 @@ void MESCAL::calc_E()
 }
 
 // Get V at Point_r (due to induced dipoles and charges)
-void MESCAL::get_V_punct(double &V_r,double Point_r[3])
+void Mescal::get_V_punct(double &V_r,double Point_r[3])
 {
  int ifrag,iatom,icoord;
  double r,r3,diff_xyz[3];
@@ -490,7 +490,7 @@ void MESCAL::get_V_punct(double &V_r,double Point_r[3])
  }
 }
 
-MESCAL::~MESCAL()
+Mescal::~Mescal()
 {
  int iatom,ifrag;
  if(ind_q)
@@ -509,7 +509,7 @@ MESCAL::~MESCAL()
 // Private functions.
 
 // Compute Inertia tensor for Fragments
-void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
+void Mescal::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
 {
  int iatom,icoord,jcoord,pivot;
  double mass,mass_tot,Norm,Norm_saved,pivot_doub;
@@ -585,7 +585,7 @@ void MESCAL::Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot)
 }
 
 // Compute Inertia tensor for reading Fragments (to compare)
-void MESCAL::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot)
+void Mescal::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot)
 {
  int iatom,icoord,jcoord,pivot;
  double mass,mass_tot,Norm,Norm_saved,pivot_doub;
@@ -662,7 +662,7 @@ void MESCAL::Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfra
 }
 
 // Update mu_ind and q_ind
-void MESCAL::update_mu_q_ind()
+void Mescal::update_mu_q_ind()
 {
  int ifrag,iatom,jatom,icoord;
  double Field[3],V_atom,old_q_ind=0.0e0,q_diff=0.0e0,sum_q;
@@ -718,7 +718,7 @@ void MESCAL::update_mu_q_ind()
 }
 
 // Set F_inter_fragment and V_inter_fragment (due to INDUCED/PERMANENT point charge(s) and INDUCED dipoles of other fragments)
-void MESCAL::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
+void Mescal::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
 {
  int ifrag,jfrag,iatom,jatom,icoord;
  double r,r2,r3,r5,fr,diff_xyz[3];
@@ -822,7 +822,7 @@ void MESCAL::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
 }
 
 // Do mu = alpha F
-void MESCAL::alphaF2mu(int &ifrag, int &iatom, double Field[3])
+void Mescal::alphaF2mu(int &ifrag, int &iatom, double Field[3])
 {
  int icoord,jcoord;
  double old_mu=0.0e0,mu_diff=0.0e0;

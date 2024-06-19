@@ -1,7 +1,7 @@
-#include"mescal.h"
+#include"Mescal.h"
 
 // Read PDB file
-void MESCAL::read_pdb_file(string name_pdb)
+void Mescal::read_pdb_file(string name_pdb)
 {
  int ichar,ichar1,Z=1,count_fragments=-1,old_fragment=-1,new_fragment,blank_spaces[14];
  double pos[3];
@@ -170,7 +170,7 @@ void MESCAL::read_pdb_file(string name_pdb)
 }
 
 // Read fragment file
-void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
+void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
  bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1,npair_read;
@@ -700,12 +700,12 @@ void MESCAL::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
 }
 
 // Print header ouput file
-void MESCAL::init_output()
+void Mescal::init_output()
 {
  ofstream write_out(mescal_ofile);
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
- write_out<<"------                 MESCAL ( in C++ )                   -----"<<endl;
+ write_out<<"------                 Mescal ( in C++ )                   -----"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<"--          Developed by: Dr. M. Rodriguez-Mayorga            --"<<endl;
@@ -714,8 +714,8 @@ void MESCAL::init_output()
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
- write_out<<"--  MicroElectroStatic Calculations (MESCAL)               -----"<<endl;
- write_out<<"--  Based on MESCAL (in Fortran) code by                   -----"<<endl;
+ write_out<<"--  MicroElectroStatic Calculations (Mescal)               -----"<<endl;
+ write_out<<"--  Based on Mescal (in Fortran) code by                   -----"<<endl;
  write_out<<"--  Dr. Gabriele D'Avino (2013-2015)                       -----"<<endl;
  write_out<<"--  email: gabriele.davino@gmail.com                       -----"<<endl;
  write_out<<"--  download: https://gitlab.com/taphino/mescal            -----"<<endl;
@@ -725,7 +725,7 @@ void MESCAL::init_output()
 }
 
 // Print init SC procedure
-void MESCAL::print_init_sc()
+void Mescal::print_init_sc()
 {
  ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<endl;
@@ -769,7 +769,7 @@ void MESCAL::print_init_sc()
 }
 
 // Print end SC procedure
-void MESCAL::print_end_sc()
+void Mescal::print_end_sc()
 {
  ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<endl;
@@ -785,7 +785,7 @@ void MESCAL::print_end_sc()
 }
 
 // Print iter information
-void MESCAL::print_iter_info()
+void Mescal::print_iter_info()
 {
  ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<setprecision(8)<<fixed;
@@ -815,7 +815,7 @@ void MESCAL::print_iter_info()
 }
 
 // Print footer ouput file
-void MESCAL::close_output()
+void Mescal::close_output()
 {
  int ifrag,iatom;
  ofstream write_out(mescal_ofile,std::ios_base::app);
@@ -856,14 +856,14 @@ void MESCAL::close_output()
  write_out<<" $$/      $$/ $$$$$$$$/  $$$$$$/   $$$$$$/   $$$$$$$/ $$/    "<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out<<endl;
- write_out<<"  Normal termination of MESCAL code          "<<endl;
+ write_out<<"  Normal termination of Mescal code          "<<endl;
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
  write_out.close();
 }
 
 // Print charges ouput file
-void MESCAL::print_charges_file()
+void Mescal::print_charges_file()
 {
  int ifrag,iatom,icoord,n_charges=0;
  double distO,distAU,u_vec,norm_vec,q_charge[2]={0.0e0},coord_q[2][3]={0.0e0}; 

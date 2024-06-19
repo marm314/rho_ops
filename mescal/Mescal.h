@@ -14,7 +14,7 @@
 #define tol8 1e-8
 
 using namespace std;
-class MESCAL
+class Mescal
 {
  private:
   bool conver_E=false,conver_mu=false,conver_q=false;
@@ -45,10 +45,10 @@ class MESCAL
   void print_iter_info();
 
  public:
-  MESCAL();
-  MESCAL(string,string,bool&,bool&,bool&);
-  MESCAL(const MESCAL&MESCAL_obj);
-  ~MESCAL();
+  Mescal();
+  Mescal(string,string,bool&,bool&,bool&);
+  Mescal(const Mescal&Mescal_obj);
+  ~Mescal();
   string sha="";
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
   int nfragments,maxiter=1000,iter=0,ifrac_deact=-1;

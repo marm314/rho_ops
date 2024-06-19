@@ -1,4 +1,4 @@
-#include"mescal.h"
+#include"Mescal.h"
 
 // Convert xyz file to xyz at CM and rotate to principal axis
 void xyz_to_new_xyz(string name_xyz)
@@ -486,7 +486,7 @@ double Z2mass(int &Z)
  return mass;
 } 
 // Z -> valence electrons
-int MESCAL::Z2val_electrons(int &Z)
+int Mescal::Z2val_electrons(int &Z)
 {
  int val_elect=0;
  if(Z==1){val_elect=1;}
@@ -603,7 +603,7 @@ int MESCAL::Z2val_electrons(int &Z)
 } 
 // Z -> atomic polarizability
 // atomic anD moLecuLar poLarizabiLitieS Thomas M. Miller
-double MESCAL::Z2atomic_pol(int &Z)
+double Mescal::Z2atomic_pol(int &Z)
 {
  double atomic_pol=0.0e0;
  if(Z==1){atomic_pol=0.666793;}
@@ -713,7 +713,7 @@ double MESCAL::Z2atomic_pol(int &Z)
  return atomic_pol;
 } 
 // Z -> atomic label
-void MESCAL::Z2label(int Z)
+void Mescal::Z2label(int Z)
 {
  if(Z==1){label="h";}
  else if(Z==2 ){label="he";}

@@ -19,7 +19,7 @@ all:
 	make mescal 
 	make RHO_OPS
 
-mescal: $(OBJECTS0) $(SCR0) mescal.h
+mescal: $(OBJECTS0) $(SCR0) Mescal.h
 	ar rvs libmescal.a $(OBJECTS0)
 
 RHO_OPS: $(OBJECTS) $(SCR) $(LIB) cuba.h Makefile 
@@ -36,7 +36,7 @@ clean:
 	$(Cln) *~
 	$(Cln) libmescal.a
 	$(Cln) *mescal*cpp
-	$(Cln) *mescal.h
+	$(Cln) *Mescal.h
 	$(Cln) gitver.cpp gitver.o gitver.h
 	$(Cln) $(NAME).tar.gz 
 tar:
