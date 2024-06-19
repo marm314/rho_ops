@@ -47,7 +47,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
  Energy=MESCAL_obj.Energy;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  fragments.push_back({MESCAL_obj.fragments[ifrag].name,MESCAL_obj.fragments[ifrag].natoms});  // name fragment, natoms (init.)
+  fragments.push_back({MESCAL_obj.fragments[ifrag].name,MESCAL_obj.fragments[ifrag].natoms}); 
   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
   {
    fragments[ifrag].atoms.push_back({MESCAL_obj.fragments[ifrag].atoms[iatom].Z});
@@ -80,7 +80,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
   fragments[ifrag].dist_RcmO=MESCAL_obj.fragments[ifrag].dist_RcmO;
   fragments[ifrag].active=MESCAL_obj.fragments[ifrag].active;
   fragments[ifrag].i_was_active=MESCAL_obj.fragments[ifrag].i_was_active;
-  // double **Pi // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
+  // TODO check if Pi is allocated. I it is, allocate double **Pi and copy it from Pi[a_tom][b_atom]
  }
 }
 

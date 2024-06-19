@@ -5329,6 +5329,38 @@ int main(int argc, char *argv[])
      Results<<" Radius max dist. fragment  "<<setw(25)<<Input_commands.mescal_r[icall_mescal]<<endl;
     }
     Results<<endl;
+    // Dynamically allocated objects (saved for example)
+    /*
+    vector<MESCAL>mescal_objects;
+    mescal_objects.push_back(mescal); 
+    mescal_objects[0]=mescal; 
+    mescal_objects[0].mescal_scs(); 
+    cout<<"New copied dynamically allocated object 1 "<<mescal_objects[0].Energy<<endl;
+    mescal_objects.push_back(mescal); 
+    mescal_objects[1]=mescal; 
+    mescal_objects[1].mescal_scs(); 
+    cout<<"New copied dynamically allocated object 2 "<<mescal_objects[1].Energy<<endl;
+    */
+    /*
+    // Two different copies of the initial object (saved for example)
+    MESCAL mescal_sys[2];
+    mescal_sys[0]=mescal;
+    mescal_sys[0].mescal_scs();
+    cout<<"New copied object 1 "<<mescal_sys[0].Energy<<endl;
+    mescal_sys[1]=mescal;
+    mescal_sys[1].mescal_scs();
+    cout<<"New copied object 2 "<<mescal_sys[1].Energy<<endl;
+    */
+    /*
+    // Two pointers to same object (saved for example)
+    MESCAL *mescal_sys[2];
+    mescal_sys[0]=&mescal;
+    mescal_sys[0]->mescal_scs();
+    cout<<"Pointer 1 to object "<<mescal_sys[0]->Energy<<endl;
+    mescal_sys[1]=&mescal;
+    mescal_sys[1]->mescal_scs();
+    cout<<"Pointer 2 to object "<<mescal_sys[1]->Energy<<endl;
+    */
     mescal.mescal_scs();
     Results<<"    Converged Energy(au)    "<<setw(25)<<mescal.Energy<<endl;
     Results<<"    Final max abs(mu_diff)  "<<setw(25)<<mescal.mu_diff_max<<endl;
