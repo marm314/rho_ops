@@ -27,7 +27,7 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &ind
 
 MESCAL::MESCAL(const MESCAL&MESCAL_obj)
 {
- int ifrag,iatom,icoord,jcoord;
+ int ifrag,iatom,jatom,icoord,jcoord;
  sha=MESCAL_obj.sha;
  perm_q=MESCAL_obj.perm_q;
  ind_q=MESCAL_obj.ind_q;
@@ -80,7 +80,21 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
   fragments[ifrag].dist_RcmO=MESCAL_obj.fragments[ifrag].dist_RcmO;
   fragments[ifrag].active=MESCAL_obj.fragments[ifrag].active;
   fragments[ifrag].i_was_active=MESCAL_obj.fragments[ifrag].i_was_active;
-  // TODO check if Pi is allocated. I it is, allocate double **Pi and copy it from Pi[a_tom][b_atom]
+  if(ind_q)
+  {
+   for(ifrag=0;ifrag<nfragments;ifrag++)
+   {
+    fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
+     {
+      fragments[ifrag].Pi[iatom][jatom]=MESCAL_obj.fragments[ifrag].Pi[iatom][jatom];
+     }
+    }
+   }
+  } 
  }
 }
 
