@@ -47,6 +47,7 @@ class MESCAL
  public:
   MESCAL();
   MESCAL(string,string,bool&,bool&,bool&);
+  MESCAL(const MESCAL&MESCAL_obj);
   ~MESCAL();
   string sha="";
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true;

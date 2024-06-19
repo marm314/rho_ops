@@ -25,6 +25,65 @@ MESCAL::MESCAL(string name_output,string name_pdb,bool &part_val_e_in, bool &ind
  read_pdb_file(name_pdb);
 }
 
+MESCAL::MESCAL(const MESCAL&MESCAL_obj)
+{
+ int ifrag,iatom,icoord,jcoord;
+ sha=MESCAL_obj.sha;
+ perm_q=MESCAL_obj.perm_q;
+ ind_q=MESCAL_obj.ind_q;
+ part_val_e=MESCAL_obj.part_val_e;
+ mute=MESCAL_obj.mute;
+ nfragments=MESCAL_obj.nfragments;
+ maxiter=MESCAL_obj.maxiter;
+ iter=MESCAL_obj.iter;
+ r0=MESCAL_obj.r0;
+ w_damp=MESCAL_obj.w_damp;
+ mu_diff_max=MESCAL_obj.mu_diff_max;
+ q_diff_max=MESCAL_obj.q_diff_max;
+ E_diff=MESCAL_obj.E_diff;
+ threshold_mu=MESCAL_obj.threshold_mu;
+ threshold_E=MESCAL_obj.threshold_E;
+ threshold_q=MESCAL_obj.threshold_q;
+ Energy=MESCAL_obj.Energy;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  fragments.push_back({MESCAL_obj.fragments[ifrag].name,MESCAL_obj.fragments[ifrag].natoms});  // name fragment, natoms (init.)
+  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  {
+   fragments[ifrag].atoms.push_back({MESCAL_obj.fragments[ifrag].atoms[iatom].Z});
+   for(icoord=0;icoord<3;icoord++)
+   {
+    fragments[ifrag].atoms[iatom].pos[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].pos[icoord];
+    fragments[ifrag].atoms[iatom].mu_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].mu_ind[icoord];
+    fragments[ifrag].atoms[iatom].F_ext[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_ext[icoord];
+    fragments[ifrag].atoms[iatom].F_q_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_q_ind[icoord];
+    fragments[ifrag].atoms[iatom].F_q_perm[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_q_perm[icoord];
+    fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].F_mu_ind[icoord];
+    fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].pos_wrt_cm[icoord];
+    fragments[ifrag].atoms[iatom].dipole_ind[icoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].dipole_ind[icoord];
+    for(jcoord=0;jcoord<3;jcoord++)
+    {
+     fragments[ifrag].atoms[iatom].alpha[icoord][jcoord]=MESCAL_obj.fragments[ifrag].atoms[iatom].alpha[icoord][jcoord];
+    }
+   }
+   fragments[ifrag].atoms[iatom].q_perm=MESCAL_obj.fragments[ifrag].atoms[iatom].q_perm;
+   fragments[ifrag].atoms[iatom].q_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].q_ind;
+   fragments[ifrag].atoms[iatom].V_ext=MESCAL_obj.fragments[ifrag].atoms[iatom].V_ext;
+   fragments[ifrag].atoms[iatom].V_q_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].V_q_ind;
+   fragments[ifrag].atoms[iatom].V_q_perm=MESCAL_obj.fragments[ifrag].atoms[iatom].V_q_perm;
+   fragments[ifrag].atoms[iatom].V_mu_ind=MESCAL_obj.fragments[ifrag].atoms[iatom].V_mu_ind;
+  }
+  for(icoord=0;icoord<3;icoord++)
+  {
+   fragments[ifrag].Rcm[icoord]=MESCAL_obj.fragments[ifrag].Rcm[icoord];
+  }
+  fragments[ifrag].dist_RcmO=MESCAL_obj.fragments[ifrag].dist_RcmO;
+  fragments[ifrag].active=MESCAL_obj.fragments[ifrag].active;
+  fragments[ifrag].i_was_active=MESCAL_obj.fragments[ifrag].i_was_active;
+  // double **Pi // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
+ }
+}
+
 // Prepare fragments info 
 void MESCAL::mescal_get_frag_info()
 {
