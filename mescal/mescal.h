@@ -50,8 +50,8 @@ class MESCAL
   MESCAL(const MESCAL&MESCAL_obj);
   ~MESCAL();
   string sha="";
-  bool perm_q=false,ind_q=false,part_val_e=false,mute=true;
-  int nfragments,maxiter=1000,iter=0;
+  bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
+  int nfragments,maxiter=1000,iter=0,ifrac_deact=-1;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
   struct FRAGMENT
   {
@@ -71,6 +71,7 @@ class MESCAL
   void clean(); // It also saves information of fragments that were active before
   void mescal_scs();
   void calc_E();
+  void deactivate_fragment(int &natoms_in,int *Z,double **coords);
   void deactivate_fragments(double &rad);
 
 };

@@ -35,6 +35,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
  mute=MESCAL_obj.mute;
  nfragments=MESCAL_obj.nfragments;
  maxiter=MESCAL_obj.maxiter;
+ ifrac_deact=MESCAL_obj.ifrac_deact;
  iter=MESCAL_obj.iter;
  r0=MESCAL_obj.r0;
  w_damp=MESCAL_obj.w_damp;
@@ -45,6 +46,7 @@ MESCAL::MESCAL(const MESCAL&MESCAL_obj)
  threshold_E=MESCAL_obj.threshold_E;
  threshold_q=MESCAL_obj.threshold_q;
  Energy=MESCAL_obj.Energy;
+ deact_rad=MESCAL_obj.deact_rad;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   fragments.push_back({MESCAL_obj.fragments[ifrag].name,MESCAL_obj.fragments[ifrag].natoms}); 
@@ -319,6 +321,41 @@ void MESCAL::clean()
  conver_E=false,conver_mu=false,conver_q=false;
 }
 
+// Deactivate a particular fragment given the atomic number Z and its coordinates (a.u. are assumed)
+void MESCAL::deactivate_fragment(int &natoms_in, int *Z,double **coord)
+{
+ bool located=false;
+ int ifrag,iatom;
+ if(deact_rad)
+ {
+  for(ifrag=0;ifrag<nfragments;ifrag++)
+  {
+   if(natoms_in==fragments[ifrag].natoms && !located)
+   {
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     if( ( Z[iatom]=fragments[ifrag].atoms[iatom].Z && 
+         abs(coord[iatom][0]-fragments[ifrag].atoms[iatom].pos[0])<tol4 ) &&
+         ( abs(coord[iatom][1]-fragments[ifrag].atoms[iatom].pos[1])<tol4 &&
+         abs(coord[iatom][2]-fragments[ifrag].atoms[iatom].pos[2])<tol4 )
+       ){located=true;}
+     else{located=false;iatom=fragments[ifrag].natoms;}
+    }
+   }
+   if(located)
+   {
+    fragments[ifrag].active=false;nactive--;ifrac_deact=ifrag;
+   }
+  }
+ }
+ else
+ {
+  cout<<"You must first deactivate using the radial function: deactivate_fragments(double &rad)"<<endl;
+  cout<<"Even for rad=1e99 ('all active')"<<endl;
+  cout<<"Note: No fragments was deactivated"<<endl;
+ }
+}
+
 // Deactivate fragments at distance higher than rad
 void MESCAL::deactivate_fragments(double &rad)
 {
@@ -330,6 +367,7 @@ void MESCAL::deactivate_fragments(double &rad)
   if(fragments[ifrag].dist_RcmO<rad){fragments[ifrag].active=true;nactive++;}
   else{fragments[ifrag].active=false;}
  }
+ deact_rad=true;
 }
 
 // Send the number atoms in the PDB file
