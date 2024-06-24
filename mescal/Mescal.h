@@ -2,6 +2,7 @@
 #define _MESCAL_H_
 #include<iostream>
 #include<iomanip>
+#include<omp.h>
 #include<vector>
 #include<fstream>
 #include<algorithm>
@@ -51,7 +52,7 @@ class Mescal
   ~Mescal();
   string sha="";
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
-  int nfragments,maxiter=1000,iter=0,ifrac_deact=-1;
+  int nfragments,maxiter=1000,iter=0,ifrac_deact=-1,nthread;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
   struct FRAGMENT
   {

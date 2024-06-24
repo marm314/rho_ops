@@ -721,101 +721,123 @@ void Mescal::update_mu_q_ind()
 void Mescal::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
 {
  int ifrag,jfrag,iatom,jatom,icoord;
- double r,r2,r3,r5,fr,diff_xyz[3];
+ double V_mu_ind,V_q_ind,V_q_perm;
+ double pos[3],F_mu_ind[3],F_q_ind[3],F_q_perm[3];
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   if(fragments[ifrag].active)
   {	  
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    if(!permanent_q)
-    {	   
-     fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
-     for(icoord=0;icoord<3;icoord++)
-     {
-      fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
-     }
-    }
-    if(induced_q)
+    V_mu_ind=0.0e0;V_q_ind=0.0e0;V_q_perm=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
     {
-     fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
-     for(icoord=0;icoord<3;icoord++)
-     {
-      fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
-     }
+     F_mu_ind[icoord]=0.0e0;
+     F_q_ind[icoord]=0.0e0;
+     F_q_perm[icoord]=0.0e0;
+     pos[icoord]=fragments[ifrag].atoms[iatom].pos[icoord];
     }
-    if(permanent_q)
+
+    #pragma omp parallel num_threads(nthread) \
+     private(jfrag,jatom,icoord) firstprivate(pos) \
+     shared(fragments,ifrag,nfragments,induced_q,permanent_q) \
+     reduction(+:V_mu_ind,V_q_ind,V_q_perm,F_mu_ind,F_q_ind,F_q_perm) 
     {
-     fragments[ifrag].atoms[iatom].V_q_perm=0.0e0;
-     for(icoord=0;icoord<3;icoord++)
+     //Variables that belong to each thread and are only needed here
+     int nth=omp_get_num_threads();
+     int ith=omp_get_thread_num();
+     double r,r2,r3,r5,fr,diff_xyz[3];
+     for(jfrag=ith;jfrag<nfragments;jfrag=jfrag+nth)
      {
-      fragments[ifrag].atoms[iatom].F_q_perm[icoord]=0.0e0;
-     }
-    }
-    for(jfrag=0;jfrag<nfragments;jfrag++)
-    {
-     if(ifrag!=jfrag && fragments[jfrag].active) // Only inter-fragment contributions
-     {
-      for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
+      if(ifrag!=jfrag && fragments[jfrag].active) // Only inter-fragment contributions
       {
-       r=0.0e0;
-       for(icoord=0;icoord<3;icoord++)
+       for(jatom=0;jatom<fragments[jfrag].natoms;jatom++)
        {
-        diff_xyz[icoord]=fragments[ifrag].atoms[iatom].pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
-        r+=diff_xyz[icoord]*diff_xyz[icoord];
-       }
-       r=pow(r,0.5e0);
-       r2=pow(r,2.0e0);
-       r3=r*r2;
-       r5=r3*r2;
-       if(r0>=tol4) // Screen only for r0>=0.0001
-       {
-        fr=1.0e0-exp(-pow(r/r0,3.0e0));
-       }
-       else
-       { 
-        fr=1.0e0;
-       }
-       if(permanent_q)
-       {
-        fragments[ifrag].atoms[iatom].V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
+        r=0.0e0;
         for(icoord=0;icoord<3;icoord++)
         {
-         fragments[ifrag].atoms[iatom].F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
+         diff_xyz[icoord]=pos[icoord]-fragments[jfrag].atoms[jatom].pos[icoord];
+         r+=diff_xyz[icoord]*diff_xyz[icoord];
         }
-       }
-       else
-       {
-        // Induced charges? 
-        if(induced_q)
+        r=pow(r,0.5e0);
+        r2=pow(r,2.0e0);
+        r3=r*r2;
+        r5=r3*r2;
+        if(r0>=tol4) // Screen only for r0>=0.0001
         {
-         fragments[ifrag].atoms[iatom].V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+         fr=1.0e0-exp(-pow(r/r0,3.0e0));
+        }
+        else
+        { 
+         fr=1.0e0;
+        }
+        if(permanent_q)
+        {
+         V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
          for(icoord=0;icoord<3;icoord++)
          {
-          fragments[ifrag].atoms[iatom].F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+          F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
          }
         }
-        // Induced dipoles are always updated 
-        fragments[ifrag].atoms[iatom].F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
-                                                 -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
-        fragments[ifrag].atoms[iatom].F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
-                                                  -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
-        fragments[ifrag].atoms[iatom].F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
-                                                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
-                                                  -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
-        fragments[ifrag].atoms[iatom].V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
-                                               +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
-                                               +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
-    
+        else
+        {
+         // Induced charges? 
+         if(induced_q)
+         {
+          V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+          for(icoord=0;icoord<3;icoord++)
+          {
+           F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+          }
+         }
+         // Induced dipoles are always updated 
+         F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
+                     +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
+                     +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
+                    -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
+         F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
+                     +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
+                     +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
+                     -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
+         F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+                     +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
+                     +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
+                     -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
+         V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
+                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
+                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
+     
+        }
        }
       }
      }
     }
+
+    if(!permanent_q)
+    {	   
+     fragments[ifrag].atoms[iatom].V_mu_ind=V_mu_ind;
+     for(icoord=0;icoord<3;icoord++)
+     {
+      fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=F_mu_ind[icoord];
+     }
+    }
+    if(induced_q)
+    {
+     fragments[ifrag].atoms[iatom].V_q_ind=V_q_ind;
+     for(icoord=0;icoord<3;icoord++)
+     {
+      fragments[ifrag].atoms[iatom].F_q_ind[icoord]=F_q_ind[icoord];
+     }
+    }
+    if(permanent_q)
+    {
+     fragments[ifrag].atoms[iatom].V_q_perm=V_q_perm;
+     for(icoord=0;icoord<3;icoord++)
+     {
+      fragments[ifrag].atoms[iatom].F_q_perm[icoord]=F_q_perm[icoord];
+     }
+    }
+
    }
   }
  }

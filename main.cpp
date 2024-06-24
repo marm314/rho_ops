@@ -5198,6 +5198,7 @@ int main(int argc, char *argv[])
    }
    // RHO_OPS init version
    Mescal mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind,mute);
+   mescal.nthread=Input_commands.mescal_nthread;
    // Lua init version
    /*
    Mescal mescal;

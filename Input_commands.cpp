@@ -710,6 +710,10 @@ Input::Input(string rho_in)
     mescal_pdb=rho_in;
     rho_input_file>>maxiter_mescal>>thresh_mescal_mu>>thresh_mescal_E>>r0_mescal>>w_damp_mescal;
    }
+   else if(rho_in=="$mescal_parallel")
+   {
+    rho_input_file>>mescal_nthread;
+   }
    else if(rho_in=="$mescal_punctual")
    {
     mescal_punctual=true;
