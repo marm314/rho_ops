@@ -104,7 +104,7 @@ Mescal::Mescal(const Mescal&Mescal_obj)
 void Mescal::mescal_get_frag_info()
 {
  int ifrag,iatom,icoord,jcoord,Sum_Val_elect;
- double pos[3],**Im,**Urot,Sum_atomic_pol,norm_cm;
+ double pos[3],**Im,**Urot,Urot_order[3],Sum_atomic_pol,norm_cm;
  Urot=new double*[3];Im=new double*[3];
  for(icoord=0;icoord<3;icoord++)
  {
@@ -165,6 +165,17 @@ void Mescal::mescal_get_frag_info()
   Im[1][0]=Im[0][1];
   Im[2][0]=Im[0][2];
   Im[2][1]=Im[1][2];
+  for(icoord=0;icoord<3;icoord++)
+  {
+   for(jcoord=0;jcoord<3;jcoord++)
+   {
+    Urot_order[jcoord]=Urot[icoord][order[jcoord]];
+   }
+   for(jcoord=0;jcoord<3;jcoord++)
+   {
+    Urot[icoord][jcoord]=Urot_order[jcoord];
+   }
+  }
   if(!mute)
   {
    for(icoord=0;icoord<3;icoord++)
@@ -174,7 +185,7 @@ void Mescal::mescal_get_frag_info()
    write_out<<"  Rotation matrix (columns)"<<endl;
    for(icoord=0;icoord<3;icoord++)
    {
-    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][order[jcoord]];}write_out<<endl;
+    for(jcoord=0;jcoord<3;jcoord++){write_out<<setw(20)<<Urot[icoord][jcoord];}write_out<<endl;
    }
    write_out<<"  Total number of valence electrons in this fragment "<<setw(8)<<Sum_Val_elect<<endl;
    write_out<<"    Sum of atomic polarizabilities for this fragment "<<setw(8)<<Sum_atomic_pol<<endl;

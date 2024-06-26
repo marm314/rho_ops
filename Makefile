@@ -42,6 +42,7 @@ clean:
 tar:
 	mkdir $(NAME)
 	cp *.cpp *.h *.c Makefile ./$(NAME)
+	cp -r mescal ./$(NAME)
 	tar -pczf $(NAME).tar.gz ./$(NAME)
 	rm -r ./$(NAME)
 	cp ./*.tar.gz ../
