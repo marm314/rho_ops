@@ -102,7 +102,7 @@ void Mescal::read_pdb_file(string name_pdb)
 }
 
 // Read fragment file
-void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
+void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2align,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol)
 {
  bool devItens=false,frag_file_good=true,pimatrix_good=false,all_int=true,Itensor=false;
  int iindex,jindex,kindex,iatom,jatom,ialpha,jalpha,imo,jmo,amo,bmo,ipair,jpair,nbasis=0,nocc=0,nvir=0,npair=1,npair_read;
@@ -575,7 +575,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     Temp_mat[iindex][jindex]=0.0e0;
     for(kindex=0;kindex<3;kindex++)
     {
-     Temp_mat[iindex][jindex]+=Urot[iindex][kindex]*alpha[kindex][jindex];
+     Temp_mat[iindex][jindex]+=Urot2align[iindex][kindex]*alpha[kindex][jindex];
     }
    }
   }
@@ -586,7 +586,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot,
     alpha[iindex][jindex]=0.0e0;
     for(kindex=0;kindex<3;kindex++)
     {
-     alpha[iindex][jindex]+=Temp_mat[iindex][kindex]*Urot[jindex][kindex];
+     alpha[iindex][jindex]+=Temp_mat[iindex][kindex]*Urot2align[jindex][kindex];
     }
     if(abs(alpha[iindex][jindex])<tol8){alpha[iindex][jindex]=0.0e0;}
    }

@@ -34,7 +34,7 @@ class Mescal
   void init_output();
   void close_output();
   void read_pdb_file(string name_pbd);
-  void read_fragment_file(string name_frag,double **Im,double **Urot,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
+  void read_fragment_file(string name_frag,double **Im_frag,double **Urot2align,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
   void Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot);
   void set_FV_inter_frag(bool &induced_q,bool &permanent_q);
