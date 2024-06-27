@@ -66,6 +66,7 @@ class Mescal
   int natoms_tot();
   void mescal_get_frag_info();
   void get_coords(double **Coords);
+  void set_FV_ext_one(int &ifrag,int &iatom,double F_ext[3],double &V_ext);
   void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void get_V_punct(double &V_r,double Point_r[3]);

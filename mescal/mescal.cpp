@@ -415,6 +415,20 @@ void Mescal::get_coords(double **Coords)
  }
 }
 
+// Set F_ext and V_ext for a given atom of a fragment
+void Mescal::set_FV_ext_one(int &ifrag,int &iatom,double F_ext[3],double &V_ext)
+{
+ int icoord;
+ if(fragments[ifrag].active) 
+ {
+  for(icoord=0;icoord<3;icoord++)
+  {
+   fragments[ifrag].atoms[iatom].F_ext[icoord]=F_ext[icoord];
+  }
+  fragments[ifrag].atoms[iatom].V_ext=V_ext;
+ }
+}
+
 // Set F_ext and V_ext (due to a/many point charge(s))
 void Mescal::set_FV_ext_qm(double **F_ext,double *V_ext)
 {
