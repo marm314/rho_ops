@@ -10,6 +10,7 @@ Input::Input(string rho_in)
  print_dm1_fchk=false;cubature2=false;cube=false;tps=false;intracule=false;Vr=false;scan_localhybs=false;dens_sim=false;v_hartree=false;
  int_pol_hyperpol=false;extracule=false;r1_moment=false;symrot_no=false;symrotdens=false;symgrad=false;intra_1rdm_sij=false;im_wfn_wfx=false;
  mescal=false;mescal_punctual=false;mescal_qm=false;mescal_qperm=false;mescal_qind=false;mescal_part_val_e=false;mescal_radius=false;
+ mescal_off_fchk=false;
  multiplicity=0;nprocs=1;extra_lines=0;dmn_threshold=pow(TEN,-TEN);
  string name=rho_in;
  ifstream rho_input_file;
@@ -750,6 +751,10 @@ Input::Input(string rho_in)
    {
     mescal_radius=true;
     rho_input_file>>mescal_r[0]>>mescal_r[1];
+   }
+   else if(rho_in=="$mescal_off_fchk")
+   {
+    mescal_off_fchk=true;
    }
    else if(rho_in=="$mescal_val_e"){mescal_part_val_e=true;}
    else if(rho_in=="$mescal_atomic_pol"){mescal_part_val_e=false;}

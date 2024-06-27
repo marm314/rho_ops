@@ -5175,7 +5175,7 @@ int main(int argc, char *argv[])
   /////////////////////////////////////
   if(Input_commands.mescal)
   {
-   int icall_mescal=0,ncalls_mescal=1;
+   int A,*Z_all,icall_mescal=0,ncalls_mescal=1;
    double V_r;
    Results<<"#*************************************************************************#";
    Results<<endl;
@@ -5213,6 +5213,18 @@ int main(int argc, char *argv[])
     if(Input_commands.mescal_radius)
     {
      mescal.deactivate_fragments(Input_commands.mescal_r[icall_mescal]); 
+    }
+    if(Input_commands.mescal_off_fchk && Input_commands.mescal_radius)
+    {
+     Results<<" Switching off the FCHK fragment in for Mescal"<<endl;
+     Results<<" Note: remember to use the guess=only geometry not the one aligned and at the CM"<<endl;
+     Z_all=new int[Read_fchk_wfn.natoms];
+     for(A=0;A<Read_fchk_wfn.natoms;A++)
+     {
+      Z_all[A]=(int)Read_fchk_wfn.Nu_charge[A];
+     }
+     mescal.deactivate_fragment(Read_fchk_wfn.natoms,Z_all,Read_fchk_wfn.Cartesian_Coor);
+     delete[] Z_all;Z_all=NULL;
     }
     // Init F_ext punctual charges 
     if(Input_commands.mescal_punctual)
