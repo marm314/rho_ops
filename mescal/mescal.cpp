@@ -310,6 +310,12 @@ void Mescal::set_FV_ext_punct(double &q_ext,double Point_mescal[3])
 }
 
 // Clean data from previous run (also store info about active fragments) 
+void Mescal::clean_converg()
+{
+ conver_E=false,conver_mu=false,conver_q=false;
+}
+
+// Clean data from previous run (also store info about active fragments) 
 void Mescal::clean()
 {
  int ifrag,iatom,icoord;

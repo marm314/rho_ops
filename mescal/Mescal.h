@@ -71,6 +71,7 @@ class Mescal
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
   void get_V_punct(double &V_r,double Point_r[3]);
   void clean(); // It also saves information of fragments that were active before
+  void clean_converg();
   void mescal_scs();
   void calc_E();
   void deactivate_fragment(int &natoms_in,int *Z,double **coords);
