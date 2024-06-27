@@ -5523,7 +5523,7 @@ void READ_FCHK_WFN::Center_of_mass()
   }
   else if(Nu_charge[i]==ONE)
   {
-   mass[i]=1.00079;
+   mass[i]=1.0079;
   }
   else if(Nu_charge[i]==TWO)
   {
@@ -6160,7 +6160,7 @@ void READ_FCHK_WFN::Center_of_mass()
   }
   else if(Nu_charge[i]==ONE)
   {
-   mass[i]=1.00079;
+   mass[i]=1.0079;
   }
   else if(Nu_charge[i]==TWO)
   {

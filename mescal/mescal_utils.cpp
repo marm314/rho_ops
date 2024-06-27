@@ -373,7 +373,7 @@ void Asymbol2Z(int &Z, string symbol)
 double Z2mass(int &Z)
 {
  double mass=0.0e0;
- if(Z==1){mass=1.00079;}
+ if(Z==1){mass=1.0079;}
  else if(Z==2 ){mass=4.0026;}
  else if(Z==3 ){mass=6.941;}
  else if(Z==4 ){mass=9.0122;}
