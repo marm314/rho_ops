@@ -900,7 +900,6 @@ void Mescal::alphaF2mu(int &ifrag, int &iatom, double Field[3])
  }
 }
 
-
 // Get q_charge and their coords that reproduce q_ind and mu_ind (in AU) and consistent with Gabriele's code
 void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],double coord_q[2][3])
 {
