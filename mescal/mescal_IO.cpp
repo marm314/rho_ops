@@ -795,7 +795,7 @@ void Mescal::close_output()
  write_out.close();
 }
 
-// Print charges ouput file
+// Print charges ouput file (in Angstrom)
 void Mescal::print_charges_file()
 {
  int ifrag,iatom,icoord,n_charges=0;
@@ -825,10 +825,10 @@ void Mescal::print_charges_file()
    for(icoord=0;icoord<3;icoord++)
    {
     u_vec=fragments[ifrag].atoms[iatom].mu_ind[icoord]/norm_vec;
-    coord_q[0][icoord]=u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;
+    coord_q[0][icoord]= u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;
     coord_q[1][icoord]=-u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;   
    }
-   q_charge[0]=norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+   q_charge[0]= norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
    q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
    write_charges<<setprecision(8)<<fixed;
    write_charges<<setw(16)<<q_charge[0];

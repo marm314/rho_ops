@@ -899,3 +899,26 @@ void Mescal::alphaF2mu(int &ifrag, int &iatom, double Field[3])
   if(mu_diff>mu_diff_max){mu_diff_max=mu_diff;}
  }
 }
+
+
+// Get q_charge and their coords that reproduce q_ind and mu_ind (in AU) and consistent with Gabriele's code
+void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],double coord_q[2][3])
+{
+ int icoord;
+ double distO,distAU,u_vec,norm_vec;
+ distO=5.0e-4*Angs2au;distAU=2.0e0*distO;
+ norm_vec=0.0e0;
+ for(icoord=0;icoord<3;icoord++)
+ {
+  norm_vec=norm_vec+pow(fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
+ }
+ norm_vec=pow(norm_vec,0.5e0);
+ for(icoord=0;icoord<3;icoord++)
+ {
+  u_vec=fragments[ifrag].atoms[iatom].mu_ind[icoord]/norm_vec;
+  coord_q[0][icoord]= u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord];
+  coord_q[1][icoord]=-u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord];
+ }
+ q_charge[0]= norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+ q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+}
