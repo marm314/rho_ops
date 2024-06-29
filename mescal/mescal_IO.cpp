@@ -805,44 +805,50 @@ void Mescal::print_charges_file()
  ofstream write_charges(mescal_charges);
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  if(fragments[ifrag].active)
   {
-   n_charges++;
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    n_charges++;
+   }
   }
  }
  write_charges<<setw(9)<<n_charges*2<<endl;
  write_charges<<setprecision(8)<<fixed;
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+  if(fragments[ifrag].active)
   {
-   norm_vec=0.0e0;
-   for(icoord=0;icoord<3;icoord++)
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    norm_vec=norm_vec+pow(fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
+    norm_vec=0.0e0;
+    for(icoord=0;icoord<3;icoord++)
+    {
+     norm_vec=norm_vec+pow(fragments[ifrag].atoms[iatom].mu_ind[icoord],2.0e0);
+    }
+    norm_vec=pow(norm_vec,0.5e0);
+    for(icoord=0;icoord<3;icoord++)
+    {
+     u_vec=fragments[ifrag].atoms[iatom].mu_ind[icoord]/norm_vec;
+     coord_q[0][icoord]= u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;
+     coord_q[1][icoord]=-u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;   
+    }
+    q_charge[0]= norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+    q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
+    write_charges<<setprecision(8)<<fixed;
+    write_charges<<setw(16)<<q_charge[0];
+    for(icoord=0;icoord<3;icoord++)
+    {
+     write_charges<<setw(16)<<coord_q[0][icoord];
+    }
+    write_charges<<endl;
+    write_charges<<setw(16)<<q_charge[1];
+    for(icoord=0;icoord<3;icoord++)
+    {
+     write_charges<<setw(16)<<coord_q[1][icoord];
+    }
+    write_charges<<endl;
    }
-   norm_vec=pow(norm_vec,0.5e0);
-   for(icoord=0;icoord<3;icoord++)
-   {
-    u_vec=fragments[ifrag].atoms[iatom].mu_ind[icoord]/norm_vec;
-    coord_q[0][icoord]= u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;
-    coord_q[1][icoord]=-u_vec*distO+fragments[ifrag].atoms[iatom].pos[icoord]/Angs2au;   
-   }
-   q_charge[0]= norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
-   q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
-   write_charges<<setprecision(8)<<fixed;
-   write_charges<<setw(16)<<q_charge[0];
-   for(icoord=0;icoord<3;icoord++)
-   {
-    write_charges<<setw(16)<<coord_q[0][icoord];
-   }
-   write_charges<<endl;
-   write_charges<<setw(16)<<q_charge[1];
-   for(icoord=0;icoord<3;icoord++)
-   {
-    write_charges<<setw(16)<<coord_q[1][icoord];
-   }
-   write_charges<<endl;
   }
  }
  write_charges.close();
