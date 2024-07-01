@@ -21,7 +21,7 @@ class Mescal
   bool conver_E=false,conver_mu=false,conver_q=false;
   int order[3],nactive=-1;
   double Energy_old,radius;
-  string label,mescal_ofile;
+  string label;
   struct ATOM
   {
    int Z;
@@ -31,9 +31,7 @@ class Mescal
   int Z2val_electrons(int &Z);
   void Z2label(int Z);
   double Z2atomic_pol(int &Z);
-  void init_output();
   void close_output();
-  void read_pdb_file(string name_pbd);
   void read_fragment_file(string name_frag,double **Im_frag,double **Urot2align,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
   void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
   void Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot);
@@ -51,6 +49,7 @@ class Mescal
   Mescal(const Mescal&Mescal_obj);
   ~Mescal();
   string sha="";
+  string mescal_ofile;
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
   int nfragments,maxiter=1000,iter=0,ifrac_deact=-1,nthread,naux_basis;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy,*Vreac;
@@ -64,6 +63,8 @@ class Mescal
   };
   vector<FRAGMENT>fragments;
   int natoms_tot();
+  void init_output();
+  void read_pdb_file(string name_pbd); // It also allocates all fragments
   void mescal_get_frag_info();
   void get_coords(double **Coords);
   void set_FV_ext_one(int &ifrag,int &iatom,double F_ext[3],double &V_ext);

@@ -3,13 +3,7 @@
 // Public functions.
 Mescal::Mescal()
 {
- string name_pdb="mescal.pdb";
- // Never Init output file (this version is mute)
- //mescal_ofile="mescal.out";
- //init_output();
- // Read PDB file to store Fragment arrays
  nfragments=0;
- read_pdb_file(name_pdb);
 }
 
 Mescal::Mescal(string name_output,string name_pdb,bool &part_val_e_in, bool &induce_q, bool &mute_in)
@@ -361,7 +355,7 @@ void Mescal::deactivate_fragment(int &natoms_in, int *Z,double **coord)
    }
    if(located)
    {
-    fragments[ifrag].active=false;nactive--;ifrac_deact=ifrag;
+    fragments[ifrag].active=false;nactive--;ifrac_deact=ifrag;ifrag=nfragments;
    }
   }
  }

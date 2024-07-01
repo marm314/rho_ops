@@ -5197,26 +5197,36 @@ int main(int argc, char *argv[])
     mescal_file=name_file.substr(0,(name_file.length()-5))+"_MESCAL.out";
    }
    // RHO_OPS init version
+
    Mescal mescal(mescal_file,Input_commands.mescal_pdb,Input_commands.mescal_part_val_e,Input_commands.mescal_qind,mute);
    mescal.nthread=Input_commands.mescal_nthread;
+
    // Lua init version
-   /*
+/*   
+   mescal_file="mescal.pdb";
    Mescal mescal;
+   mescal.mute=mute;
    mescal.part_val_e=Input_commands.mescal_part_val_e;
    mescal.ind_q=Input_commands.mescal_qind;
-   */
+   mescal.nthread=Input_commands.mescal_nthread;
+   mescal.read_pdb_file(mescal_file);
+   mescal_file="mescal_MESCAL.out";
+   mescal.mescal_ofile=mescal_file;
+   mescal.init_output();
+*/   
    mescal.mescal_get_frag_info();
    mescal.sha=sha;
    if(Input_commands.mescal_radius){ncalls_mescal=2;}
    do
    {
+    if(icall_mescal==1){mescal.init_output();}
     if(Input_commands.mescal_radius)
     {
      mescal.deactivate_fragments(Input_commands.mescal_r[icall_mescal]); 
     }
     if(Input_commands.mescal_off_fchk && Input_commands.mescal_radius)
     {
-     Results<<" Switching off the FCHK fragment in for Mescal"<<endl;
+     Results<<" Switching off the FCHK fragment for Mescal"<<endl;
      Results<<" Note: remember to use the guess=only geometry not the one aligned and at the CM"<<endl;
      Z_all=new int[Read_fchk_wfn.natoms];
      for(A=0;A<Read_fchk_wfn.natoms;A++)
