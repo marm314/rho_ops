@@ -915,3 +915,99 @@ void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],doubl
  q_charge[0]= norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
  q_charge[1]=-norm_vec/distAU+0.5e0*fragments[ifrag].atoms[iatom].q_ind;
 }
+
+// Functions to be used by MPI for read .pdb and .dat files stored in master
+
+// Using read info (for parallel MPI coding)
+void Mescal::use_pdb_info(int &natoms,string *pdb_file)
+{
+ int Z=1,iatom,count_fragments=-1,old_fragment=-1,new_fragment;
+ double pos[3];
+ string line,line_aux;
+ for(iatom=0;iatom<natoms;iatom++)
+ {
+  line=pdb_file[iatom];
+  stringstream ss(line.substr(20,6));
+  ss>>new_fragment;
+  if(new_fragment!=old_fragment)
+  {
+   count_fragments++;
+   line_aux=line.substr(17,3);
+   line_aux.erase(std::remove_if(line_aux.begin(),line_aux.end(),::isspace),line_aux.end());
+   old_fragment=new_fragment;
+   fragments.push_back({line_aux,1});                                         // name fragment, natoms (init.)
+   // Here add atomic info to push_back
+   line_aux=line.substr(11,5);
+   line_aux.erase(std::remove_if(line_aux.begin(),line_aux.end(),::isspace),line_aux.end());
+   if(line_aux.length()>1)
+   {
+    if(islower(line_aux[1]))
+    {
+     line_aux=line_aux.substr(0,2);
+    }
+    else
+    {
+     line_aux=line_aux.substr(0,1);
+    }
+   }
+   else
+   {
+    line_aux=line_aux.substr(0,1);
+   }
+   Asymbol2Z(Z,line_aux);
+   // Det Atomic positions
+   line_aux=line.substr(30,8);
+   stringstream ss1(line_aux);
+   ss1>>pos[0];
+   pos[0]=pos[0]*Angs2au;
+   line_aux=line.substr(38,8);
+   stringstream ss2(line_aux);
+   ss2>>pos[1];
+   pos[1]=pos[1]*Angs2au;
+   line_aux=line.substr(46,8);
+   stringstream ss3(line_aux);
+   ss3>>pos[2];
+   pos[2]=pos[2]*Angs2au;
+   fragments[count_fragments].atoms.push_back({Z,pos[0],pos[1],pos[2]});// Z, position
+   nfragments++;
+  }
+  else
+  {
+   fragments[count_fragments].natoms++;                                        // Add an atom to the fragment
+   // Here add atomic info to push_back
+   // Det Z
+   line_aux=line.substr(11,5);
+   line_aux.erase(std::remove_if(line_aux.begin(),line_aux.end(),::isspace),line_aux.end());
+   if(line_aux.length()>1)
+   {
+    if(islower(line_aux[1]))
+    {
+     line_aux=line_aux.substr(0,2);
+    }
+    else
+    {
+     line_aux=line_aux.substr(0,1);
+    }
+   }
+   else
+   {
+    line_aux=line_aux.substr(0,1);
+   }
+   Asymbol2Z(Z,line_aux);
+   // Det Atomic positions
+   line_aux=line.substr(30,8);
+   stringstream ss1(line_aux);
+   ss1>>pos[0];
+   pos[0]=pos[0]*Angs2au;
+   line_aux=line.substr(38,8);
+   stringstream ss2(line_aux);
+   ss2>>pos[1];
+   pos[1]=pos[1]*Angs2au;
+   line_aux=line.substr(46,8);
+   stringstream ss3(line_aux);
+   ss3>>pos[2];
+   pos[2]=pos[2]*Angs2au;
+   fragments[count_fragments].atoms.push_back({Z,pos[0],pos[1],pos[2]});// Z, position  
+  }
+ }
+}

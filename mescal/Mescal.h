@@ -65,6 +65,7 @@ class Mescal
   int natoms_tot();
   void init_output();
   void read_pdb_file(string name_pbd); // It also allocates all fragments
+  void use_pdb_info(int &natoms,string *pbd_file); // It also allocates all fragments
   void mescal_get_frag_info();
   void get_coords(double **Coords);
   void set_FV_ext_one(int &ifrag,int &iatom,double F_ext[3],double &V_ext);
