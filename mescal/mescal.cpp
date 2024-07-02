@@ -919,9 +919,9 @@ void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],doubl
 // Functions to be used by MPI for read .pdb and .dat files stored in master
 
 // Using read info (for parallel MPI coding)
-void Mescal::use_pdb_info(int &natoms,string *pdb_file)
+void Mescal::use_pdb_info(bool &ind_q,int &natoms,string *pdb_file)
 {
- int Z=1,iatom,count_fragments=-1,old_fragment=-1,new_fragment;
+ int Z=1,ifrag,iatom,jatom,count_fragments=-1,old_fragment=-1,new_fragment;
  double pos[3];
  string line,line_aux;
  for(iatom=0;iatom<natoms;iatom++)
@@ -1008,6 +1008,21 @@ void Mescal::use_pdb_info(int &natoms,string *pdb_file)
    ss3>>pos[2];
    pos[2]=pos[2]*Angs2au;
    fragments[count_fragments].atoms.push_back({Z,pos[0],pos[1],pos[2]});// Z, position  
+  }
+ }
+ if(ind_q)
+ {
+  for(ifrag=0;ifrag<nfragments;ifrag++)
+  {
+   fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
+    for(jatom=0;jatom<fragments[ifrag].natoms;iatom++)
+    {
+     fragments[ifrag].Pi[iatom][jatom]=0.0e0;
+    }
+   }
   }
  }
 }
