@@ -919,7 +919,7 @@ void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],doubl
 // Functions to be used by MPI for read .pdb and .dat files stored in master
 
 // Using read info (for parallel MPI coding)
-void Mescal::use_pdb_info(bool &ind_q,int &natoms,string *pdb_file)
+void Mescal::use_pdb_info(int &natoms,string *pdb_file)
 {
  int Z=1,ifrag,iatom,jatom,count_fragments=-1,old_fragment=-1,new_fragment;
  double pos[3];
