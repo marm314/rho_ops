@@ -52,13 +52,15 @@ class Mescal
   string mescal_ofile;
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
   int nfragments,maxiter=1000,iter=0,ifrac_deact=-1,nthread,naux_basis;
-  double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy,*Vreac;
+  double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
+  vector<double>Vreac;
   struct FRAGMENT
   {
    string name;
    int natoms;
    vector<ATOM>atoms;
-   double **Pi,Rcm[3],dist_RcmO; // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
+   vector<double>Pi;
+   double Rcm[3],dist_RcmO; // Pi matrix for the atom,atom susceptibility Pi[a_tom][b_atom]
    bool active=true,i_was_active=false;
   };
   vector<FRAGMENT>fragments;

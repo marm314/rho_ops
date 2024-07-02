@@ -80,13 +80,12 @@ Mescal::Mescal(const Mescal&Mescal_obj)
   {
    for(ifrag=0;ifrag<nfragments;ifrag++)
    {
-    fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
+    fragments[ifrag].Pi=vector<double>(fragments[ifrag].natoms*fragments[ifrag].natoms,0.0e0);
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
      {
-      fragments[ifrag].Pi[iatom][jatom]=Mescal_obj.fragments[ifrag].Pi[iatom][jatom];
+      fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=Mescal_obj.fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
      }
     }
    }
@@ -517,18 +516,7 @@ void Mescal::get_V_punct(double &V_r,double Point_r[3])
 
 Mescal::~Mescal()
 {
- int iatom,ifrag;
- if(ind_q)
- {
-  for(ifrag=0;ifrag<nfragments;ifrag++)
-  {
-   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-   {
-    delete[] fragments[ifrag].Pi[iatom];fragments[ifrag].Pi[iatom]=NULL;
-   }
-   delete[] fragments[ifrag].Pi;fragments[ifrag].Pi=NULL;
-  }
- } 
+
 }
 
 // Private functions.
@@ -720,7 +708,7 @@ void Mescal::update_mu_q_ind()
              +fragments[ifrag].atoms[jatom].V_q_perm
              +fragments[ifrag].atoms[jatom].V_q_ind
              +fragments[ifrag].atoms[jatom].V_mu_ind;
-       fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom][jatom]*V_atom; 
+       fragments[ifrag].atoms[iatom].q_ind-=fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]*V_atom; 
       }
       if(iter>0)
       {
@@ -921,7 +909,7 @@ void Mescal::get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],doubl
 // Using read info (for parallel MPI coding)
 void Mescal::use_pdb_info(int &natoms,string *pdb_file)
 {
- int Z=1,ifrag,iatom,jatom,count_fragments=-1,old_fragment=-1,new_fragment;
+ int Z=1,ifrag,iatom,count_fragments=-1,old_fragment=-1,new_fragment;
  double pos[3];
  string line,line_aux;
  for(iatom=0;iatom<natoms;iatom++)
@@ -1014,15 +1002,7 @@ void Mescal::use_pdb_info(int &natoms,string *pdb_file)
  {
   for(ifrag=0;ifrag<nfragments;ifrag++)
   {
-   fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
-   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-   {
-    fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
-    for(jatom=0;jatom<fragments[ifrag].natoms;iatom++)
-    {
-     fragments[ifrag].Pi[iatom][jatom]=0.0e0;
-    }
-   }
+   fragments[ifrag].Pi=vector<double>(fragments[ifrag].natoms*fragments[ifrag].natoms,0.0e0);
   }
  }
 }

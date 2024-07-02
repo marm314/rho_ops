@@ -125,13 +125,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
  }
  if(ind_q)
  {
-  fragments[ifrag].Pi=new double*[fragments[ifrag].natoms];
-  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
-  {
-   fragments[ifrag].Pi[iatom]=new double[fragments[ifrag].natoms];
-   for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
-   {fragments[ifrag].Pi[iatom][jatom]=0.0e0;}
-  }
+  fragments[ifrag].Pi=vector<double>(fragments[ifrag].natoms*fragments[ifrag].natoms,0.0e0);
  }
  q_read=new double [fragments[ifrag].natoms];
  for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){q_read[iindex]=0.0e0;}
@@ -214,16 +208,16 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
    {
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){read_frag>>fragments[ifrag].Pi[iatom][jatom];}
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){read_frag>>fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];}
     }
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      for(jatom=0;jatom<=iatom;jatom++)
      {
-      fragments[ifrag].Pi[iatom][jatom]=0.5e0*(fragments[ifrag].Pi[iatom][jatom]+fragments[ifrag].Pi[jatom][iatom]);
+      fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=0.5e0*(fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]+fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms]);
       if(iatom!=jatom)
       {
-       fragments[ifrag].Pi[jatom][iatom]=fragments[ifrag].Pi[iatom][jatom];
+       fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms]=fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
       }
      }
     }
@@ -232,10 +226,10 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
      val=0.0e0;
      for(jatom=0;jatom<fragments[ifrag].natoms-1;jatom++)
      {
-      val+=fragments[ifrag].Pi[jatom][iatom];
+      val+=fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms];
      }
-     fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom]=-val;
-     fragments[ifrag].Pi[iatom][fragments[ifrag].natoms-1]=fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom];
+     fragments[ifrag].Pi[fragments[ifrag].natoms-1+iatom*fragments[ifrag].natoms]=-val;
+     fragments[ifrag].Pi[iatom+(fragments[ifrag].natoms-1)*fragments[ifrag].natoms]=fragments[ifrag].Pi[fragments[ifrag].natoms-1+iatom*fragments[ifrag].natoms];
     }
    }
   }
@@ -412,28 +406,28 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
     {
      for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
      {
-      fragments[ifrag].Pi[iatom][jatom]=0.0e0;
+      fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=0.0e0;
       ipair=0;
       for(imo=0;imo<nocc;imo++)
       {
        for(amo=nocc;amo<nbasis;amo++)
        {
-        fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*U_cphf_cpks[jatom][ipair];
+        fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]+=S_mat[iatom][imo][amo]*U_cphf_cpks[jatom][ipair];
         ipair++;	
-        //fragments[ifrag].Pi[iatom][jatom]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
+        //fragments[ifrag].Pi[iatom*jatom*fragments[ifrag].natoms]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
        }
       }
-      fragments[ifrag].Pi[iatom][jatom]=4.0e0*fragments[ifrag].Pi[iatom][jatom];
+      fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=4.0e0*fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
      }
     }
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      for(jatom=0;jatom<=iatom;jatom++)
      {
-      fragments[ifrag].Pi[iatom][jatom]=0.5e0*(fragments[ifrag].Pi[iatom][jatom]+fragments[ifrag].Pi[jatom][iatom]);
+      fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=0.5e0*(fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]+fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms]);
       if(iatom!=jatom)
       {
-       fragments[ifrag].Pi[jatom][iatom]=fragments[ifrag].Pi[iatom][jatom];
+       fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms]=fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
       }
      }
     }
@@ -442,10 +436,10 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
      val=0.0e0;
      for(jatom=0;jatom<fragments[ifrag].natoms-1;jatom++)
      {
-      val+=fragments[ifrag].Pi[jatom][iatom];
+      val+=fragments[ifrag].Pi[jatom+iatom*fragments[ifrag].natoms];
      }
-     fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom]=-val;
-     fragments[ifrag].Pi[iatom][fragments[ifrag].natoms-1]=fragments[ifrag].Pi[fragments[ifrag].natoms-1][iatom];
+     fragments[ifrag].Pi[fragments[ifrag].natoms-1+iatom*fragments[ifrag].natoms]=-val;
+     fragments[ifrag].Pi[iatom+(fragments[ifrag].natoms-1)*fragments[ifrag].natoms]=fragments[ifrag].Pi[fragments[ifrag].natoms-1+iatom*fragments[ifrag].natoms];
     }
     if(!mute)
     { 
@@ -456,7 +450,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
      {
       for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
       {
-       print_pi_mat<<setw(25)<<fragments[ifrag].Pi[iatom][jatom];
+       print_pi_mat<<setw(25)<<fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
        iindex++;
        if(iindex==5){iindex=0;print_pi_mat<<endl;}
       }
@@ -494,7 +488,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
       for(jatom=0;jatom<fragments[ifrag].natoms;jatom++)
       {
        // alpha ^xy (Pi)  = \sum AB Pi_AB x_A y_B
-       Temp_mat[iindex][jindex]+=fragments[ifrag].Pi[iatom][jatom]
+       Temp_mat[iindex][jindex]+=fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]
 	                          *Cartes_coord[iatom][iindex]
 				  *Cartes_coord[jatom][jindex];
       }
