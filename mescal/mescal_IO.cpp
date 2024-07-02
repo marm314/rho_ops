@@ -276,7 +276,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
    if(!read_invApB.good()){cout<<"Warning! Unable to find the inv_apb_mat file"<<endl;}
    else
    {	    
-    cout<<"Reading the inv_apb_mat file"<<endl;
+    if(!mute){cout<<"Reading the inv_apb_mat file"<<endl;}
     delete[] inv_ApB_mat[0];inv_ApB_mat[0]=NULL;
     delete[] inv_ApB_mat;inv_ApB_mat=NULL;
     read_invApB>>npair_read>>jindex;
@@ -414,7 +414,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
        {
         fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]+=S_mat[iatom][imo][amo]*U_cphf_cpks[jatom][ipair];
         ipair++;	
-        //fragments[ifrag].Pi[iatom*jatom*fragments[ifrag].natoms]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
+        //fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]+=S_mat[iatom][imo][amo]*S_mat[jatom][amo][imo]/(orb_ene[imo]-orb_ene[amo]); 
        }
       }
       fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms]=4.0e0*fragments[ifrag].Pi[iatom+jatom*fragments[ifrag].natoms];
