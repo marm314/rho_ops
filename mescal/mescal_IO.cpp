@@ -142,39 +142,25 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
   if(line.length()<29){line+="                             ";}
   if(line.substr(0,14)=="Atomic numbers")
   {
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    tmp2>>Zfrag[iatom];
-   } 
-   tmp2.close();
-   system("/bin/rm -rf tmp");
+    read_frag>>Zfrag[iatom];
+   }
+   do
+   {
+    getline(read_frag,line);
+   }while(line[0]==' ');
   }
   if(line.substr(0,29)=="Current cartesian coordinates")
   {
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
    {
-    for(iindex=0;iindex<3;iindex++){tmp2>>Cartes_coord[iatom][iindex];}
+    for(iindex=0;iindex<3;iindex++){read_frag>>Cartes_coord[iatom][iindex];}
    }
-   tmp2.close();
-   system("/bin/rm -rf tmp");
+   do
+   {
+    getline(read_frag,line);
+   }while(line[0]==' ');
   }
   if(line.substr(0,19)=="Number of electrons" && ind_q)
   {
@@ -185,55 +171,26 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
   }
   if(line.substr(0,14)=="Polarizability")
   {
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
    for(iindex=0;iindex<3;iindex++)
    {
-    for(jindex=0;jindex<=iindex;jindex++){tmp2>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
+    for(jindex=0;jindex<=iindex;jindex++){read_frag>>alpha[iindex][jindex];if(iindex!=jindex){alpha[jindex][iindex]=alpha[iindex][jindex];}}
    }
-   tmp2.close();
-   system("/bin/rm -rf tmp"); 
+   do
+   {
+    getline(read_frag,line);
+   }while(line[0]==' ');
   }
   if(line.substr(0,16)=="Mulliken Charges")
   {
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
-   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){tmp2>>q_read[iindex];}
-   tmp2.close();
-   system("/bin/rm -rf tmp");
+   for(iindex=0;iindex<fragments[ifrag].natoms;iindex++){read_frag>>q_read[iindex];}
   }
   if(line.substr(0,25)=="Normalized inertia tensor")
   {
    Itensor=true;
-   ofstream tmp("tmp");
-   getline(read_frag,line);
-   do
-   {
-    tmp<<line<<endl;
-    getline(read_frag,line);
-   }while(line[0]==' ');
-   tmp.close();
-   ifstream tmp2("tmp");
    for(iindex=0;iindex<3;iindex++)
    {
-    for(jindex=0;jindex<3;jindex++){tmp2>>Im_ref[iindex][jindex];}
+    for(jindex=0;jindex<3;jindex++){read_frag>>Im_ref[iindex][jindex];}
    }
-   tmp2.close();
-   system("/bin/rm -rf tmp"); 
    // Check Inertia tensor similarity
    devItens=false; 
    for(iindex=0;iindex<3;iindex++)
@@ -243,28 +200,22 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
      if(abs(Im_ref[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
     }
    }
-   if(devItens){cout<<"Comment: The read Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+   if(devItens && !mute){cout<<"Comment: The read Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+   line=" ";
+   do
+   {
+    iindex++; // Do a silly thing just to keep on reading lines
+   }while(line[0]==' ' && getline(read_frag,line));
   }
   if(line.substr(0,14)=="Susceptibility") // It is the last quantity, we can read it like this
   {
    pimatrix_good=true;
    if(ind_q)
    {
-    ofstream tmp("tmp");
-    getline(read_frag,line);
-    do
-    {
-     tmp<<line<<endl;
-     getline(read_frag,line);
-    }while(line[0]==' ');
-    tmp.close();
-    ifstream tmp2("tmp");
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
-     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){tmp2>>fragments[ifrag].Pi[iatom][jatom];}
+     for(jatom=0;jatom<fragments[ifrag].natoms;jatom++){read_frag>>fragments[ifrag].Pi[iatom][jatom];}
     }
-    tmp2.close();
-    system("/bin/rm -rf tmp"); 
     for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
     {
      for(jatom=0;jatom<=iatom;jatom++)
@@ -315,7 +266,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
      if(abs(Im[iindex][jindex]-Im_frag[iindex][jindex])>tol2){devItens=true;}
     }
    }
-   if(devItens){cout<<"Comment: The computed Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
+   if(devItens && !mute){cout<<"Comment: The computed Inertia tensor of fragment "<<setw(5)<<ifrag+1<<" presents deviations >10^-2 w.r.t. reference."<<endl;}
    for(iindex=0;iindex<3;iindex++)
    { 
     delete[] Im[iindex];Im[iindex]=NULL;
@@ -525,7 +476,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
    delete[] S_mat;S_mat=NULL;
    if(!pimatrix_good){cout<<"Warning! Pi = 0; thus, q_ind = 0 (mu^CR _ind == mu^dipole _ind because alpha(PI) = 0)"<<endl;}
   }
-  // If it we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
+  // If we want charge redistribution model (ind_q = True), we must substract the alpha_c = alpha(Pi) contrib.
   if(ind_q && pimatrix_good)
   {
    ofstream print_alpha_mat;
@@ -625,9 +576,7 @@ void Mescal::read_fragment_file(string name_frag,double **Im_frag,double **Urot2
  {delete[] inv_ApB_mat[iindex];inv_ApB_mat[iindex]=NULL;}
  delete[] inv_ApB_mat;inv_ApB_mat=NULL;
  for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
- {
-  delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;
- }
+ {delete[] U_cphf_cpks[iatom];U_cphf_cpks[iatom]=NULL;}
  delete[] U_cphf_cpks;U_cphf_cpks=NULL;
 }
 
