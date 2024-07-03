@@ -602,6 +602,7 @@ void Mescal::init_output()
 // Print init SC procedure
 void Mescal::print_init_sc()
 {
+ int ifrag;
  ofstream write_out(mescal_ofile,std::ios_base::app);
  write_out<<endl;
  write_out<<"----------------------------------------------------------------"<<endl;
@@ -614,9 +615,12 @@ void Mescal::print_init_sc()
   write_out<<" Nactive Frag"<<setw(20)<<nactive<<endl;
   write_out<<" Radius Frag "<<setw(20)<<radius<<endl;
  }
- if(ifrac_deact!=-1)
+ if(ifrac_deact.size()>0)
  {
-  write_out<<" Deact Frag  "<<setw(20)<<ifrac_deact+1<<endl;
+  for(ifrag=0;ifrag<(int)ifrac_deact.size();ifrag++)
+  {
+   write_out<<" Deact Frag  "<<setw(20)<<ifrac_deact[ifrag]+1<<endl;
+  }
  }
  write_out<<" Maxiter     "<<setw(20)<<maxiter<<endl;
  write_out<<" Threshold mu"<<setw(20)<<threshold_mu<<endl;

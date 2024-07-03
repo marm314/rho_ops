@@ -29,7 +29,13 @@ Mescal::Mescal(const Mescal&Mescal_obj)
  mute=Mescal_obj.mute;
  nfragments=Mescal_obj.nfragments;
  maxiter=Mescal_obj.maxiter;
- ifrac_deact=Mescal_obj.ifrac_deact;
+ if(Mescal_obj.ifrac_deact.size()>0)
+ {
+  for(ifrag=0;ifrag<(int)Mescal_obj.ifrac_deact.size();ifrag++)
+  {
+   ifrac_deact.push_back(Mescal_obj.ifrac_deact[ifrag]);
+  }
+ }
  iter=Mescal_obj.iter;
  r0=Mescal_obj.r0;
  w_damp=Mescal_obj.w_damp;
@@ -354,7 +360,7 @@ void Mescal::deactivate_fragment(int &natoms_in, int *Z,double **coord)
    }
    if(located)
    {
-    fragments[ifrag].active=false;nactive--;ifrac_deact=ifrag;ifrag=nfragments;
+    fragments[ifrag].active=false;nactive--;ifrac_deact.push_back(ifrag);ifrag=nfragments;
    }
   }
  }

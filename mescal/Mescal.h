@@ -51,8 +51,9 @@ class Mescal
   string sha="";
   string mescal_ofile;
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
-  int nfragments,maxiter=1000,iter=0,ifrac_deact=-1,nthread,naux_basis;
+  int nfragments,maxiter=1000,iter=0,nthread,naux_basis;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
+  vector<int>ifrac_deact;
   vector<double>Vreac;
   struct FRAGMENT
   {
