@@ -80,6 +80,7 @@ class Mescal
   void clean_converg(); // Clear only bool variables needed to rerun SCF without modifying the active states
   void mescal_scs();
   void calc_E();
+  void activate_fragment(int &natoms_in,int *Z,double **coords);
   void deactivate_fragment(int &natoms_in,int *Z,double **coords);
   void deactivate_fragments(double &rad);
 
