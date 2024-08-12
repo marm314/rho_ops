@@ -368,6 +368,7 @@ void Mescal::deactivate_fragment(int &natoms_in, int *Z,double **coord)
 {
  bool located=false;
  int ifrag,iatom;
+ double rad=1e99;
  if(deact_rad)
  {
   for(ifrag=0;ifrag<nfragments;ifrag++)
@@ -392,9 +393,26 @@ void Mescal::deactivate_fragment(int &natoms_in, int *Z,double **coord)
  }
  else
  {
-  cout<<"You must first deactivate using the radial function: deactivate_fragments(double &rad)"<<endl;
-  cout<<"Even for rad=1e99 ('all active')"<<endl;
-  cout<<"Note: No fragments was deactivated"<<endl;
+  deactivate_fragments(rad);
+  for(ifrag=0;ifrag<nfragments;ifrag++)
+  {
+   if(natoms_in==fragments[ifrag].natoms && !located)
+   {
+    for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+    {
+     if( ( Z[iatom]=fragments[ifrag].atoms[iatom].Z && 
+         abs(coord[iatom][0]-fragments[ifrag].atoms[iatom].pos[0])<tol4 ) &&
+         ( abs(coord[iatom][1]-fragments[ifrag].atoms[iatom].pos[1])<tol4 &&
+         abs(coord[iatom][2]-fragments[ifrag].atoms[iatom].pos[2])<tol4 )
+       ){located=true;}
+     else{located=false;iatom=fragments[ifrag].natoms;}
+    }
+   }
+   if(located)
+   {
+    fragments[ifrag].active=false;nactive--;ifrac_deact.push_back(ifrag);ifrag=nfragments;
+   }
+  }
  }
 }
 

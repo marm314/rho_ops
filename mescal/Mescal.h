@@ -53,8 +53,10 @@ class Mescal
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
   int nfragments,maxiter=1000,iter=0,nthread,naux_basis;
   double r0=0.0e0,w_damp=0.4,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
+  double rad_active[2]={0.0e0};
   vector<int>ifrac_deact;
-  vector<double>Vreac;
+  vector<double>Vreac_r1;
+  vector<double>Vreac_r2;
   struct FRAGMENT
   {
    string name;
