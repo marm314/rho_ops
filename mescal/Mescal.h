@@ -79,6 +79,7 @@ class Mescal
   void get_V_punct(double &V_r,double Point_r[3]);
   void get_ind_q_frag_atom(int &ifrag,int &iatom, double q_charge[2],double coord_q[2][3]);
   void clean();         // It also saves information of fragments that were active before
+  void clean_all();     // Clean all information, not saving information of fragments that were active before
   void clean_converg(); // Clear only bool variables needed to rerun SCF without modifying the active states
   void mescal_scs();
   void calc_E();

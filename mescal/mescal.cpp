@@ -337,6 +337,34 @@ void Mescal::clean()
  conver_E=false,conver_mu=false,conver_q=false;
 }
 
+// Clean data from previous run (do not store info about active fragments) 
+void Mescal::clean_all()
+{
+ int ifrag,iatom,icoord;
+ for(ifrag=0;ifrag<nfragments;ifrag++)
+ {
+  fragments[ifrag].i_was_active=false;
+  if(fragments[ifrag].active)
+  {     
+   fragments[ifrag].active=false;
+   for(iatom=0;iatom<fragments[ifrag].natoms;iatom++)
+   {
+    for(icoord=0;icoord<3;icoord++)
+    {
+     fragments[ifrag].atoms[iatom].F_ext[icoord]=0.0e0;
+     fragments[ifrag].atoms[iatom].F_q_ind[icoord]=0.0e0;
+     fragments[ifrag].atoms[iatom].F_mu_ind[icoord]=0.0e0;
+    }
+    fragments[ifrag].atoms[iatom].V_ext=0.0e0;
+    fragments[ifrag].atoms[iatom].V_q_ind=0.0e0;
+    fragments[ifrag].atoms[iatom].V_mu_ind=0.0e0;
+   }
+  }
+ }
+ nactive=-1;
+ conver_E=false,conver_mu=false,conver_q=false;
+}
+
 // Activate a particular fragment given the atomic number Z and its coordinates (a.u. are assumed)
 void Mescal::activate_fragment(int &natoms_in, int *Z,double **coord)
 {
