@@ -837,7 +837,7 @@ void Mescal::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
      //Variables that belong to each thread and are only needed here
      int nth=omp_get_num_threads();
      int ith=omp_get_thread_num();
-     double r,r2,r3,r5,fr,diff_xyz[3];
+     double r,r2,r3,r5,fr,diff_xyz[3],q_perm_FV,q_ind_FV,mu_ind_FV[4];
      for(jfrag=ith;jfrag<nfragments;jfrag=jfrag+nth)
      {
       if(ifrag!=jfrag && fragments[jfrag].active) // Only inter-fragment contributions
@@ -862,12 +862,17 @@ void Mescal::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
         { 
          fr=1.0e0;
         }
+     
         if(permanent_q)
         {
-         V_q_perm+=fragments[jfrag].atoms[jatom].q_perm/r;
+         q_perm_FV=fragments[jfrag].atoms[jatom].q_perm/r;
+         if(abs(q_perm_FV)<tol8){q_perm_FV=0.0e0;}
+         V_q_perm+=q_perm_FV;
          for(icoord=0;icoord<3;icoord++)
          {
-          F_q_perm[icoord]+=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
+          q_perm_FV=fragments[jfrag].atoms[jatom].q_perm*diff_xyz[icoord]/r3;
+          if(abs(q_perm_FV)<tol8){q_perm_FV=0.0e0;}
+          F_q_perm[icoord]+=q_perm_FV;
          }
         }
         else
@@ -875,30 +880,44 @@ void Mescal::set_FV_inter_frag(bool &induced_q,bool &permanent_q)
          // Induced charges? 
          if(induced_q)
          {
-          V_q_ind+=fragments[jfrag].atoms[jatom].q_ind/r;
+          q_ind_FV=fragments[jfrag].atoms[jatom].q_ind/r;
+          if(abs(q_ind_FV)<tol8){q_ind_FV=0.0e0;}
+          V_q_ind+=q_ind_FV;
           for(icoord=0;icoord<3;icoord++)
           {
-           F_q_ind[icoord]+=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+           q_ind_FV=fragments[jfrag].atoms[jatom].q_ind*diff_xyz[icoord]/r3;
+           if(abs(q_ind_FV)<tol8){q_ind_FV=0.0e0;}
+           F_q_ind[icoord]+=q_ind_FV;
           }
          }
          // Induced dipoles are always updated 
-         F_mu_ind[0]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
+         mu_ind_FV[0]=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[0]
                      +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[0]*diff_xyz[1]
                      +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[0]*diff_xyz[2])
-                    -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr/r5;
-         F_mu_ind[1]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
+                     -fragments[jfrag].atoms[jatom].mu_ind[0]*r2)*fr;
+         mu_ind_FV[1]=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[1]
                      +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[1]
                      +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[1]*diff_xyz[2])
-                     -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr/r5;
-         F_mu_ind[2]+=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
+                     -fragments[jfrag].atoms[jatom].mu_ind[1]*r2)*fr;
+         mu_ind_FV[2]=(3.0e0*(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]*diff_xyz[2]
                      +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]*diff_xyz[2]
                      +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]*diff_xyz[2])
-                     -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr/r5;
-         V_mu_ind+=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
-                  +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
-                  +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2])/r3;
-     
+                     -fragments[jfrag].atoms[jatom].mu_ind[2]*r2)*fr;
+         mu_ind_FV[3]=(fragments[jfrag].atoms[jatom].mu_ind[0]*diff_xyz[0]
+                     +fragments[jfrag].atoms[jatom].mu_ind[1]*diff_xyz[1]
+                     +fragments[jfrag].atoms[jatom].mu_ind[2]*diff_xyz[2]);
+         mu_ind_FV[0]=mu_ind_FV[0]/r5; if(abs(mu_ind_FV[0])<tol8){mu_ind_FV[0]=0.0e0;}
+         mu_ind_FV[1]=mu_ind_FV[1]/r5; if(abs(mu_ind_FV[1])<tol8){mu_ind_FV[1]=0.0e0;}
+         mu_ind_FV[2]=mu_ind_FV[2]/r5; if(abs(mu_ind_FV[2])<tol8){mu_ind_FV[2]=0.0e0;}
+         mu_ind_FV[3]=mu_ind_FV[3]/r3; if(abs(mu_ind_FV[3])<tol8){mu_ind_FV[3]=0.0e0;}
+         F_mu_ind[0]+=mu_ind_FV[0];
+         F_mu_ind[1]+=mu_ind_FV[1];
+         F_mu_ind[2]+=mu_ind_FV[2];
+         V_mu_ind+=mu_ind_FV[3];
+         //Debug
+         //cout<<r<<" "<<mu_ind_FV[0]<<" "<<mu_ind_FV[1]<<" "<<mu_ind_FV[2]<<" "<<mu_ind_FV[3]<<endl;
         }
+     
        }
       }
      }
