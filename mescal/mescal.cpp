@@ -36,6 +36,7 @@ Mescal::Mescal(const Mescal&Mescal_obj)
    ifrac_deact.push_back(Mescal_obj.ifrac_deact[ifrag]);
   }
  }
+ idriver=Mescal_obj.idriver;
  iter=Mescal_obj.iter;
  r0=Mescal_obj.r0;
  w_damp=Mescal_obj.w_damp;
@@ -47,6 +48,10 @@ Mescal::Mescal(const Mescal&Mescal_obj)
  threshold_q=Mescal_obj.threshold_q;
  Energy=Mescal_obj.Energy;
  deact_rad=Mescal_obj.deact_rad;
+ for(icoord=0;icoord<3;icoord++)
+ {
+  userO[icoord]=Mescal_obj.userO[icoord];
+ }
  for(ifrag=0;ifrag<nfragments;ifrag++)
  {
   fragments.push_back({Mescal_obj.fragments[ifrag].name,Mescal_obj.fragments[ifrag].natoms}); 
