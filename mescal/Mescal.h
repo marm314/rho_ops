@@ -51,10 +51,10 @@ class Mescal
   string sha="";
   string mescal_ofile;
   bool perm_q=false,ind_q=false,part_val_e=false,mute=true,deact_rad=false;
-  int nfragments,maxiter=1000,iter=0,nthread,naux_basis,nactive=-1;
+  int nfragments,maxiter=1000,iter=0,nthread,naux_basis,nactive=-1,idriver=0;
   int aux_basis_interval[2]={0};
   double r0=0.0e0,w_damp=0.6,mu_diff_max,q_diff_max,E_diff,threshold_mu,threshold_E,threshold_q,Energy;
-  double rad_active[2]={0.0e0};
+  double rad_active[2]={0.0e0},userO[3]={0.0e0};
   vector<int>ifrac_deact;
   vector<double>Vreac_r1;
   vector<double>Vreac_r2;

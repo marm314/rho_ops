@@ -144,7 +144,7 @@ void Mescal::mescal_get_frag_info()
   }
   Frag_T_inertia(ifrag,pos,Im,Urot);
   norm_cm=0.0e0;
-  for(icoord=0;icoord<3;icoord++){fragments[ifrag].Rcm[icoord]=pos[icoord];norm_cm+=pow(pos[icoord],2.0e0);}
+  for(icoord=0;icoord<3;icoord++){fragments[ifrag].Rcm[icoord]=pos[icoord];norm_cm+=pow(pos[icoord]-userO[icoord],2.0e0);}
   if(!mute)
   {
    write_out<<"  Center of Mass ";
