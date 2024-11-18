@@ -33,7 +33,6 @@ class Mescal
   double Z2atomic_pol(int &Z);
   void close_output();
   void read_fragment_file(string name_frag,double **Im_frag,double **Urot2align,int &ifrag,int &Sum_Val_elect, double &Sum_atomic_pol);
-  void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
   void Frag_T_inertia_compare(int &ifrag, double **Cartes_coord, int *Zfrag, double Rcm[3],double **Im,double **Urot);
   void set_FV_inter_frag(bool &induced_q,bool &permanent_q);
   void alphaF2mu(int &ifrag, int &iatom, double Field[3]);
@@ -74,6 +73,7 @@ class Mescal
   void use_pdb_info(int &natoms,string *pbd_file); // It also allocates all fragments
   void mescal_get_frag_info();
   void get_coords(double **Coords);
+  void Frag_T_inertia(int &ifrag,double Rcm[3],double **Im,double **Urot);
   void set_FV_ext_one(int &ifrag,int &iatom,double F_ext[3],double &V_ext);
   void set_FV_ext_qm(double **F_ext,double *V_ext);
   void set_FV_ext_punct(double &q_mescal,double Point_mescal[3]);
